@@ -1,5 +1,5 @@
 // lib/merge.ts
-import type { CompetitionId, EspnScheduleEvent, EspnScoringDetail, FdMatch, Match, Scorers } from './types';
+import type { CompetitionId, EspnDetail, EspnScheduleEvent, EspnScoringDetail, FdMatch, Match, Scorers } from './types';
 import { normalizeTeamName, isManUtd } from './normalize';
 import { COMPETITIONS, competitionIdForFdCode } from './competitions';
 
@@ -123,4 +123,43 @@ export function mergeMatches(
   }
 
   return [...fdConverted, ...espnOnly].sort((a, b) => a.utcDate.localeCompare(b.utcDate));
+}
+
+function groupByScorer(entries: EspnScoringDetail[]): Array<{ name: string; mins: string[] }> {
+  const order: string[] = [];
+  const byName: Record<string, string[]> = {};
+  entries.forEach(g => {
+    const name = g.participants?.[0]?.athlete?.displayName || '?';
+    const mark = g.penaltyKick ? ' (P)' : g.ownGoal ? ' (OG)' : '';
+    const min = (g.clock?.displayValue || '') + mark;
+    if (!byName[name]) { byName[name] = []; order.push(name); }
+    byName[name].push(min);
+  });
+  return order.map(name => ({ name, mins: byName[name] }));
+}
+
+// Reads the /summary detail response (Task 11's fetchEspnDetail), NOT the schedule
+// event — the team-schedule endpoint has no play-by-play `.details` at all (verified
+// live 2026-07-16). homeTeamEspnId comes from
+// detail.header.competitions[0].competitors.find(c => c.homeAway === 'home').team.id.
+export function extractScorers(detail: EspnDetail, homeTeamEspnId: string): Scorers {
+  const details = detail.header.competitions[0]?.details || [];
+  const goals = details.filter(d => d.scoringPlay && !d.shootout);
+  const home = groupByScorer(goals.filter(g => g.team?.id === homeTeamEspnId));
+  const away = groupByScorer(goals.filter(g => g.team?.id !== homeTeamEspnId));
+
+  const isRedCard = (d: EspnScoringDetail) =>
+    !d.scoringPlay && (
+      d.type?.text?.toLowerCase().includes('red card') ||
+      d.type?.abbreviation?.toUpperCase() === 'RC'
+    );
+  const cards = details.filter(isRedCard);
+  const redCards = {
+    home: cards.filter(d => d.team?.id === homeTeamEspnId)
+      .map(d => ({ name: d.participants?.[0]?.athlete?.displayName || '?', min: d.clock?.displayValue || '' })),
+    away: cards.filter(d => d.team?.id !== homeTeamEspnId)
+      .map(d => ({ name: d.participants?.[0]?.athlete?.displayName || '?', min: d.clock?.displayValue || '' })),
+  };
+
+  return { home, away, redCards };
 }

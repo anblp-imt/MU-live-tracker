@@ -123,3 +123,50 @@ describe('mergeMatches', () => {
     ]);
   });
 });
+
+import { extractScorers } from './merge';
+import type { EspnDetail } from './types';
+
+describe('extractScorers', () => {
+  const detail: EspnDetail = {
+    header: {
+      competitions: [{
+        status: { type: { state: 'post' } },
+        details: [
+          {
+            scoringPlay: true, clock: { displayValue: "33'" },
+            team: { id: '360' }, participants: [{ athlete: { displayName: 'Patrick Dorgu' } }],
+          },
+          {
+            scoringPlay: true, clock: { displayValue: "44'" },
+            team: { id: '360' }, participants: [{ athlete: { displayName: 'Bryan Mbeumo' } }],
+          },
+          {
+            scoringPlay: true, penaltyKick: true, clock: { displayValue: "48'" },
+            team: { id: '360' }, participants: [{ athlete: { displayName: 'Bruno Fernandes' } }],
+          },
+          {
+            scoringPlay: false, type: { text: 'Red Card', abbreviation: 'RC' }, clock: { displayValue: "80'" },
+            team: { id: '331' }, participants: [{ athlete: { displayName: 'Some Defender' } }],
+          },
+        ],
+      }],
+    },
+  };
+
+  it('groups goals by scorer and marks penalties', () => {
+    const result = extractScorers(detail, '331'); // home team id = Brighton in this fixture
+    expect(result.away).toEqual([
+      { name: 'Patrick Dorgu', mins: ["33'"] },
+      { name: 'Bryan Mbeumo', mins: ["44'"] },
+      { name: 'Bruno Fernandes', mins: ["48' (P)"] },
+    ]);
+    expect(result.home).toEqual([]);
+  });
+
+  it('collects red cards separately from goals, attributed by team', () => {
+    const result = extractScorers(detail, '331');
+    expect(result.redCards.home).toEqual([{ name: 'Some Defender', min: "80'" }]);
+    expect(result.redCards.away).toEqual([]);
+  });
+});
