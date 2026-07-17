@@ -2970,7 +2970,7 @@ describe('TodayPage', () => {
   it('keeps showing the last known data and a retry banner when a later poll fails', async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce({ ok: true, json: async () => response({ matches: [
-        { id: 't', utcDate: '2026-08-22T15:00:00Z', status: 'IN_PLAY', competition: 'PL', home: { name: 'Hull City AFC' }, away: { name: 'Manchester United FC' }, venue: 'A', score: { fullTime: { home: 0, away: 0 }, display: { home: 0, away: 0 } }, minute: '10', sources: { fd: 1 } },
+        { id: 't', utcDate: '2026-08-22T15:00:00Z', status: 'IN_PLAY', competition: 'PL', home: { name: 'Hull City AFC' }, away: { name: 'Manchester United FC' }, venue: 'H', score: { fullTime: { home: 0, away: 0 }, display: { home: 0, away: 0 } }, minute: '10', sources: { fd: 1 } },
       ] }) })
       .mockRejectedValue(new Error('network down'));
     vi.stubGlobal('fetch', fetchMock);
