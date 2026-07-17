@@ -1,15 +1,10 @@
 import Link from 'next/link';
 import type { Match } from '@/lib/types';
 import { getCompetition } from '@/lib/competitions';
+import { isFergieTime } from './LiveBadge';
 import styles from './MatchCard.module.css';
 
 const CLICKABLE_STATUSES: Match['status'][] = ['IN_PLAY', 'PAUSED', 'FINISHED'];
-
-// Replaced by the real implementation from components/LiveBadge.tsx in Task 20 — this
-// stub keeps MatchCard buildable/testable before that file exists.
-function isFergieTime(_match: Match): boolean {
-  return false;
-}
 
 function statusLabel(match: Match): string {
   if (match.status === 'IN_PLAY') return isFergieTime(match) ? 'FERGIE TIME' : `${match.minute ?? ''}'`;

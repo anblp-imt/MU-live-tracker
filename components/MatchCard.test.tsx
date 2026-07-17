@@ -62,4 +62,12 @@ describe('MatchCard', () => {
     expect(screen.getByText('FT')).toBeInTheDocument();
     expect(screen.getByText('0 : 2')).toBeInTheDocument();
   });
+
+  it('shows FERGIE TIME instead of the minute when MU is not winning in the 90th', () => {
+    render(<MatchCard match={makeMatch({
+      status: 'IN_PLAY', minute: '90', venue: 'H',
+      score: { fullTime: { home: 0, away: 0 }, display: { home: 0, away: 0 } },
+    })} />);
+    expect(screen.getByText('FERGIE TIME')).toBeInTheDocument();
+  });
 });
