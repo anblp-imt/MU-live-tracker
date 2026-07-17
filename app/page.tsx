@@ -1,25 +1,31 @@
 'use client';
 import { useEffect, useState } from 'react';
-import type { MatchesResponse } from '@/lib/types';
+import { usePolling } from '@/hooks/usePolling';
+import { pollingIntervalForMatches } from '@/lib/polling';
 import { MatchList } from '@/components/MatchList';
+import type { MatchesResponse } from '@/lib/types';
+
+async function fetchMatches(): Promise<MatchesResponse> {
+  const res = await fetch('/api/matches');
+  if (!res.ok) throw new Error('Failed to load matches');
+  return res.json();
+}
 
 export default function TodayPage() {
-  const [data, setData] = useState<MatchesResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // 5 minutes is a safe default before we know whether anything is live; once the first
+  // response arrives, the effect below recomputes the real interval.
+  const [intervalMs, setIntervalMs] = useState<number | null>(300_000);
+  const { data, error } = usePolling(fetchMatches, intervalMs);
 
+  // [React] This effect reacts to `data` changing (a state update from the usePolling
+  // hook above) by triggering *another* state update (setIntervalMs), which in turn
+  // changes usePolling's own intervalMs prop and restarts its interval effect. Chaining
+  // effects like this is a normal, if easy-to-miss, React pattern — see LEARNING.md.
   useEffect(() => {
-    // [React] `cancelled` guards against setting state after this effect's cleanup has
-    // already run (e.g. the user navigated away before the fetch resolved) — without it,
-    // React warns about updating an unmounted component and you can get a stale write.
-    let cancelled = false;
-    fetch('/api/matches')
-      .then(res => res.json())
-      .then((json: MatchesResponse) => { if (!cancelled) setData(json); })
-      .catch(() => { if (!cancelled) setError('Failed to load matches'); });
-    return () => { cancelled = true; };
-  }, []); // [React] empty dependency array = run once after the first render, like componentDidMount.
+    if (data) setIntervalMs(pollingIntervalForMatches(data.matches));
+  }, [data]);
 
-  if (error) return <p role="alert">{error}</p>;
+  if (error && !data) return <p role="alert">{error.message}</p>;
   if (!data) return <p>Loading...</p>;
 
   const todayKey = new Date().toISOString().slice(0, 10);
@@ -28,6 +34,8 @@ export default function TodayPage() {
   return (
     <main>
       <h1>Today</h1>
+      {error && <p role="alert">Showing last known data — refresh failed</p>}
+      {!data.meta.sources.espn && <p role="status">ESPN enrichment unavailable — showing football-data only</p>}
       <MatchList matches={todayMatches} emptyLabel="No Manchester United match today" />
     </main>
   );
