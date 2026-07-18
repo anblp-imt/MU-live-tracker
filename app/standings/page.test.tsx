@@ -1,8 +1,13 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import StandingsPage from './page';
+import { clearCache } from '@/lib/cache';
 
+// usePolling's client cache is a module-level Map shared across every test in this file
+// — without clearing it, a previous test's mocked matches/standings could leak into the
+// next one via the 'matches'/'standings:*' cache keys.
+beforeEach(() => clearCache());
 afterEach(() => vi.unstubAllGlobals());
 
 function standingsRow(position: number, teamName: string) {
@@ -15,7 +20,7 @@ describe('StandingsPage', () => {
       if (url.includes('/api/standings')) {
         return Promise.resolve({ json: async () => ({ standings: [standingsRow(1, 'AFC Bournemouth')] }) });
       }
-      return Promise.resolve({ json: async () => ({ season: '2026-27', matches: [], meta: { sources: { fd: true, espn: true } } }) });
+      return Promise.resolve({ ok: true, json: async () => ({ season: '2026-27', matches: [], meta: { sources: { fd: true, espn: true } } }) });
     }));
 
     render(<StandingsPage />);
@@ -30,6 +35,7 @@ describe('StandingsPage', () => {
         return Promise.resolve({ json: async () => ({ standings: [standingsRow(1, 'Arsenal FC'), standingsRow(2, 'Manchester United FC')] }) });
       }
       return Promise.resolve({
+        ok: true,
         json: async () => ({
           season: '2026-27',
           matches: [{
@@ -55,7 +61,7 @@ describe('StandingsPage', () => {
     );
     vi.stubGlobal('fetch', vi.fn((url: string) => {
       if (url.includes('/api/standings')) return Promise.resolve({ json: async () => ({ standings: bigTable }) });
-      return Promise.resolve({ json: async () => ({ season: '2026-27', matches: [], meta: { sources: { fd: true, espn: true } } }) });
+      return Promise.resolve({ ok: true, json: async () => ({ season: '2026-27', matches: [], meta: { sources: { fd: true, espn: true } } }) });
     }));
 
     render(<StandingsPage />);
@@ -78,6 +84,7 @@ describe('StandingsPage', () => {
     vi.stubGlobal('fetch', vi.fn((url: string) => {
       if (url.includes('/api/standings')) return Promise.resolve({ json: async () => ({ standings: [] }) });
       return Promise.resolve({
+        ok: true,
         json: async () => ({
           season: '2026-27',
           matches: [{

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { getCached, setCached } from '@/lib/cache';
 
 interface UsePollingResult<T> {
   data: T | null;
@@ -7,10 +8,22 @@ interface UsePollingResult<T> {
   loading: boolean;
 }
 
-export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | null): UsePollingResult<T> {
-  const [data, setData] = useState<T | null>(null);
+interface CacheOptions {
+  key: string;
+  ttlMs: number;
+}
+
+// Every top-level page (Today/Schedule/Standings) is a separate route — navigating
+// between them via the nav links unmounts and remounts the whole component, so `data`
+// always restarted at null and a spinner flashed even though the server's own cache
+// (lib/cache.ts) had the response ready instantly. Seeding from that same cache module
+// (imported here, so it's the client-bundle's own in-memory copy) lets a remount render
+// the last-known data immediately while `run()` still refreshes it in the background.
+export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | null, cache?: CacheOptions): UsePollingResult<T> {
+  const cachedRef = useRef<T | undefined>(cache ? getCached<T>(cache.key) : undefined);
+  const [data, setData] = useState<T | null>(cachedRef.current ?? null);
   const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(cachedRef.current === undefined);
 
   // [React] Stores the latest fetcher without putting it in the effect's dependency
   // array. Inline functions get a new identity every render — if `fetcher` itself were a
@@ -19,6 +32,11 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
   const fetcherRef = useRef(fetcher);
   useEffect(() => {
     fetcherRef.current = fetcher;
+  });
+
+  const cacheRef = useRef(cache);
+  useEffect(() => {
+    cacheRef.current = cache;
   });
 
   useEffect(() => {
@@ -33,6 +51,7 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
         if (!cancelled) {
           setData(result);
           setError(null);
+          if (cacheRef.current) setCached(cacheRef.current.key, result, cacheRef.current.ttlMs);
         }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));

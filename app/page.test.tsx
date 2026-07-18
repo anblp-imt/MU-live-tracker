@@ -2,7 +2,12 @@ import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import TodayPage from './page';
 import type { MatchesResponse } from '@/lib/types';
+import { clearCache } from '@/lib/cache';
 
+// usePolling's client cache is a module-level Map shared across every test in this file
+// — without clearing it, a previous test's mocked matches could leak into the next one
+// via the 'matches' cache key.
+beforeEach(() => clearCache());
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 

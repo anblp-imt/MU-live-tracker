@@ -1,13 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import { usePolling } from './usePolling';
+import { clearCache, getCached } from '@/lib/cache';
 
-function Probe({ fetcher, intervalMs }: { fetcher: () => Promise<string>; intervalMs: number | null }) {
-  const { data, error, loading } = usePolling(fetcher, intervalMs);
+function Probe({ fetcher, intervalMs, cache }: { fetcher: () => Promise<string>; intervalMs: number | null; cache?: { key: string; ttlMs: number } }) {
+  const { data, error, loading } = usePolling(fetcher, intervalMs, cache);
   return <div>{loading ? 'loading' : error ? `error:${error.message}` : `data:${data}`}</div>;
 }
 
-beforeEach(() => vi.useFakeTimers());
+beforeEach(() => { vi.useFakeTimers(); clearCache(); });
 afterEach(() => vi.useRealTimers());
 
 describe('usePolling', () => {
@@ -81,5 +82,37 @@ describe('usePolling', () => {
     // New 5000ms interval fires (4000ms remaining after the 1000ms already advanced).
     await act(async () => { vi.advanceTimersByTime(4000); await Promise.resolve(); });
     expect(fetcher).toHaveBeenCalledTimes(3);
+  });
+
+  it('renders a cached value immediately on mount instead of the loading state', async () => {
+    const cache = { key: 'probe', ttlMs: 60_000 };
+    // Simulates the scenario this was built for: a previous mount (e.g. before the user
+    // navigated to another page and back) already populated the cache.
+    const seedFetcher = vi.fn().mockResolvedValue('cached-value');
+    const { unmount } = render(<Probe fetcher={seedFetcher} intervalMs={null} cache={cache} />);
+    await act(async () => { await Promise.resolve(); });
+    unmount();
+
+    const freshFetcher = vi.fn().mockResolvedValue('fresh-value');
+    render(<Probe fetcher={freshFetcher} intervalMs={null} cache={cache} />);
+    // No "loading" flash: cached-value renders on the very first paint, synchronously.
+    expect(screen.getByText('data:cached-value')).toBeInTheDocument();
+
+    // The remount still refetches in the background to keep the cache from going stale.
+    await act(async () => { await Promise.resolve(); });
+    expect(screen.getByText('data:fresh-value')).toBeInTheDocument();
+  });
+
+  it('does not seed from a differently-keyed or expired cache entry', async () => {
+    const fetcher = vi.fn(() => new Promise<string>(() => {}));
+    render(<Probe fetcher={fetcher} intervalMs={null} cache={{ key: 'unseen-key', ttlMs: 60_000 }} />);
+    expect(screen.getByText('loading')).toBeInTheDocument();
+  });
+
+  it('writes the fetched result to the cache under the given key', async () => {
+    const fetcher = vi.fn().mockResolvedValue('written-value');
+    render(<Probe fetcher={fetcher} intervalMs={null} cache={{ key: 'write-key', ttlMs: 60_000 }} />);
+    await act(async () => { await Promise.resolve(); });
+    expect(getCached('write-key')).toBe('written-value');
   });
 });

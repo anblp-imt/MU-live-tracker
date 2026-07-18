@@ -7,9 +7,17 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { displayTeamName, isManUtd } from '@/lib/normalize';
 import { recentForm, standingsAroundMu } from '@/lib/standings';
 import { getCompetition } from '@/lib/competitions';
+import { usePolling } from '@/hooks/usePolling';
+import { getCached, setCached, LIVE_TTL_MS } from '@/lib/cache';
 import styles from './page.module.css';
 
 type Tab = 'PL' | 'CL' | 'FA' | 'EFL';
+
+async function fetchMatches(): Promise<MatchesResponse> {
+  const res = await fetch('/api/matches');
+  if (!res.ok) throw new Error('Failed to load matches');
+  return res.json();
+}
 
 function FormDots({ form }: { form: ('W' | 'D' | 'L')[] }) {
   if (form.length === 0) return <span className={styles.formPlaceholder}>—</span>;
@@ -30,20 +38,25 @@ export default function StandingsPage() {
   // filter at all, leaving Schedule as Context's only remaining consumer — see
   // LEARNING.md section 4 for what that removal taught.)
   const [tab, setTab] = useState<Tab>('PL');
+  const { data: matchesData } = usePolling(fetchMatches, null, { key: 'matches', ttlMs: LIVE_TTL_MS });
+  const matches: Match[] = matchesData?.matches ?? [];
   const [standings, setStandings] = useState<StandingRow[] | null>(null);
-  const [matches, setMatches] = useState<Match[]>([]);
 
-  useEffect(() => {
-    fetch('/api/matches').then(res => res.json()).then((json: MatchesResponse) => setMatches(json.matches));
-  }, []);
-
+  // Seeded from the same client cache module the Today/Schedule pages write to (and that
+  // this effect itself writes to below) — switching PL -> CL -> PL no longer blanks back
+  // to a spinner if a fresh-enough copy of that tab's standings is already cached.
   useEffect(() => {
     if (tab !== 'PL' && tab !== 'CL') { setStandings(null); return; }
+    const cacheKey = `standings:${tab}`;
+    setStandings(getCached<StandingRow[]>(cacheKey) ?? null);
     let cancelled = false;
-    setStandings(null);
     fetch(`/api/standings?comp=${tab}`)
       .then(res => res.json())
-      .then((json: { standings: StandingRow[] }) => { if (!cancelled) setStandings(json.standings); });
+      .then((json: { standings: StandingRow[] }) => {
+        if (cancelled) return;
+        setStandings(json.standings);
+        setCached(cacheKey, json.standings, LIVE_TTL_MS);
+      });
     return () => { cancelled = true; };
   }, [tab]);
 

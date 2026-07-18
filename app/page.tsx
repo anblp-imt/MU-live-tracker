@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { usePolling } from '@/hooks/usePolling';
 import { pollingIntervalForMatches } from '@/lib/polling';
+import { LIVE_TTL_MS } from '@/lib/cache';
 import { MatchList } from '@/components/MatchList';
 import { PageHeading } from '@/components/PageHeading';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -18,7 +19,7 @@ export default function TodayPage() {
   // 5 minutes is a safe default before we know whether anything is live; once the first
   // response arrives, the effect below recomputes the real interval.
   const [intervalMs, setIntervalMs] = useState<number | null>(300_000);
-  const { data, error } = usePolling(fetchMatches, intervalMs);
+  const { data, error } = usePolling(fetchMatches, intervalMs, { key: 'matches', ttlMs: LIVE_TTL_MS });
 
   // [React] This effect reacts to `data` changing (a state update from the usePolling
   // hook above) by triggering *another* state update (setIntervalMs), which in turn

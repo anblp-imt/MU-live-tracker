@@ -3,11 +3,16 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SchedulePage from './page';
 import type { MatchesResponse } from '@/lib/types';
+import { clearCache } from '@/lib/cache';
 
 // Pinned so "is this month in the past" (the default-collapse rule) doesn't drift as
 // real time passes — without this, these tests would start failing once the real date
 // moves past July 2026, exactly the kind of test-suite decay a fixed clock avoids.
 beforeEach(() => {
+  // usePolling's client cache is a module-level Map shared across every test in this
+  // file (and, without this, could leak a previous test's mocked matches into the next
+  // one via the 'matches' cache key) — clear it so each test starts from a real fetch.
+  clearCache();
   // Fake only Date, not setTimeout/setInterval — waitFor() and userEvent both rely on
   // real timers internally, and faking those too makes them hang indefinitely.
   vi.useFakeTimers({ toFake: ['Date'] });
@@ -30,6 +35,7 @@ function match(id: string, competition: MatchesResponse['matches'][number]['comp
 describe('SchedulePage', () => {
   it('shows all matches by default (local ALL state, no shared Context)', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
       json: async () => ({
         season: '2026-27',
         matches: [match('a', 'PL', 'Manchester United FC'), match('b', 'FRIENDLY', 'Leeds United')],
@@ -43,6 +49,7 @@ describe('SchedulePage', () => {
 
   it('filters to one competition when its tab is clicked', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
       json: async () => ({
         season: '2026-27',
         matches: [match('a', 'PL', 'Arsenal FC'), match('b', 'FRIENDLY', 'Leeds United')],
@@ -60,6 +67,7 @@ describe('SchedulePage', () => {
 
   it('groups fixtures under a month heading per calendar month', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
       json: async () => ({
         season: '2026-27',
         matches: [
@@ -78,6 +86,7 @@ describe('SchedulePage', () => {
 
   it('collapses and re-expands a month group when its heading is clicked', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
       json: async () => ({
         season: '2026-27',
         matches: [
@@ -104,6 +113,7 @@ describe('SchedulePage', () => {
 
   it('starts past months collapsed and the current/future month expanded', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
       json: async () => ({
         season: '2026-27',
         matches: [
