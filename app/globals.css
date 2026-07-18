@@ -70,7 +70,7 @@ a {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #0d0d0d;
+  color: var(--mu-black);
   background: var(--mu-gold-bright);
   padding: 2px 7px;
   border-radius: 1px;
