@@ -8,7 +8,7 @@ import { displayTeamName, isManUtd } from '@/lib/normalize';
 import { recentForm, standingsAroundMu } from '@/lib/standings';
 import { getCompetition } from '@/lib/competitions';
 import { usePolling } from '@/hooks/usePolling';
-import { getCached, setCached, LIVE_TTL_MS } from '@/lib/cache';
+import { getCached, setCached, LIVE_TTL_MS, STATIC_TTL_MS } from '@/lib/cache';
 import styles from './page.module.css';
 
 type Tab = 'PL' | 'CL' | 'FA' | 'EFL';
@@ -44,7 +44,10 @@ export default function StandingsPage() {
 
   // Seeded from the same client cache module the Today/Schedule pages write to (and that
   // this effect itself writes to below) — switching PL -> CL -> PL no longer blanks back
-  // to a spinner if a fresh-enough copy of that tab's standings is already cached.
+  // to a spinner if a fresh-enough copy of that tab's standings is already cached. TTL
+  // matches the server route's own cache (app/api/standings/route.ts): a league table
+  // only moves when a match finishes, not every 30s like a live score, so it can be held
+  // far longer than the 'matches' cache above.
   useEffect(() => {
     if (tab !== 'PL' && tab !== 'CL') { setStandings(null); return; }
     const cacheKey = `standings:${tab}`;
@@ -55,7 +58,7 @@ export default function StandingsPage() {
       .then((json: { standings: StandingRow[] }) => {
         if (cancelled) return;
         setStandings(json.standings);
-        setCached(cacheKey, json.standings, LIVE_TTL_MS);
+        setCached(cacheKey, json.standings, STATIC_TTL_MS);
       });
     return () => { cancelled = true; };
   }, [tab]);

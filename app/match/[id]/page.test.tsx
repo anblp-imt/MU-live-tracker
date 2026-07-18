@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
+import { clearCache } from '@/lib/cache';
 
 const mockParams = { id: '2026-08-22_hullcityafc' };
 let mockSearchParams = new URLSearchParams({ espnId: '740966', slug: 'eng.1' });
@@ -11,7 +12,10 @@ vi.mock('next/navigation', () => ({
 
 import MatchDetailPage from './page';
 
-beforeEach(() => vi.useFakeTimers());
+// usePolling's client cache is a module-level Map shared across every test in this file
+// (several reuse the same espnId/slug) — clear it so each test starts from a real fetch,
+// except the one test below that deliberately exercises the cache.
+beforeEach(() => { clearCache(); vi.useFakeTimers(); });
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); mockSearchParams = new URLSearchParams({ espnId: '740966', slug: 'eng.1' }); });
 
 describe('MatchDetailPage', () => {
@@ -105,6 +109,27 @@ describe('MatchDetailPage', () => {
     resolveSecondFetch({ ok: true, json: async () => liveDetail });
     await act(async () => { await Promise.resolve(); await Promise.resolve(); });
     expect(screen.getByText('Starting Lineup').closest('details')).not.toHaveAttribute('open');
+  });
+
+  it('renders instantly from cache when the same fixture is reopened', async () => {
+    const detail = {
+      header: { competitions: [{ status: { type: { state: 'post' } }, competitors: [] }] },
+      rosters: [],
+    };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => detail }));
+
+    const { unmount } = render(<MatchDetailPage />);
+    await act(async () => { await Promise.resolve(); });
+    expect(screen.getByText('Full Time')).toBeInTheDocument();
+    unmount();
+
+    // Simulates navigating back out to Today and clicking straight back into the same
+    // fixture: no fetch has resolved yet for this new mount, so if the page were still
+    // relying purely on the fresh fetch it would render the loading spinner here.
+    const stillLoadingFetch = vi.fn(() => new Promise(() => {}));
+    vi.stubGlobal('fetch', stillLoadingFetch);
+    render(<MatchDetailPage />);
+    expect(screen.getByText('Full Time')).toBeInTheDocument();
   });
 
   it('shows an error message when the detail fetch fails', async () => {

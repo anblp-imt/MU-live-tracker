@@ -6,6 +6,7 @@ import { FormationPitch } from '@/components/FormationPitch';
 import { extractScorers } from '@/lib/merge';
 import { displayTeamName } from '@/lib/normalize';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { LIVE_TTL_MS } from '@/lib/cache';
 import type { EspnDetail } from '@/lib/types';
 import styles from './page.module.css';
 
@@ -35,9 +36,14 @@ export default function MatchDetailPage() {
   const slug = searchParams.get('slug');
 
   const [intervalMs, setIntervalMs] = useState<number | null>(null);
+  // Keyed the same way as the server route's own cache (app/api/match/[id]/route.ts) so
+  // re-opening the same fixture — e.g. back out to Today and click back in — renders
+  // instantly from the last-known detail instead of a fresh loading spinner, while still
+  // refreshing in the background.
   const { data, error } = usePolling(
     () => (espnId && slug ? fetchDetail(espnId, slug) : Promise.reject(new Error('Match detail unavailable'))),
     intervalMs,
+    espnId && slug ? { key: `match-detail:${slug}:${espnId}`, ttlMs: LIVE_TTL_MS } : undefined,
   );
 
   useEffect(() => {
