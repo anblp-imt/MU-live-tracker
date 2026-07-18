@@ -28,7 +28,10 @@ describe('MatchDetailPage', () => {
         header: {
           competitions: [{
             status: { type: { state: 'post' } },
-            competitors: [{ homeAway: 'home', team: { id: '331' } }, { homeAway: 'away', team: { id: '360' } }],
+            competitors: [
+              { homeAway: 'home', team: { id: '331', displayName: 'Brighton & Hove Albion' }, score: '1' },
+              { homeAway: 'away', team: { id: '360', displayName: 'Manchester United' }, score: '2' },
+            ],
             details: [{ scoringPlay: true, clock: { displayValue: "33'" }, team: { id: '360' }, participants: [{ athlete: { displayName: 'Patrick Dorgu' } }] }],
           }],
         },
@@ -44,6 +47,10 @@ describe('MatchDetailPage', () => {
 
     expect(screen.getByText(/Patrick Dorgu/)).toBeInTheDocument();
     expect(screen.getByTestId('formation-pitch')).toBeInTheDocument();
+    expect(screen.getByText('Red Devils')).toBeInTheDocument();
+    expect(screen.getByText('Brighton & Hove Albion')).toBeInTheDocument();
+    expect(screen.getByText(/1 – 2/)).toBeInTheDocument();
+    expect(screen.getByText('Full Time')).toBeInTheDocument();
   });
 
   it('shows an error message when the detail fetch fails', async () => {

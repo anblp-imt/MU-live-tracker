@@ -1,0 +1,42 @@
+.main {
+  padding: 1.5rem;
+}
+
+.title {
+  font-size: 22px;
+}
+
+.scoreHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-body);
+  font-weight: 700;
+}
+
+.teamName {
+  color: var(--mu-white);
+}
+
+.score {
+  font-family: var(--font-mono);
+  color: var(--mu-gold);
+  font-size: 18px;
+}
+
+.status {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+  margin: 2px 0 16px;
+}
+
+.scorers {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: var(--mu-surface);
+  border: 1.5px dashed rgba(201, 162, 39, 0.3);
+  border-radius: 3px;
+}
