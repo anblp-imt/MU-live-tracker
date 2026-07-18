@@ -75,8 +75,8 @@
   font-weight: 700;
 }
 
-.dotW { background: var(--mu-green); color: #0d0d0d; }
-.dotD { background: var(--mu-gold); color: #0d0d0d; }
+.dotW { background: var(--mu-green); color: var(--mu-black); }
+.dotD { background: var(--mu-gold); color: var(--mu-black); }
 .dotL { background: var(--mu-red); color: #fff; }
 
 .formPlaceholder {
