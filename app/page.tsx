@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 import { usePolling } from '@/hooks/usePolling';
 import { pollingIntervalForMatches } from '@/lib/polling';
 import { MatchList } from '@/components/MatchList';
+import { PageHeading } from '@/components/PageHeading';
 import type { MatchesResponse } from '@/lib/types';
+import styles from './page.module.css';
 
 async function fetchMatches(): Promise<MatchesResponse> {
   const res = await fetch('/api/matches');
@@ -32,8 +34,8 @@ export default function TodayPage() {
   const todayMatches = data.matches.filter(m => m.utcDate.slice(0, 10) === todayKey);
 
   return (
-    <main>
-      <h1>Today</h1>
+    <main className={styles.main}>
+      <PageHeading title="Today" />
       {error && <p role="alert">Showing last known data — refresh failed</p>}
       {!data.meta.sources.espn && <p role="status">ESPN enrichment unavailable — showing football-data only</p>}
       <MatchList matches={todayMatches} emptyLabel="No Manchester United match today" />

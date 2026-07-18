@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import type { CompetitionId, MatchesResponse } from '@/lib/types';
 import { useCompetitionFilter } from '@/contexts/CompetitionFilterContext';
 import { MatchList } from '@/components/MatchList';
+import { PageHeading } from '@/components/PageHeading';
+import styles from './page.module.css';
 
 export default function SchedulePage() {
   const { selected } = useCompetitionFilter();
@@ -22,8 +24,8 @@ export default function SchedulePage() {
     : data.matches.filter(m => m.competition === (selected as CompetitionId));
 
   return (
-    <main>
-      <h1>Schedule</h1>
+    <main className={styles.main}>
+      <PageHeading title="Schedule" />
       <MatchList matches={filtered} emptyLabel="No matches for this competition" />
     </main>
   );

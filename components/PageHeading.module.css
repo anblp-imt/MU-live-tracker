@@ -1,0 +1,15 @@
+.rule {
+  height: 1px;
+  background: linear-gradient(90deg, var(--mu-gold), transparent);
+  width: 65%;
+  margin: 7px 0 4px;
+}
+
+.kicker {
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  margin: 0 0 16px;
+}
