@@ -1,11 +1,12 @@
 .nav {
   display: flex;
   gap: 18px;
-  padding: 14px 20px 10px;
+  padding: 14px 20px;
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  border-bottom: 1px solid rgba(201, 162, 39, 0.2);
 }
 
 .nav a {
@@ -15,9 +16,4 @@
 
 .nav a:hover {
   color: var(--mu-white);
-}
-
-.pillsRow {
-  padding: 0 20px 14px;
-  border-bottom: 1px solid rgba(201, 162, 39, 0.2);
 }

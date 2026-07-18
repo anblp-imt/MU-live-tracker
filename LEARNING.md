@@ -48,7 +48,7 @@ that file for `// [React]` comments for the inline explanation.
   another effect that triggers another state update is normal React, and easy to miss the
   first time you see it.
 
-## 4. Context (Milestone D)
+## 4. Context (Milestone D) — and why it was later removed
 
 `contexts/CompetitionFilterContext.tsx` (Task 22): the trigger for reaching past "lift
 state up" wasn't "this state feels important" — it was that the two components that
@@ -57,6 +57,16 @@ parent/child relationship. A Next.js layout renders a page through `{children}`;
 way to hand that page extra props. Context is what fills that specific gap. Compare this
 to Task 18's local lifted state, which was enough until the same filter needed to live in
 the shared layout too.
+
+**Later removed** (2026-07-18 UI redesign): the nav pills were pulled off Today (a page
+that shows at most one match — MU can't play twice in a day, so filtering by competition
+there was meaningless) and off Standings (which already had its own local per-page tabs,
+Task 26). Once Schedule was the *only* remaining consumer of the shared selection, the
+Context had nothing left to share — two components in a parent/child relationship again,
+so Task 18's plain local `useState` was the right tool once more. The lesson this leaves:
+Context is a fix for a specific structural problem (state needed by non-parent/child
+components), not a permanent upgrade over lifted state — when the structural reason goes
+away, so should the Context.
 
 ## 5. Derived state and `useMemo` (Milestone E)
 

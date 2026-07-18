@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import SchedulePage from './page';
-import { CompetitionFilterProvider } from '@/contexts/CompetitionFilterContext';
 import type { MatchesResponse } from '@/lib/types';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -16,7 +16,7 @@ function match(id: string, competition: MatchesResponse['matches'][number]['comp
 }
 
 describe('SchedulePage', () => {
-  it('shows all matches by default (ALL from the shared context)', async () => {
+  it('shows all matches by default (local ALL state, no shared Context)', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       json: async () => ({
         season: '2026-27',
@@ -25,7 +25,24 @@ describe('SchedulePage', () => {
       }),
     }));
 
-    render(<CompetitionFilterProvider><SchedulePage /></CompetitionFilterProvider>);
+    render(<SchedulePage />);
     await waitFor(() => expect(screen.getAllByTestId('match-card')).toHaveLength(2));
+  });
+
+  it('filters to one competition when its tab is clicked', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      json: async () => ({
+        season: '2026-27',
+        matches: [match('a', 'PL', 'Arsenal FC'), match('b', 'FRIENDLY', 'Leeds United')],
+        meta: { sources: { fd: true, espn: true } },
+      }),
+    }));
+
+    render(<SchedulePage />);
+    await waitFor(() => expect(screen.getAllByTestId('match-card')).toHaveLength(2));
+
+    await userEvent.click(screen.getByRole('tab', { name: 'PL' }));
+    await waitFor(() => expect(screen.getAllByTestId('match-card')).toHaveLength(1));
+    expect(screen.getByText(/Hull City AFC/)).toBeInTheDocument();
   });
 });

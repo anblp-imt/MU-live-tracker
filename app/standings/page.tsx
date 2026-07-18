@@ -21,9 +21,12 @@ function FormDots({ form }: { form: ('W' | 'D' | 'L')[] }) {
 }
 
 export default function StandingsPage() {
-  // [React] This tab lives only on this page. Reusing CompetitionFilterContext here
-  // would couple two unrelated UI concerns for no benefit — local useState is the right
-  // tool when a piece of state doesn't need to escape the component that owns it.
+  // [React] This tab lives only on this page — local useState is the right tool when a
+  // piece of state doesn't need to escape the component that owns it. (An earlier
+  // version of this codebase had a Context sharing a competition filter between the
+  // layout nav and Schedule; it was removed once Today/Standings stopped needing a
+  // filter at all, leaving Schedule as Context's only remaining consumer — see
+  // LEARNING.md section 4 for what that removal taught.)
   const [tab, setTab] = useState<Tab>('PL');
   const [standings, setStandings] = useState<StandingRow[] | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
