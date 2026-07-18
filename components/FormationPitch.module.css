@@ -1,0 +1,98 @@
+.pitch {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    #1a4020 0%, #1d4a24 12.5%, #1a4020 12.5%, #1a4020 25%,
+    #1d4a24 25%, #1d4a24 37.5%, #1a4020 37.5%, #1a4020 50%,
+    #1d4a24 50%, #1d4a24 62.5%, #1a4020 62.5%, #1a4020 75%,
+    #1d4a24 75%, #1d4a24 87.5%, #1a4020 87.5%
+  );
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  border-radius: 6px;
+  padding: 10px 8px;
+}
+
+.pitchLines {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(237, 230, 214, 0.25);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.teamLabel {
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(237, 230, 214, 0.65);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  padding: 6px 0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-evenly;
+  margin: 8px 0;
+}
+
+.node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 44px;
+}
+
+.circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid rgba(237, 230, 214, 0.4);
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--mu-white);
+}
+
+.muCircle {
+  background: rgba(218, 41, 28, 0.25);
+  border-color: var(--mu-red);
+}
+
+.name {
+  font-size: 8.5px;
+  color: rgba(237, 230, 214, 0.85);
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  font-weight: 600;
+  max-width: 52px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.midline {
+  border-top: 1.5px solid rgba(237, 230, 214, 0.3);
+  border-bottom: 1.5px solid rgba(237, 230, 214, 0.3);
+  height: 26px;
+  margin: 4px 0;
+  position: relative;
+}
+
+.centerCircle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(237, 230, 214, 0.3);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

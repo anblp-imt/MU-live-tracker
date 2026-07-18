@@ -47,7 +47,7 @@ describe('MatchDetailPage', () => {
 
     expect(screen.getByText(/Patrick Dorgu/)).toBeInTheDocument();
     expect(screen.getByTestId('formation-pitch')).toBeInTheDocument();
-    expect(screen.getByText('Red Devils')).toBeInTheDocument();
+    expect(screen.getAllByText('Red Devils').length).toBeGreaterThan(0);
     expect(screen.getByText('Brighton & Hove Albion')).toBeInTheDocument();
     expect(screen.getByText(/1 – 2/)).toBeInTheDocument();
     expect(screen.getByText('Full Time')).toBeInTheDocument();

@@ -1,7 +1,9 @@
 'use client';
 import { useMemo } from 'react';
 import { buildFormationRows } from '@/lib/formation';
+import { displayTeamName, isManUtd } from '@/lib/normalize';
 import type { EspnRoster } from '@/lib/types';
+import styles from './FormationPitch.module.css';
 
 export function FormationPitch({ homeRoster, awayRoster }: { homeRoster?: EspnRoster; awayRoster?: EspnRoster }) {
   // [React] buildFormationRows re-sorts and re-groups every starter on every call. It's
@@ -21,18 +23,41 @@ export function FormationPitch({ homeRoster, awayRoster }: { homeRoster?: EspnRo
     return <p>Lineup not available for this match.</p>;
   }
 
+  const homeIsMu = isManUtd(homeRoster?.team?.displayName || '');
+  const awayIsMu = isManUtd(awayRoster?.team?.displayName || '');
+
   return (
-    <div data-testid="formation-pitch">
+    <div data-testid="formation-pitch" className={styles.pitch}>
+      <div className={styles.pitchLines} />
+      <div className={styles.teamLabel}>{displayTeamName(awayRoster?.team?.displayName || '')}</div>
       <div data-testid="away-rows">
         {awayRows.map((row, i) => (
-          <div key={i}>{row.map(p => p.athlete?.displayName).join(', ')}</div>
+          <div key={i} className={styles.row}>
+            {row.map((p, j) => (
+              <span key={j} className={styles.node}>
+                <span className={`${styles.circle} ${awayIsMu ? styles.muCircle : ''}`}>{p.formationPlace}</span>
+                <span className={styles.name}>{p.athlete?.displayName}</span>
+              </span>
+            ))}
+          </div>
         ))}
+      </div>
+      <div className={styles.midline}>
+        <div className={styles.centerCircle} />
       </div>
       <div data-testid="home-rows">
         {homeRows.map((row, i) => (
-          <div key={i}>{row.map(p => p.athlete?.displayName).join(', ')}</div>
+          <div key={i} className={styles.row}>
+            {row.map((p, j) => (
+              <span key={j} className={styles.node}>
+                <span className={`${styles.circle} ${homeIsMu ? styles.muCircle : ''}`}>{p.formationPlace}</span>
+                <span className={styles.name}>{p.athlete?.displayName}</span>
+              </span>
+            ))}
+          </div>
         ))}
       </div>
+      <div className={styles.teamLabel}>{displayTeamName(homeRoster?.team?.displayName || '')}</div>
     </div>
   );
 }
