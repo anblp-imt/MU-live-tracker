@@ -17,3 +17,7 @@ const MU_TOKEN = 'manchesterunited';
 export function isManUtd(name: string): boolean {
   return normalizeTeamName(name).includes(MU_TOKEN);
 }
+
+export function displayTeamName(name: string): string {
+  return isManUtd(name) ? 'Red Devils' : name;
+}

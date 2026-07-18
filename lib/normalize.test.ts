@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeTeamName, isManUtd } from './normalize';
+import { normalizeTeamName, isManUtd, displayTeamName } from './normalize';
 
 describe('normalizeTeamName', () => {
   it('lowercases and strips punctuation/spaces', () => {
@@ -26,5 +26,16 @@ describe('isManUtd', () => {
 
   it('does not match Manchester City', () => {
     expect(isManUtd('Manchester City FC')).toBe(false);
+  });
+});
+
+describe('displayTeamName', () => {
+  it('returns "Red Devils" for Manchester United, from either data source', () => {
+    expect(displayTeamName('Manchester United FC')).toBe('Red Devils');
+    expect(displayTeamName('Manchester United')).toBe('Red Devils');
+  });
+
+  it('returns the name unchanged for any other club', () => {
+    expect(displayTeamName('Arsenal FC')).toBe('Arsenal FC');
   });
 });
