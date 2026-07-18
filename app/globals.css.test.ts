@@ -7,8 +7,9 @@ describe('MU theme tokens', () => {
 
   it('defines the MU brand colors', () => {
     expect(css).toContain('--mu-red: #DA291C');
-    expect(css).toContain('--mu-gold: #FFD700');
-    expect(css).toContain('--mu-black');
+    expect(css).toContain('--mu-gold: #C9A227');
+    expect(css).toContain('--mu-gold-bright: #FFD700');
+    expect(css).toContain('--mu-black: #0d0d0d');
   });
 
   it('defines the Fergie Time pulse animation', () => {

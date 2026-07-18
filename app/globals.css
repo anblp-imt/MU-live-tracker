@@ -1,10 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
 :root {
   --mu-red: #DA291C;
   --mu-red-dark: #9A1F14;
-  --mu-black: #111111;
-  --mu-gold: #FFD700;
-  --mu-white: #F5F5F5;
-  --font-heading: Georgia, 'Times New Roman', serif;
+  --mu-black: #0d0d0d;
+  --mu-surface: #161310;
+  --mu-gold: #C9A227;
+  --mu-gold-bright: #FFD700;
+  --mu-green: #3fae5c;
+  --mu-white: #EDE6D6;
+  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 * {
@@ -14,12 +21,13 @@
 body {
   background: var(--mu-black);
   color: var(--mu-white);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   margin: 0;
 }
 
 h1, h2, h3 {
   font-family: var(--font-heading);
+  font-weight: 900;
   color: var(--mu-red);
 }
 
@@ -28,17 +36,44 @@ a {
 }
 
 .badge-live {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--mu-red);
-  font-weight: bold;
+  background: rgba(218, 41, 28, 0.15);
+  border: 1px solid rgba(218, 41, 28, 0.4);
+  padding: 2px 7px;
+  border-radius: 1px;
 }
 
 .badge-ht {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--mu-gold);
+  background: rgba(201, 162, 39, 0.15);
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  padding: 2px 7px;
+  border-radius: 1px;
 }
 
 .badge-fergie {
-  color: var(--mu-gold);
-  font-weight: bold;
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0d0d0d;
+  background: var(--mu-gold-bright);
+  padding: 2px 7px;
+  border-radius: 1px;
   animation: fergie-pulse 1s infinite;
 }
 
