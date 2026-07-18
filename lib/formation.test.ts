@@ -44,4 +44,22 @@ describe('buildFormationRows', () => {
     const backLine = rows[1].map(p => p.athlete?.displayName);
     expect(backLine.indexOf('Right Back')).toBeLessThan(backLine.indexOf('Left Back'));
   });
+
+  it('prefers formationPlace over the abbreviation suffix when the two disagree', () => {
+    // CD-R (suffix says right) is registered at formationPlace 6 (FP_LAT says left);
+    // CD-L (suffix says left) is registered at formationPlace 5 (FP_LAT says right).
+    // formationPlace must win — matches WC-2026-live-tracker's production-tested
+    // priority (utils.js), where the jersey-number-based slot proved more reliable
+    // than ESPN's abbreviation suffix when the two signals disagree.
+    const roster: EspnRosterPlayer[] = [
+      player('GK', 'G', '1'),
+      player('Suffix says right, fp says left', 'CD-R', '6'),
+      player('Suffix says left, fp says right', 'CD-L', '5'),
+    ];
+    const rows = buildFormationRows(roster, '2');
+    const backLine = rows[1].map(p => p.athlete?.displayName);
+    expect(backLine.indexOf('Suffix says left, fp says right')).toBeLessThan(
+      backLine.indexOf('Suffix says right, fp says left'),
+    );
+  });
 });

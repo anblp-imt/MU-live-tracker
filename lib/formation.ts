@@ -46,13 +46,14 @@ export function buildFormationRows(
     return [[]];
   }
 
-  // The abbreviation's own -L/-R marker is authoritative when present; FP_LAT is a
-  // fallback for side-less abbreviations (CM, F, AM…).
+  // formationPlace (classic jersey-number lateral slot) is authoritative when present;
+  // the abbreviation's own -L/-R suffix is a fallback for slots outside 1-11. Matches
+  // WC-2026-live-tracker's utils.js, arrived at via production "formation position
+  // accuracy" fixes — formationPlace proved more reliable than the abbreviation suffix
+  // when the two disagree.
   const fpLat = (p: EspnRosterPlayer): number => {
-    const w = widthRank((p.position?.abbreviation || '').toUpperCase());
-    if (w !== 0) return w;
     const n = Number(p.formationPlace);
-    return n in FP_LAT ? FP_LAT[n] : 0;
+    return n in FP_LAT ? FP_LAT[n] : widthRank((p.position?.abbreviation || '').toUpperCase());
   };
 
   const rowCounts = (formation || '').split('-').map(Number).filter(n => n > 0);
