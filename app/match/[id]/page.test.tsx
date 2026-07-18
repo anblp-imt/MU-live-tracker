@@ -82,6 +82,31 @@ describe('MatchDetailPage', () => {
     expect(screen.getByText(/Live/)).toBeInTheDocument();
   });
 
+  it('opens the lineup by default before kickoff, closes it once live', async () => {
+    const preDetail = {
+      header: { competitions: [{ status: { type: { state: 'pre' } }, competitors: [] }] },
+      rosters: [],
+    };
+    const liveDetail = {
+      header: { competitions: [{ status: { type: { state: 'in' }, displayClock: '5\'' }, competitors: [] }] },
+      rosters: [],
+    };
+    let resolveSecondFetch: (v: unknown) => void = () => {};
+    const secondFetch = new Promise(resolve => { resolveSecondFetch = resolve; });
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => preDetail })
+      .mockImplementationOnce(() => secondFetch);
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<MatchDetailPage />);
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    expect(screen.getByText('Starting Lineup').closest('details')).toHaveAttribute('open');
+
+    resolveSecondFetch({ ok: true, json: async () => liveDetail });
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    expect(screen.getByText('Starting Lineup').closest('details')).not.toHaveAttribute('open');
+  });
+
   it('shows an error message when the detail fetch fails', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
     render(<MatchDetailPage />);

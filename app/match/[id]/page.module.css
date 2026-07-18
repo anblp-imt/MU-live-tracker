@@ -33,6 +33,14 @@
   margin: 2px 0 16px;
 }
 
+.lineupSummary {
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  color: var(--mu-red);
+  margin-bottom: 8px;
+}
+
 .scorers {
   margin-top: 16px;
   padding: 12px 14px;

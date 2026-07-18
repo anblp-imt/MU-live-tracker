@@ -38,6 +38,25 @@
   margin: 8px 0;
 }
 
+.teamHalf {
+  position: relative;
+}
+
+.formationBadge {
+  position: absolute;
+  top: 0;
+  right: 4px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--mu-gold);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  border-radius: 2px;
+  padding: 1px 5px;
+}
+
 .node {
   display: flex;
   flex-direction: column;

@@ -74,26 +74,32 @@ export function FormationPitch({ homeRoster, awayRoster }: { homeRoster?: EspnRo
     <div data-testid="formation-pitch" className={styles.pitch}>
       <div className={styles.pitchLines} />
       <div className={styles.teamLabel}>{displayTeamName(awayRoster?.team?.displayName || '')}</div>
-      <div data-testid="away-rows">
-        {awayRows.map((row, i) => (
-          <div key={i} className={styles.row}>
-            {row.map((p, j) => (
-              <PlayerNode key={j} player={p} isMu={awayIsMu} side="away" teamColor={awayColor} />
-            ))}
-          </div>
-        ))}
+      <div className={styles.teamHalf}>
+        {awayRoster?.formation && <span className={styles.formationBadge}>{awayRoster.formation}</span>}
+        <div data-testid="away-rows">
+          {awayRows.map((row, i) => (
+            <div key={i} className={styles.row}>
+              {row.map((p, j) => (
+                <PlayerNode key={j} player={p} isMu={awayIsMu} side="away" teamColor={awayColor} />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
       <div className={styles.midline}>
         <div className={styles.centerCircle} />
       </div>
-      <div data-testid="home-rows">
-        {homeRows.map((row, i) => (
-          <div key={i} className={styles.row}>
-            {row.map((p, j) => (
-              <PlayerNode key={j} player={p} isMu={homeIsMu} side="home" teamColor={homeColor} />
-            ))}
-          </div>
-        ))}
+      <div className={styles.teamHalf}>
+        {homeRoster?.formation && <span className={styles.formationBadge}>{homeRoster.formation}</span>}
+        <div data-testid="home-rows">
+          {homeRows.map((row, i) => (
+            <div key={i} className={styles.row}>
+              {row.map((p, j) => (
+                <PlayerNode key={j} player={p} isMu={homeIsMu} side="home" teamColor={homeColor} />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
       <div className={styles.teamLabel}>{displayTeamName(homeRoster?.team?.displayName || '')}</div>
     </div>

@@ -61,6 +61,7 @@ export default function MatchDetailPage() {
   const rosters = data.rosters || [];
   const home = rosters.find(r => r.homeAway === 'home');
   const away = rosters.find(r => r.homeAway === 'away');
+  const matchState = headerComp?.status?.type?.state;
 
   return (
     <main className={styles.main}>
@@ -71,7 +72,14 @@ export default function MatchDetailPage() {
         <span className={styles.teamName}>{displayTeamName(awayComp?.team?.displayName || '')}</span>
       </div>
       <p className={styles.status}>{matchStatusText(data)}</p>
-      <FormationPitch homeRoster={home} awayRoster={away} />
+      {/* key={matchState} remounts only when pre/in/post actually changes, resetting
+          the default open/closed state at that transition — a poll within the same
+          phase re-renders without remounting, so a manual toggle by the user survives
+          it instead of snapping back open/closed every 30s. */}
+      <details key={matchState} open={matchState === 'pre'}>
+        <summary className={styles.lineupSummary}>Starting Lineup</summary>
+        <FormationPitch homeRoster={home} awayRoster={away} />
+      </details>
       <section className={styles.scorers}>
         <h2>Scorers</h2>
         <div>Home: {scorers.home.map(s => `${s.name} ${s.mins.join(', ')}`).join(' · ') || '—'}</div>
