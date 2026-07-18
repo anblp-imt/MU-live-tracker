@@ -4,6 +4,7 @@ import type { CompetitionId, MatchesResponse } from '@/lib/types';
 import { COMPETITIONS } from '@/lib/competitions';
 import { MatchList } from '@/components/MatchList';
 import { PageHeading } from '@/components/PageHeading';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import styles from './page.module.css';
 
 type FilterValue = CompetitionId | 'ALL';
@@ -26,7 +27,7 @@ export default function SchedulePage() {
     return () => { cancelled = true; };
   }, []);
 
-  if (!data) return <p>Loading...</p>;
+  if (!data) return <LoadingSpinner />;
   const filtered: typeof data.matches = selected === 'ALL'
     ? data.matches
     : data.matches.filter(m => m.competition === (selected as CompetitionId));

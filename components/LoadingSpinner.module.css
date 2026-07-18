@@ -1,0 +1,14 @@
+.wrap {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.spin {
+  animation: loading-spin 1.1s linear infinite;
+}
+
+@keyframes loading-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

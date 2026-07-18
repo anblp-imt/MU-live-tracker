@@ -5,6 +5,7 @@ import { usePolling } from '@/hooks/usePolling';
 import { FormationPitch } from '@/components/FormationPitch';
 import { extractScorers } from '@/lib/merge';
 import { displayTeamName } from '@/lib/normalize';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import type { EspnDetail } from '@/lib/types';
 import styles from './page.module.css';
 
@@ -46,7 +47,7 @@ export default function MatchDetailPage() {
 
   if (!espnId || !slug) return <p>Match detail unavailable for this fixture.</p>;
   if (error) return <p role="alert">{error.message}</p>;
-  if (!data) return <p>Loading...</p>;
+  if (!data) return <LoadingSpinner />;
 
   const headerComp = data.header?.competitions?.[0];
   const homeComp = headerComp?.competitors?.find(c => c.homeAway === 'home');

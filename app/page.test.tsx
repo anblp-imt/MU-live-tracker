@@ -14,7 +14,7 @@ describe('TodayPage', () => {
   it('shows a loading state before the first fetch resolves', () => {
     vi.stubGlobal('fetch', vi.fn(() => new Promise(() => {})));
     render(<TodayPage />);
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
   });
 
   it('shows only today\'s matches from the fetched data', async () => {

@@ -4,6 +4,7 @@ import { usePolling } from '@/hooks/usePolling';
 import { pollingIntervalForMatches } from '@/lib/polling';
 import { MatchList } from '@/components/MatchList';
 import { PageHeading } from '@/components/PageHeading';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import type { MatchesResponse } from '@/lib/types';
 import styles from './page.module.css';
 
@@ -28,7 +29,7 @@ export default function TodayPage() {
   }, [data]);
 
   if (error && !data) return <p role="alert">{error.message}</p>;
-  if (!data) return <p>Loading...</p>;
+  if (!data) return <LoadingSpinner />;
 
   const todayKey = new Date().toISOString().slice(0, 10);
   const todayMatches = data.matches.filter(m => m.utcDate.slice(0, 10) === todayKey);

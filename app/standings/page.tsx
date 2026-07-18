@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import type { Match, MatchesResponse, StandingRow } from '@/lib/types';
 import { CupRun } from '@/components/CupRun';
 import { PageHeading } from '@/components/PageHeading';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { displayTeamName } from '@/lib/normalize';
 import { recentForm } from '@/lib/standings';
 import styles from './page.module.css';
@@ -100,7 +101,7 @@ export default function StandingsPage() {
               })}
             </ul>
           </>
-        ) : <p>Loading...</p>
+        ) : <LoadingSpinner />
       )}
       {(tab === 'FA' || tab === 'EFL') && <CupRun matches={matches} competition={tab} />}
     </main>
