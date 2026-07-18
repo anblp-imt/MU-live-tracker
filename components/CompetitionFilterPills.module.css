@@ -1,0 +1,37 @@
+.pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--mu-gold);
+  cursor: pointer;
+}
+
+.pill[aria-selected="true"] {
+  border-color: var(--mu-red);
+  background: rgba(218, 41, 28, 0.15);
+  color: var(--mu-white);
+}
+
+.short {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .full {
+    display: none;
+  }
+  .short {
+    display: inline;
+  }
+}

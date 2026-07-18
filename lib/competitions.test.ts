@@ -21,4 +21,8 @@ describe('competitions mapping', () => {
     expect(competitionIdForFdCode('CL')).toBe('CL');
     expect(competitionIdForFdCode('FA')).toBeUndefined();
   });
+
+  it('has a navShortLabel short enough to fit unwrapped in a mobile nav pill', () => {
+    expect(COMPETITIONS.map(c => c.navShortLabel)).toEqual(['PL', 'UCL', 'FA Cup', 'Carabao', 'Friendly']);
+  });
 });

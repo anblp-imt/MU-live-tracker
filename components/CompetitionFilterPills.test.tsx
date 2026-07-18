@@ -21,4 +21,12 @@ describe('CompetitionFilterPills', () => {
     await userEvent.click(screen.getByRole('tab', { name: 'Premier League' }));
     expect(onSelect).toHaveBeenCalledWith('PL');
   });
+
+  it('renders both the full and short label for responsive nav pills', () => {
+    render(<CompetitionFilterPills selected="ALL" onSelect={() => {}} />);
+    expect(screen.getByText('Premier League')).toBeInTheDocument();
+    expect(screen.getByText('PL')).toBeInTheDocument();
+    expect(screen.getByText('UEFA Champions League')).toBeInTheDocument();
+    expect(screen.getByText('UCL')).toBeInTheDocument();
+  });
 });
