@@ -222,7 +222,64 @@ prerequisite this styling pass depends on being correct, not something it re-ver
 No-lineup fallback text (`"Lineup not available for this match."`) keeps its current
 copy, gets basic spacing/color only.
 
-## 10. Testing strategy
+## 10. Responsive (mobile)
+
+Confirmed in a follow-up round with the visual companion, simulating a 375px viewport
+(iPhone SE/mini — the narrowest realistic target). Single shared breakpoint,
+`max-width: 640px`, used everywhere below rather than scattering multiple magic numbers.
+
+### 10a. Nav pills — wrap + abbreviate
+
+Below the breakpoint, pills wrap to multiple rows (`flex-wrap: wrap`, already the
+natural behavior once padding/gaps are set — no extra CSS needed there) *and* switch to
+short labels so all 6 stay visible without scrolling: "Premier League" → **PL**, "UEFA
+Champions League" → **UCL**, "Carabao Cup" → **Carabao**. "FA Cup", "Friendly", "All"
+are already short enough and don't change.
+
+`lib/competitions.ts`'s `CompetitionMapping` gets a new field, since none of the
+existing ones produce this exact set (`id` gives `PL`/`CL`/`FA`/`EFL`/`FRIENDLY` —
+`CL`≠`UCL`, `EFL`≠`Carabao`, mismatching what was approved):
+
+```ts
+export interface CompetitionMapping {
+  id: CompetitionId;
+  label: string;
+  navShortLabel: string;   // new — nav-pill label below the 640px breakpoint
+  fdCode?: 'PL' | 'CL';
+  espnSlug: string;
+  hasStandings: boolean;
+}
+```
+
+`CompetitionFilterPills` renders both `label` and `navShortLabel` per pill (two `<span>`s,
+one `.full`/one `.short`), toggled via a CSS media query — no JS viewport detection, no
+hydration-mismatch risk, consistent with this project's "CSS Modules + pure hooks, no
+library that hides mechanism" constraint (original design spec section 6). `COMPETITIONS`
+gaining a field is additive; nothing that reads it today breaks.
+
+### 10b. Standings table → card list
+
+Below 640px, the `<table>` becomes a per-team card row (position in a colored chip on
+the left, team name + Form dots stacked center, Pts + "N played" stacked right) — not a
+CSS reflow of the same table (naive `display:block` tricks on `<tr>`/`<td>` can't
+reproduce this flex layout cleanly while keeping the table semantically a table). Same
+approach as 10a: both the `<table>` markup and the mobile card-list markup render in the
+JSX, visibility toggled by the same `640px` media query in `.module.css` — avoids adding
+a `useMediaQuery`-style hook (and its SSR/hydration footguns) for something CSS alone
+handles safely.
+
+### 10c. Everything else
+
+Match cards (`MatchCard`), Cup Run's dashed-card list, and the Formation Pitch weren't
+raised as problems in the mobile mockup pass — `MatchCard`'s flex row and the dashed
+cards already reflow safely with normal wrapping; the Formation Pitch's fixed internal
+proportions (percentage-based pitch stripes, flex player rows) scale down with its
+container width without restructuring. These get verified visually during implementation
+(headless-browser screenshot at 375px, per this session's established `run`-skill
+pattern) rather than a dedicated mockup round, since nothing here needed a design
+decision — only confirmation nothing breaks.
+
+## 11. Testing strategy
 
 - Pure-CSS changes (MatchCard border/color, pills, table cell styling, pitch gradient):
   no new tests — existing RTL tests assert on text/roles/testids, not computed styles,
@@ -234,6 +291,12 @@ copy, gets basic spacing/color only.
   - `NavFilterPills` hiding on `/standings` — `components/NavFilterPills.test.tsx`
     (doesn't exist yet; small new file)
   - `recentForm()` — new `lib/standings.test.ts`
+  - `COMPETITIONS`/`navShortLabel` — extend `lib/competitions.test.ts` with the exact
+    5 short labels (PL, UCL, FA Cup, Carabao, Friendly), catching typos the same way a
+    missing/wrong `espnSlug` would already be caught today
+  - `CompetitionFilterPills` rendering both `label` and `navShortLabel` per pill —
+    extend its existing test to assert both text nodes are present (CSS visibility
+    toggling itself isn't unit-testable and isn't tested — confirmed visually)
   - `MatchCard` rendering `<LiveBadge>` instead of plain-text minute for `IN_PLAY` —
     update `components/MatchCard.test.tsx`'s existing live-state assertions to match
   - Match detail score header — new cases in `app/match/[id]/page.test.tsx`
@@ -241,9 +304,8 @@ copy, gets basic spacing/color only.
   question from Task 27 is already resolved — route is dynamic, confirmed) after each
   logical group of changes, matching the established milestone-by-milestone rhythm.
 
-## 11. Out of scope
+## 12. Out of scope
 
-- Responsive/mobile layout — not raised in the brainstorm, not addressed here.
 - Real "last 5 form" data beyond what's derivable from already-merged matches (no new
   external data source).
 - Cup round numbers (section 7d) — no backing data, not built.
