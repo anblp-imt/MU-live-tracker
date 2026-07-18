@@ -1,3 +1,5 @@
+'use client';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { Match } from '@/lib/types';
 import { getCompetition } from '@/lib/competitions';
@@ -24,8 +26,30 @@ export function MatchCard({ match }: { match: Match }) {
   const clickable = CLICKABLE_STATUSES.includes(match.status);
   const isLive = LIVE_STATUSES.includes(match.status);
 
+  // [React] usePolling refetches this match's data every 30s while live, but a prop
+  // changing silently gives no visual cue that something just happened. This ref holds
+  // the previous render's score/minute "fingerprint"; the effect compares it to the
+  // current one and flips a brief flash flag only when they actually differ — not on
+  // every render (which would flash even when polling returns identical data) and not
+  // on mount (there's no "previous" value yet to have changed from).
+  const liveKey = `${match.score.display.home}-${match.score.display.away}-${match.minute}`;
+  const prevLiveKey = useRef(liveKey);
+  const [justUpdated, setJustUpdated] = useState(false);
+
+  useEffect(() => {
+    if (prevLiveKey.current === liveKey) return;
+    prevLiveKey.current = liveKey;
+    setJustUpdated(true);
+    const timer = setTimeout(() => setJustUpdated(false), 900);
+    return () => clearTimeout(timer);
+  }, [liveKey]);
+
   const content = (
-    <div className={`${styles.card} ${cardStateClass(match)}`} data-testid="match-card">
+    <div
+      className={`${styles.card} ${cardStateClass(match)}`}
+      data-testid="match-card"
+      data-live-update={justUpdated ? 'true' : undefined}
+    >
       {isLive && (
         <div className={styles.stamp}>
           <LiveBadge match={match} />

@@ -23,6 +23,15 @@
   opacity: 0.75;
 }
 
+.card[data-live-update="true"] {
+  animation: live-flash 0.9s ease-out;
+}
+
+@keyframes live-flash {
+  0% { background: rgba(201, 162, 39, 0.35); }
+  100% { background: var(--mu-surface); }
+}
+
 .stamp {
   position: absolute;
   top: -9px;

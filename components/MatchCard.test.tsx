@@ -1,7 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, act } from '@testing-library/react';
 import { MatchCard } from './MatchCard';
 import type { Match } from '@/lib/types';
+
+afterEach(() => vi.useRealTimers());
 
 function makeMatch(overrides: Partial<Match> = {}): Match {
   return {
@@ -69,5 +71,33 @@ describe('MatchCard', () => {
       score: { fullTime: { home: 0, away: 0 }, display: { home: 0, away: 0 } },
     })} />);
     expect(screen.getByText('FERGIE TIME')).toBeInTheDocument();
+  });
+
+  it('briefly flags a live update when the score changes between polls, then clears it', () => {
+    vi.useFakeTimers();
+    const live = makeMatch({
+      status: 'IN_PLAY', minute: '23',
+      score: { fullTime: { home: 0, away: 0 }, display: { home: 0, away: 0 } },
+    });
+    const { rerender } = render(<MatchCard match={live} />);
+    expect(screen.getByTestId('match-card')).not.toHaveAttribute('data-live-update');
+
+    rerender(<MatchCard match={{ ...live, minute: '24', score: { fullTime: { home: 1, away: 0 }, display: { home: 1, away: 0 } } }} />);
+    expect(screen.getByTestId('match-card')).toHaveAttribute('data-live-update', 'true');
+
+    act(() => { vi.advanceTimersByTime(900); });
+    expect(screen.getByTestId('match-card')).not.toHaveAttribute('data-live-update');
+  });
+
+  it('does not flag a live update on the first render', () => {
+    render(<MatchCard match={makeMatch({ status: 'IN_PLAY', minute: '10' })} />);
+    expect(screen.getByTestId('match-card')).not.toHaveAttribute('data-live-update');
+  });
+
+  it('does not flag a live update when re-rendered with identical data', () => {
+    const live = makeMatch({ status: 'IN_PLAY', minute: '10' });
+    const { rerender } = render(<MatchCard match={live} />);
+    rerender(<MatchCard match={{ ...live }} />);
+    expect(screen.getByTestId('match-card')).not.toHaveAttribute('data-live-update');
   });
 });
