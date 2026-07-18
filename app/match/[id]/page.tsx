@@ -6,8 +6,16 @@ import { FormationPitch } from '@/components/FormationPitch';
 import { extractScorers } from '@/lib/merge';
 import { displayTeamName } from '@/lib/normalize';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { LIVE_TTL_MS } from '@/lib/cache';
+import { LIVE_TTL_MS, STATIC_TTL_MS } from '@/lib/cache';
 import type { EspnDetail } from '@/lib/types';
+
+// A live match's detail is stale in 30s; a not-yet-started or finished one barely
+// changes and can be held far longer (matches the STATIC_TTL_MS the server route and
+// the Standings page already use for equally slow-moving data).
+function detailTtlMs(detail: EspnDetail): number {
+  const state = detail.header?.competitions?.[0]?.status?.type?.state;
+  return state === 'in' ? LIVE_TTL_MS : STATIC_TTL_MS;
+}
 import styles from './page.module.css';
 
 async function fetchDetail(espnId: string, slug: string): Promise<EspnDetail> {
@@ -43,7 +51,7 @@ export default function MatchDetailPage() {
   const { data, error } = usePolling(
     () => (espnId && slug ? fetchDetail(espnId, slug) : Promise.reject(new Error('Match detail unavailable'))),
     intervalMs,
-    espnId && slug ? { key: `match-detail:${slug}:${espnId}`, ttlMs: LIVE_TTL_MS } : undefined,
+    espnId && slug ? { key: `match-detail:${slug}:${espnId}`, ttlMs: detailTtlMs } : undefined,
   );
 
   useEffect(() => {

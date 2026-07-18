@@ -3,7 +3,7 @@ import { render, screen, act } from '@testing-library/react';
 import { usePolling } from './usePolling';
 import { clearCache, getCached } from '@/lib/cache';
 
-function Probe({ fetcher, intervalMs, cache }: { fetcher: () => Promise<string>; intervalMs: number | null; cache?: { key: string; ttlMs: number } }) {
+function Probe({ fetcher, intervalMs, cache }: { fetcher: () => Promise<string>; intervalMs: number | null; cache?: { key: string; ttlMs: number | ((result: string) => number) } }) {
   const { data, error, loading } = usePolling(fetcher, intervalMs, cache);
   return <div>{loading ? 'loading' : error ? `error:${error.message}` : `data:${data}`}</div>;
 }
@@ -107,6 +107,17 @@ describe('usePolling', () => {
     const fetcher = vi.fn(() => new Promise<string>(() => {}));
     render(<Probe fetcher={fetcher} intervalMs={null} cache={{ key: 'unseen-key', ttlMs: 60_000 }} />);
     expect(screen.getByText('loading')).toBeInTheDocument();
+  });
+
+  it('computes the TTL from the fetched result when ttlMs is a function', async () => {
+    // Mirrors the match-detail page: TTL depends on data only knowable after the fetch
+    // resolves (e.g. "is this match still live?"), so ttlMs must be able to inspect it.
+    const fetcher = vi.fn().mockResolvedValue('live-value');
+    const ttlMs = vi.fn((result: string) => (result === 'live-value' ? 30_000 : 300_000));
+    render(<Probe fetcher={fetcher} intervalMs={null} cache={{ key: 'dynamic-ttl-key', ttlMs }} />);
+    await act(async () => { await Promise.resolve(); });
+    expect(ttlMs).toHaveBeenCalledWith('live-value');
+    expect(getCached('dynamic-ttl-key')).toBe('live-value');
   });
 
   it('writes the fetched result to the cache under the given key', async () => {

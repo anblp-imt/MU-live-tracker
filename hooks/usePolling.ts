@@ -8,9 +8,12 @@ interface UsePollingResult<T> {
   loading: boolean;
 }
 
-interface CacheOptions {
+interface CacheOptions<T> {
   key: string;
-  ttlMs: number;
+  // A fixed TTL, or a function of the fetched result — e.g. a live match's detail is
+  // stale in 30s, but a finished/not-yet-started one barely changes and can be held
+  // far longer, and that distinction is only knowable after the fetch resolves.
+  ttlMs: number | ((result: T) => number);
 }
 
 // Every top-level page (Today/Schedule/Standings) is a separate route — navigating
@@ -19,7 +22,7 @@ interface CacheOptions {
 // (lib/cache.ts) had the response ready instantly. Seeding from that same cache module
 // (imported here, so it's the client-bundle's own in-memory copy) lets a remount render
 // the last-known data immediately while `run()` still refreshes it in the background.
-export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | null, cache?: CacheOptions): UsePollingResult<T> {
+export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | null, cache?: CacheOptions<T>): UsePollingResult<T> {
   const cachedRef = useRef<T | undefined>(cache ? getCached<T>(cache.key) : undefined);
   const [data, setData] = useState<T | null>(cachedRef.current ?? null);
   const [error, setError] = useState<Error | null>(null);
@@ -51,7 +54,10 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
         if (!cancelled) {
           setData(result);
           setError(null);
-          if (cacheRef.current) setCached(cacheRef.current.key, result, cacheRef.current.ttlMs);
+          if (cacheRef.current) {
+            const { key, ttlMs } = cacheRef.current;
+            setCached(key, result, typeof ttlMs === 'function' ? ttlMs(result) : ttlMs);
+          }
         }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
