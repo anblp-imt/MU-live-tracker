@@ -6,9 +6,9 @@ import type { MatchesResponse } from '@/lib/types';
 
 afterEach(() => vi.unstubAllGlobals());
 
-function match(id: string, competition: MatchesResponse['matches'][number]['competition'], opponent: string): MatchesResponse['matches'][number] {
+function match(id: string, competition: MatchesResponse['matches'][number]['competition'], opponent: string, utcDate = '2026-08-22T11:30:00Z'): MatchesResponse['matches'][number] {
   return {
-    id, utcDate: '2026-08-22T11:30:00Z', status: 'SCHEDULED', competition,
+    id, utcDate, status: 'SCHEDULED', competition,
     home: { name: 'Hull City AFC' }, away: { name: opponent }, venue: 'A',
     score: { fullTime: { home: null, away: null }, display: { home: null, away: null } },
     sources: { fd: 1 },
@@ -44,5 +44,23 @@ describe('SchedulePage', () => {
     await userEvent.click(screen.getByRole('tab', { name: 'PL' }));
     await waitFor(() => expect(screen.getAllByTestId('match-card')).toHaveLength(1));
     expect(screen.getByText(/Hull City AFC/)).toBeInTheDocument();
+  });
+
+  it('groups fixtures under a month heading per calendar month', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      json: async () => ({
+        season: '2026-27',
+        matches: [
+          match('a', 'PL', 'Arsenal FC', '2026-07-18T15:00:00Z'),
+          match('b', 'PL', 'Chelsea FC', '2026-08-22T11:30:00Z'),
+        ],
+        meta: { sources: { fd: true, espn: true } },
+      }),
+    }));
+
+    render(<SchedulePage />);
+    await waitFor(() => expect(screen.getAllByTestId('match-card')).toHaveLength(2));
+    expect(screen.getByRole('heading', { level: 2, name: 'July 2026' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'August 2026' })).toBeInTheDocument();
   });
 });

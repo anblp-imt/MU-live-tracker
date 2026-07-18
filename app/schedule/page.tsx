@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import type { CompetitionId, MatchesResponse } from '@/lib/types';
 import { COMPETITIONS } from '@/lib/competitions';
+import { groupMatchesByMonth } from '@/lib/schedule';
 import { MatchList } from '@/components/MatchList';
 import { PageHeading } from '@/components/PageHeading';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -31,6 +32,7 @@ export default function SchedulePage() {
   const filtered: typeof data.matches = selected === 'ALL'
     ? data.matches
     : data.matches.filter(m => m.competition === (selected as CompetitionId));
+  const groups = groupMatchesByMonth(filtered);
 
   return (
     <main className={styles.main}>
@@ -43,7 +45,16 @@ export default function SchedulePage() {
           </button>
         ))}
       </div>
-      <MatchList matches={filtered} emptyLabel="No matches for this competition" />
+      {groups.length === 0 ? (
+        <p>No matches for this competition</p>
+      ) : (
+        groups.map(group => (
+          <section key={group.label} className={styles.monthGroup}>
+            <h2 className={styles.monthLabel}>{group.label}</h2>
+            <MatchList matches={group.matches} />
+          </section>
+        ))
+      )}
     </main>
   );
 }

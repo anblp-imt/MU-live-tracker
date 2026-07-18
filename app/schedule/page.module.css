@@ -26,3 +26,15 @@
   background: rgba(218, 41, 28, 0.15);
   color: var(--mu-white);
 }
+
+.monthGroup {
+  margin-bottom: 20px;
+}
+
+.monthLabel {
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+  padding-bottom: 4px;
+  margin: 0 0 10px;
+}
