@@ -12,7 +12,12 @@ const LIVE_STATUSES: Match['status'][] = ['IN_PLAY', 'PAUSED'];
 function statusLabel(match: Match): string {
   if (match.status === 'FINISHED') return 'FT';
   if (match.status === 'POSTPONED') return 'Postponed';
-  return new Date(match.utcDate).toLocaleString('en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+  return new Date(match.utcDate).toLocaleString('en-GB', {
+    weekday: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 function cardStateClass(match: Match): string {
