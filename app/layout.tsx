@@ -4,7 +4,7 @@ import Link from 'next/link';
 import styles from './layout.module.css';
 import './globals.css';
 
-export const metadata: Metadata = { title: 'MU Live Tracker' };
+export const metadata: Metadata = { title: 'Glory Glory Man United' };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

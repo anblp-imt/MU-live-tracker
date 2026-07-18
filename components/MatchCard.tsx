@@ -6,7 +6,7 @@ import { getCompetition } from '@/lib/competitions';
 import { LiveBadge } from './LiveBadge';
 import styles from './MatchCard.module.css';
 
-const CLICKABLE_STATUSES: Match['status'][] = ['IN_PLAY', 'PAUSED', 'FINISHED'];
+const CLICKABLE_STATUSES: Match['status'][] = ['SCHEDULED', 'TIMED', 'IN_PLAY', 'PAUSED', 'FINISHED'];
 const LIVE_STATUSES: Match['status'][] = ['IN_PLAY', 'PAUSED'];
 
 function statusLabel(match: Match): string {

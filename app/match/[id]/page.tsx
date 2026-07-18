@@ -42,7 +42,11 @@ export default function MatchDetailPage() {
 
   useEffect(() => {
     const state = data?.header?.competitions?.[0]?.status?.type?.state;
-    setIntervalMs(state === 'in' ? 30_000 : null);
+    // 'pre' must keep polling too, not just 'in' — otherwise a match opened before
+    // kickoff fetches once, intervalMs stays null forever (no state change to trigger
+    // the polling effect again), and the page is stuck showing "Kickoff soon" even
+    // after the match goes live.
+    setIntervalMs(state === 'in' || state === 'pre' ? 30_000 : null);
   }, [data]);
 
   if (!espnId || !slug) return <p>Match detail unavailable for this fixture.</p>;

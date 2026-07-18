@@ -4,7 +4,7 @@
   gap: 0.75rem;
   align-items: center;
   padding: 12px 14px;
-  background: var(--mu-surface);
+  background: transparent;
   border: 1.5px dashed;
   border-radius: 3px;
   font-family: var(--font-body);
@@ -29,7 +29,7 @@
 
 @keyframes live-flash {
   0% { background: rgba(201, 162, 39, 0.35); }
-  100% { background: var(--mu-surface); }
+  100% { background: transparent; }
 }
 
 .stamp {

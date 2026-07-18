@@ -31,14 +31,14 @@ describe('MatchCard', () => {
     expect(screen.getByText('UCL')).toBeInTheDocument();
   });
 
-  it('is not a link for a SCHEDULED match', () => {
+  it('is a link for a SCHEDULED match', () => {
     render(<MatchCard match={makeMatch({ status: 'SCHEDULED' })} />);
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByRole('link')).toBeInTheDocument();
   });
 
-  it('is not a link for a TIMED match', () => {
+  it('is a link for a TIMED match', () => {
     render(<MatchCard match={makeMatch({ status: 'TIMED' })} />);
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByRole('link')).toBeInTheDocument();
   });
 
   it('is not a link for a POSTPONED match', () => {

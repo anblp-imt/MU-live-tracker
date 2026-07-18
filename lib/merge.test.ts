@@ -113,6 +113,22 @@ describe('mergeMatches', () => {
     expect(result[0].sources.fd).toBeUndefined();
   });
 
+  it('reads a live ESPN-only match score, which the API sends as a plain numeric string', () => {
+    const liveFriendly = espnEvent({
+      id: 'f2',
+      date: '2026-07-20T18:00:00Z',
+      competitions: [{
+        competitors: [
+          { homeAway: 'home', team: { id: '360', displayName: 'Manchester United' }, score: '2' },
+          { homeAway: 'away', team: { id: '111', displayName: 'Wrexham' }, score: '1' },
+        ],
+        status: { type: { state: 'in' }, displayClock: "60'" },
+      }],
+    });
+    const result = mergeMatches([], { FRIENDLY: [liveFriendly] });
+    expect(result[0].score.display).toEqual({ home: 2, away: 1 });
+  });
+
   it('sorts the combined list by utcDate ascending', () => {
     const early = fd({ id: 1, utcDate: '2026-08-22T11:30:00Z', awayTeam: { name: 'Manchester United FC' }, homeTeam: { name: 'Hull City AFC' } });
     const late = fd({ id: 2, utcDate: '2026-09-01T11:30:00Z', awayTeam: { name: 'Manchester United FC' }, homeTeam: { name: 'Everton FC' } });

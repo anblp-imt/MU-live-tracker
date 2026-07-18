@@ -47,7 +47,9 @@ describe('LiveBadge', () => {
   });
 
   it('renders the plain minute when not Fergie Time', () => {
-    render(<LiveBadge match={makeMatch({ minute: '40' })} />);
+    // ESPN's displayClock already includes the trailing apostrophe (e.g. "40'") —
+    // LiveBadge must not append a second one on top of it.
+    render(<LiveBadge match={makeMatch({ minute: "40'" })} />);
     expect(screen.getByText("40'")).toBeInTheDocument();
   });
 

@@ -71,9 +71,14 @@ function espnToMatch(ev: EspnScheduleEvent, competition: CompetitionId): Match |
   const opp = comp.competitors.find(c => !isManUtd(c.team.displayName))!;
   const home = mu.homeAway === 'home' ? mu : opp;
   const away = mu.homeAway === 'home' ? opp : mu;
+  // ESPN's scoreboard/schedule endpoint returns competitor.score as a plain numeric
+  // string (e.g. "2"), not the { value } object the FD wire type might suggest —
+  // reading `.value` off a string silently returns undefined, which is why ESPN-only
+  // fixtures (friendlies, cups) never showed a live score.
+  const toScore = (s?: string): number | null => (s === undefined ? null : Number(s));
   const score = status === 'SCHEDULED'
     ? { home: null, away: null }
-    : { home: home.score?.value ?? null, away: away.score?.value ?? null };
+    : { home: toScore(home.score), away: toScore(away.score) };
   return {
     id: matchKey(ev.date, opponent.name),
     utcDate: ev.date,

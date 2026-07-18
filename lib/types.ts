@@ -95,7 +95,7 @@ export interface EspnScheduleEvent {
     competitors: Array<{
       homeAway: 'home' | 'away';
       team: { id: string; displayName: string };
-      score?: { value: number };
+      score?: string;
     }>;
     status: { type: { state: 'pre' | 'in' | 'post'; name?: string }; displayClock?: string };
   }>;
@@ -116,12 +116,17 @@ export interface EspnRosterPlayer {
   starter: boolean;
   formationPlace?: string;
   position?: { abbreviation?: string };
-  athlete?: { displayName?: string };
+  jersey?: string;
+  athlete?: {
+    displayName?: string;
+    shortName?: string;
+    jerseyImages?: Array<{ href: string; rel?: string[] }>;
+  };
 }
 
 export interface EspnRoster {
   homeAway: 'home' | 'away';
-  team?: { displayName?: string };
+  team?: { displayName?: string; color?: string };
   formation?: string;
   roster: EspnRosterPlayer[];
 }

@@ -66,6 +66,25 @@
   border-color: var(--mu-red);
 }
 
+.kitCircle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid rgba(237, 230, 214, 0.4);
+  background: rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kitImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
 .name {
   font-size: 8.5px;
   color: rgba(237, 230, 214, 0.85);

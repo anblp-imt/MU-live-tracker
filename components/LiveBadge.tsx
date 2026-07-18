@@ -18,5 +18,7 @@ export function LiveBadge({ match }: { match: Match }) {
   if (match.status !== 'IN_PLAY' && match.status !== 'PAUSED') return null;
   if (match.status === 'PAUSED') return <span className="badge-ht">HT</span>;
   if (isFergieTime(match)) return <span className="badge-fergie">FERGIE TIME</span>;
-  return <span className="badge-live">{match.minute}&apos;</span>;
+  // match.minute is ESPN's own displayClock (e.g. "23'", "90'+4'") and already carries
+  // its trailing apostrophe — appending another one here used to render "23''".
+  return <span className="badge-live">{match.minute}</span>;
 }
