@@ -1,12 +1,13 @@
 import type { Match } from '@/lib/types';
 import { MatchCard } from './MatchCard';
+import styles from './MatchList.module.css';
 
 export function MatchList({ matches, emptyLabel = 'No matches' }: { matches: Match[]; emptyLabel?: string }) {
   if (matches.length === 0) {
     return <p data-testid="match-list-empty">{emptyLabel}</p>;
   }
   return (
-    <ul data-testid="match-list">
+    <ul data-testid="match-list" className={styles.list}>
       {matches.map(match => (
         // [React] key must be stable and unique per item so React can match old/new DOM
         // nodes across re-renders instead of tearing everything down and rebuilding it —

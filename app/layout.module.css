@@ -1,0 +1,23 @@
+.nav {
+  display: flex;
+  gap: 18px;
+  padding: 14px 20px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.nav a {
+  color: var(--mu-gold);
+  text-decoration: none;
+}
+
+.nav a:hover {
+  color: var(--mu-white);
+}
+
+.pillsRow {
+  padding: 0 20px 14px;
+  border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+}

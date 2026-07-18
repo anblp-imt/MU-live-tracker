@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CompetitionFilterProvider } from '@/contexts/CompetitionFilterContext';
 import { NavFilterPills } from '@/components/NavFilterPills';
+import styles from './layout.module.css';
 import './globals.css';
 
 export const metadata: Metadata = { title: 'MU Live Tracker' };
@@ -13,12 +14,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <CompetitionFilterProvider>
           <header>
-            <nav>
+            <nav className={styles.nav}>
               <Link href="/">Today</Link>
-              {' '}<Link href="/schedule">Schedule</Link>
-              {' '}<Link href="/standings">Standings</Link>
+              <Link href="/schedule">Schedule</Link>
+              <Link href="/standings">Standings</Link>
             </nav>
-            <NavFilterPills />
+            <div className={styles.pillsRow}>
+              <NavFilterPills />
+            </div>
           </header>
           {children}
         </CompetitionFilterProvider>
