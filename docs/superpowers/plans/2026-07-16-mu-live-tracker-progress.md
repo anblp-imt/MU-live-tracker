@@ -15,7 +15,8 @@ Plan: `docs/superpowers/plans/2026-07-16-mu-live-tracker-plan.md` (28 tasks)
 Branch: `main` (direct commits — new repo, no parallel work, per user decision 2026-07-16)
 Last synced to `.superpowers/sdd/progress.md` at: commit `09c467b` (2026-07-17)
 
-## Status: Tasks 1-24 complete and Approved. Task 25 committed, NOT YET reviewed. Tasks 26-28 + final review remain.
+## Status: All 28 tasks complete and committed (HEAD 543bee5). Final whole-branch
+verification and finishing-a-development-branch remain.
 
 ```
 Task 1:  complete (commits 27be07e..c52e2e2, review clean — Approved)
@@ -106,17 +107,29 @@ Task 24: complete (commit 51af582, 3/3 tests, review clean — Approved).
          useMemo works (not just "looks memoized") via a mental remove-useMemo check.
 
 --- Session handoff 2026-07-17: all commits through 09c467b pushed to origin/main ---
-Task 25: commit 09c467b landed (components/CupRun.tsx + test, 2 files, matches Task 25
-         scope) but NOT YET REVIEWED — the implementer agent's session was interrupted
-         right after committing, before the controller could verify scope/dispatch a task
-         reviewer. Resume here: verify `git show --stat 09c467b` touches only
-         CupRun.tsx/CupRun.test.tsx, generate review package (base 51af582, head
-         09c467b), dispatch task reviewer per the subagent-driven-development skill, then
-         continue with Task 26 onward.
-
-Remaining: Task 26 (standings page), 27 (match detail page), 28 (LEARNING.md), then final
-whole-branch review per superpowers:subagent-driven-development, then
-superpowers:finishing-a-development-branch.
+Task 25: complete (commit 09c467b, 2/2 tests, review clean — Approved). Scope confirmed
+         (CupRun.tsx + CupRun.test.tsx only), code verbatim from plan Step 3, fixture
+         hand-traced (venue: 'H' + opponent in away.name — no mismatch), sort order
+         correct, deliberately unmemoized per design.
+--- Milestone E (derived state, useMemo) complete: Tasks 23-25 ---
+Task 26: complete (commit 6da563c, 2/2 tests, typecheck clean). Standings page: PL/CL
+         tables via local tab state, FA/EFL delegate to CupRun. Verbatim from plan.
+Task 27: complete (commit 08fb6b4, 3/3 tests, full suite 114/114, typecheck + `next
+         build` both clean). Match detail page: usePolling gated to 30s only while
+         state === 'in', FormationPitch + extractScorers wired in.
+         Found and fixed a 4th occurrence of the fake-timers/waitFor bug class (Tasks
+         19/21): the plan's "fetch fails" test called `waitFor()` under
+         `vi.useFakeTimers()`, which hangs (waitFor's internal poll uses setTimeout,
+         also faked) — replaced with the `act()`+`Promise.resolve()` pattern already
+         established in app/page.test.tsx. Test-only fix, component code untouched.
+         Also verified (not just assumed) that `useSearchParams` without a `<Suspense>`
+         boundary — required by Next 16 docs for statically-prerendered routes — is a
+         non-issue here: `next build` confirms `/match/[id]` renders dynamically (ƒ),
+         not statically, since it has no generateStaticParams.
+--- Milestone F (remaining pages) complete: Tasks 26-27 ---
+Task 28: complete (commit 543bee5). LEARNING.md added verbatim per plan, indexed by
+         Milestones A-E.
+--- All 28 tasks complete ---
 ```
 
 ## Recurring pattern worth knowing before resuming
