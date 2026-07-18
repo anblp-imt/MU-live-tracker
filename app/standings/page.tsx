@@ -4,8 +4,8 @@ import type { Match, MatchesResponse, StandingRow } from '@/lib/types';
 import { CupRun } from '@/components/CupRun';
 import { PageHeading } from '@/components/PageHeading';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { displayTeamName } from '@/lib/normalize';
-import { recentForm } from '@/lib/standings';
+import { displayTeamName, isManUtd } from '@/lib/normalize';
+import { recentForm, standingsAroundMu } from '@/lib/standings';
 import styles from './page.module.css';
 
 type Tab = 'PL' | 'CL' | 'FA' | 'EFL';
@@ -61,6 +61,28 @@ export default function StandingsPage() {
       {(tab === 'PL' || tab === 'CL') && (
         standings ? (
           <>
+            {tab === 'CL' && standingsAroundMu(standings, 2).length > 0 && (
+              <div className={styles.highlightBlock} data-testid="cl-highlight">
+                <p className={styles.highlightLabel}>Red Devils&apos; Position</p>
+                <ul className={styles.highlightList}>
+                  {standingsAroundMu(standings, 2).map(row => {
+                    const isMu = isManUtd(row.team.name);
+                    return (
+                      <li key={row.team.name} className={isMu ? styles.muRow : undefined}>
+                        <span className={styles.position}>{row.position}</span>
+                        <span className={styles.rowMain}>
+                          <span className={isMu ? styles.muName : undefined}>{displayTeamName(row.team.name)}</span>
+                        </span>
+                        <span className={styles.rowStats}>
+                          <span className={styles.points}>{row.points}</span>
+                          <span className={styles.played}>{row.playedGames} played</span>
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
             <table className={styles.tableDesktop}>
               <thead>
                 <tr>
@@ -69,7 +91,7 @@ export default function StandingsPage() {
               </thead>
               <tbody>
                 {standings.map(row => {
-                  const isMu = displayTeamName(row.team.name) === 'Red Devils';
+                  const isMu = isManUtd(row.team.name);
                   return (
                     <tr key={row.team.name} className={isMu ? styles.muRow : undefined}>
                       <td>{row.position}</td>
@@ -84,7 +106,7 @@ export default function StandingsPage() {
             </table>
             <ul className={styles.listMobile}>
               {standings.map(row => {
-                const isMu = displayTeamName(row.team.name) === 'Red Devils';
+                const isMu = isManUtd(row.team.name);
                 return (
                   <li key={row.team.name} className={isMu ? styles.muRow : undefined}>
                     <span className={styles.position}>{row.position}</span>

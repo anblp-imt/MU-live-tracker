@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { recentForm } from './standings';
-import type { Match } from './types';
+import { recentForm, standingsAroundMu } from './standings';
+import type { Match, StandingRow } from './types';
+
+function row(position: number, teamName: string): StandingRow {
+  return { position, team: { name: teamName }, playedGames: 10, won: 0, draw: 0, lost: 0, points: 0, goalDifference: 0 };
+}
 
 function match(id: string, utcDate: string, competition: Match['competition'], status: Match['status'], venue: 'H' | 'A', homeScore: number | null, awayScore: number | null): Match {
   return {
@@ -39,5 +43,34 @@ describe('recentForm', () => {
 
   it('returns an empty array when there are no finished matches in this competition', () => {
     expect(recentForm([], 'PL')).toEqual([]);
+  });
+});
+
+describe('standingsAroundMu', () => {
+  const bigTable = Array.from({ length: 36 }, (_, i) =>
+    i === 17 ? row(18, 'Manchester United FC') : row(i + 1, `Team ${i + 1}`),
+  );
+
+  it('returns MU plus windowSize rows on each side when MU is mid-table', () => {
+    const result = standingsAroundMu(bigTable, 2);
+    expect(result.map(r => r.position)).toEqual([16, 17, 18, 19, 20]);
+    expect(result.find(r => r.position === 18)?.team.name).toBe('Manchester United FC');
+  });
+
+  it('clamps at the top of the table when MU is near position 1', () => {
+    const table = [row(1, 'Manchester United FC'), row(2, 'B'), row(3, 'C'), row(4, 'D')];
+    const result = standingsAroundMu(table, 2);
+    expect(result.map(r => r.position)).toEqual([1, 2, 3]);
+  });
+
+  it('clamps at the bottom of the table when MU is near the last position', () => {
+    const table = [row(1, 'A'), row(2, 'B'), row(3, 'C'), row(4, 'Manchester United FC')];
+    const result = standingsAroundMu(table, 2);
+    expect(result.map(r => r.position)).toEqual([2, 3, 4]);
+  });
+
+  it('returns an empty array when MU is not present in the standings', () => {
+    const table = [row(1, 'A'), row(2, 'B')];
+    expect(standingsAroundMu(table, 2)).toEqual([]);
   });
 });

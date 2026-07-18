@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import StandingsPage from './page';
 
@@ -47,6 +47,31 @@ describe('StandingsPage', () => {
     await waitFor(() => expect(screen.getAllByText('Red Devils').length).toBeGreaterThan(0));
     expect(screen.queryByText('Manchester United FC')).not.toBeInTheDocument();
     expect(screen.getAllByText('W').length).toBeGreaterThan(0);
+  });
+
+  it('shows a "Red Devils\' Position" highlight block on the CL tab, but not on PL', async () => {
+    const bigTable = Array.from({ length: 36 }, (_, i) =>
+      i === 17 ? standingsRow(18, 'Manchester United FC') : standingsRow(i + 1, `Team ${i + 1}`),
+    );
+    vi.stubGlobal('fetch', vi.fn((url: string) => {
+      if (url.includes('/api/standings')) return Promise.resolve({ json: async () => ({ standings: bigTable }) });
+      return Promise.resolve({ json: async () => ({ season: '2026-27', matches: [], meta: { sources: { fd: true, espn: true } } }) });
+    }));
+
+    render(<StandingsPage />);
+    await waitFor(() => expect(screen.getAllByText('Red Devils').length).toBeGreaterThan(0));
+    expect(screen.queryByText(/Red Devils' Position/)).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('tab', { name: 'CL' }));
+    await waitFor(() => expect(screen.getByText(/Red Devils' Position/)).toBeInTheDocument());
+
+    // Scope to the highlight block itself — the full table below still lists all 36
+    // teams regardless of tab, so an unscoped query can't tell "windowed to Team 16-20"
+    // apart from "present somewhere on the page."
+    const highlight = within(screen.getByTestId('cl-highlight'));
+    expect(highlight.getByText('Team 16')).toBeInTheDocument();
+    expect(highlight.getByText('Team 20')).toBeInTheDocument();
+    expect(highlight.queryByText('Team 1')).not.toBeInTheDocument();
   });
 
   it('switches to a cup run when the FA tab is clicked', async () => {
