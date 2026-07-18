@@ -40,6 +40,9 @@ yarn-error.log*
 # local Claude Code tooling config (auto-accumulated permission allowlists, not project source)
 .claude/
 
+# superpowers brainstorming visual-companion sessions (scratch, not project source)
+.superpowers/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
