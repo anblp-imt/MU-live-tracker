@@ -2,13 +2,28 @@
 import { useEffect, useState } from 'react';
 import type { Match, MatchesResponse, StandingRow } from '@/lib/types';
 import { CupRun } from '@/components/CupRun';
+import { PageHeading } from '@/components/PageHeading';
+import { displayTeamName } from '@/lib/normalize';
+import { recentForm } from '@/lib/standings';
+import styles from './page.module.css';
 
 type Tab = 'PL' | 'CL' | 'FA' | 'EFL';
 
+function FormDots({ form }: { form: ('W' | 'D' | 'L')[] }) {
+  if (form.length === 0) return <span className={styles.formPlaceholder}>—</span>;
+  return (
+    <span className={styles.formDots}>
+      {form.map((r, i) => (
+        <span key={i} className={`${styles.dot} ${r === 'W' ? styles.dotW : r === 'D' ? styles.dotD : styles.dotL}`}>{r}</span>
+      ))}
+    </span>
+  );
+}
+
 export default function StandingsPage() {
-  // [React] This tab lives only on this page. Reusing CompetitionFilterContext (Task 22)
-  // here would couple two unrelated UI concerns for no benefit — local useState is the
-  // right tool when a piece of state doesn't need to escape the component that owns it.
+  // [React] This tab lives only on this page. Reusing CompetitionFilterContext here
+  // would couple two unrelated UI concerns for no benefit — local useState is the right
+  // tool when a piece of state doesn't need to escape the component that owns it.
   const [tab, setTab] = useState<Tab>('PL');
   const [standings, setStandings] = useState<StandingRow[] | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
@@ -27,28 +42,61 @@ export default function StandingsPage() {
     return () => { cancelled = true; };
   }, [tab]);
 
+  // Only MU's own finished matches produce real form data (the app has no other club's
+  // match history) — used on MU's row only; every other row shows a placeholder.
+  const muForm = (tab === 'PL' || tab === 'CL') ? recentForm(matches, tab, 5) : [];
+
   return (
-    <main>
-      <h1>Standings</h1>
-      <div role="tablist">
+    <main className={styles.main}>
+      <PageHeading title="Standings" />
+      <div role="tablist" className={styles.tabs}>
         {(['PL', 'CL', 'FA', 'EFL'] as const).map(t => (
-          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t}</button>
+          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={styles.tab}>{t}</button>
         ))}
       </div>
       {(tab === 'PL' || tab === 'CL') && (
         standings ? (
-          <table>
-            <tbody>
-              {standings.map(row => (
-                <tr key={row.team.name}>
-                  <td>{row.position}</td>
-                  <td>{row.team.name}</td>
-                  <td>{row.playedGames}</td>
-                  <td>{row.points}</td>
+          <>
+            <table className={styles.tableDesktop}>
+              <thead>
+                <tr>
+                  <th>#</th><th>Team</th><th>P</th><th>Form</th><th>Pts</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {standings.map(row => {
+                  const isMu = displayTeamName(row.team.name) === 'Red Devils';
+                  return (
+                    <tr key={row.team.name} className={isMu ? styles.muRow : undefined}>
+                      <td>{row.position}</td>
+                      <td className={isMu ? styles.muName : undefined}>{displayTeamName(row.team.name)}</td>
+                      <td>{row.playedGames}</td>
+                      <td>{isMu ? <FormDots form={muForm} /> : <span className={styles.formPlaceholder}>—</span>}</td>
+                      <td>{row.points}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <ul className={styles.listMobile}>
+              {standings.map(row => {
+                const isMu = displayTeamName(row.team.name) === 'Red Devils';
+                return (
+                  <li key={row.team.name} className={isMu ? styles.muRow : undefined}>
+                    <span className={styles.position}>{row.position}</span>
+                    <span className={styles.rowMain}>
+                      <span className={isMu ? styles.muName : undefined}>{displayTeamName(row.team.name)}</span>
+                      {isMu ? <FormDots form={muForm} /> : <span className={styles.formPlaceholder}>—</span>}
+                    </span>
+                    <span className={styles.rowStats}>
+                      <span className={styles.points}>{row.points}</span>
+                      <span className={styles.played}>{row.playedGames} played</span>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
         ) : <p>Loading...</p>
       )}
       {(tab === 'FA' || tab === 'EFL') && <CupRun matches={matches} competition={tab} />}

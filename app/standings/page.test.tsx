@@ -5,17 +5,48 @@ import StandingsPage from './page';
 
 afterEach(() => vi.unstubAllGlobals());
 
+function standingsRow(position: number, teamName: string) {
+  return { position, team: { name: teamName }, playedGames: 14, won: 0, draw: 0, lost: 0, points: 0, goalDifference: 0 };
+}
+
 describe('StandingsPage', () => {
   it('loads the PL table by default', async () => {
     vi.stubGlobal('fetch', vi.fn((url: string) => {
       if (url.includes('/api/standings')) {
-        return Promise.resolve({ json: async () => ({ standings: [{ position: 1, team: { name: 'AFC Bournemouth' }, playedGames: 0, won: 0, draw: 0, lost: 0, points: 0, goalDifference: 0 }] }) });
+        return Promise.resolve({ json: async () => ({ standings: [standingsRow(1, 'AFC Bournemouth')] }) });
       }
       return Promise.resolve({ json: async () => ({ season: '2026-27', matches: [], meta: { sources: { fd: true, espn: true } } }) });
     }));
 
     render(<StandingsPage />);
-    await waitFor(() => expect(screen.getByText('AFC Bournemouth')).toBeInTheDocument());
+    // getAllByText, not getByText: the same row renders once in the desktop table and
+    // once in the mobile card list (both always in the DOM, toggled by CSS media query).
+    await waitFor(() => expect(screen.getAllByText('AFC Bournemouth').length).toBeGreaterThan(0));
+  });
+
+  it('shows Manchester United as "Red Devils" with its own recent form', async () => {
+    vi.stubGlobal('fetch', vi.fn((url: string) => {
+      if (url.includes('/api/standings')) {
+        return Promise.resolve({ json: async () => ({ standings: [standingsRow(1, 'Arsenal FC'), standingsRow(2, 'Manchester United FC')] }) });
+      }
+      return Promise.resolve({
+        json: async () => ({
+          season: '2026-27',
+          matches: [{
+            id: 'm1', utcDate: '2026-08-01T15:00:00Z', status: 'FINISHED', competition: 'PL',
+            home: { name: 'Manchester United FC' }, away: { name: 'Arsenal FC' }, venue: 'H',
+            score: { fullTime: { home: 2, away: 0 }, display: { home: 2, away: 0 } },
+            sources: { fd: 1 },
+          }],
+          meta: { sources: { fd: true, espn: true } },
+        }),
+      });
+    }));
+
+    render(<StandingsPage />);
+    await waitFor(() => expect(screen.getAllByText('Red Devils').length).toBeGreaterThan(0));
+    expect(screen.queryByText('Manchester United FC')).not.toBeInTheDocument();
+    expect(screen.getAllByText('W').length).toBeGreaterThan(0);
   });
 
   it('switches to a cup run when the FA tab is clicked', async () => {
