@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { groupMatchesByMonth } from './schedule';
+import { groupMatchesByMonth, isPastMonth } from './schedule';
 import type { Match } from './types';
 
 function match(id: string, utcDate: string): Match {
@@ -39,5 +39,30 @@ describe('groupMatchesByMonth', () => {
 
   it('returns an empty array for no matches', () => {
     expect(groupMatchesByMonth([])).toEqual([]);
+  });
+
+  it('exposes a sortable "YYYY-MM" key alongside the display label', () => {
+    const groups = groupMatchesByMonth([match('a', '2026-07-18T15:00:00Z')]);
+    expect(groups[0].key).toBe('2026-07');
+  });
+});
+
+describe('isPastMonth', () => {
+  const now = new Date('2026-07-18T12:00:00Z');
+
+  it('is true for a month before the current one', () => {
+    expect(isPastMonth('2026-06', now)).toBe(true);
+  });
+
+  it('is false for the current month', () => {
+    expect(isPastMonth('2026-07', now)).toBe(false);
+  });
+
+  it('is false for a future month', () => {
+    expect(isPastMonth('2026-08', now)).toBe(false);
+  });
+
+  it('handles a past month crossing a year boundary', () => {
+    expect(isPastMonth('2025-12', now)).toBe(true);
   });
 });

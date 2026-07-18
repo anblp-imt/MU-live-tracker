@@ -17,3 +17,10 @@
 .nav a:hover {
   color: var(--mu-white);
 }
+
+.chant {
+  margin-left: auto;
+  color: var(--mu-red);
+  opacity: 0.75;
+  font-style: italic;
+}

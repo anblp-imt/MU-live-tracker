@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import type { CompetitionId, MatchesResponse } from '@/lib/types';
 import { COMPETITIONS } from '@/lib/competitions';
-import { groupMatchesByMonth } from '@/lib/schedule';
+import { groupMatchesByMonth, isPastMonth } from '@/lib/schedule';
 import { MatchList } from '@/components/MatchList';
 import { PageHeading } from '@/components/PageHeading';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -19,6 +19,21 @@ type FilterValue = CompetitionId | 'ALL';
 export default function SchedulePage() {
   const [selected, setSelected] = useState<FilterValue>('ALL');
   const [data, setData] = useState<MatchesResponse | null>(null);
+  // [React] Rather than seeding this from an effect once `data` arrives (which would
+  // need a "have we initialized yet" guard to avoid clobbering the user's own clicks on
+  // a later re-render), `toggled` only ever tracks which groups the user has manually
+  // flipped away from their computed default. A group's actual collapsed state is
+  // `isPastMonth(...) XOR toggled.has(key)` — pure per-render, no seeding needed.
+  const [toggled, setToggled] = useState<Set<string>>(new Set());
+
+  function toggleGroup(key: string) {
+    setToggled(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -48,12 +63,25 @@ export default function SchedulePage() {
       {groups.length === 0 ? (
         <p>No matches for this competition</p>
       ) : (
-        groups.map(group => (
-          <section key={group.label} className={styles.monthGroup}>
-            <h2 className={styles.monthLabel}>{group.label}</h2>
-            <MatchList matches={group.matches} />
-          </section>
-        ))
+        groups.map(group => {
+          const isCollapsed = isPastMonth(group.key) !== toggled.has(group.key);
+          return (
+            <section key={group.key} className={styles.monthGroup}>
+              <h2 className={styles.monthLabel}>
+                <button
+                  type="button"
+                  className={styles.monthToggle}
+                  aria-expanded={!isCollapsed}
+                  onClick={() => toggleGroup(group.key)}
+                >
+                  <span className={styles.monthChevron} aria-hidden="true">{isCollapsed ? '▸' : '▾'}</span>
+                  {group.label}
+                </button>
+              </h2>
+              {!isCollapsed && <MatchList matches={group.matches} />}
+            </section>
+          );
+        })
       )}
     </main>
   );

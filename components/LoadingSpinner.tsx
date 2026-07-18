@@ -5,7 +5,7 @@ import styles from './LoadingSpinner.module.css';
 export function LoadingSpinner() {
   return (
     <div role="status" aria-label="Loading" className={styles.wrap}>
-      <svg viewBox="0 0 32 32" className={styles.spin} width="28" height="28">
+      <svg viewBox="0 0 32 32" className={styles.spin} width="72" height="72">
         <circle cx="16" cy="16" r="14.5" fill="none" stroke="#C9A227" strokeWidth="1.2" />
         <g fill="#DA291C">
           <path d="M11 10 L13.2 5 L14.3 10 Z" />
