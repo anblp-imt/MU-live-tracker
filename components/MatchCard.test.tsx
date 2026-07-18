@@ -21,7 +21,7 @@ function makeMatch(overrides: Partial<Match> = {}): Match {
 describe('MatchCard', () => {
   it('shows the opponent and venue from MU\'s perspective', () => {
     render(<MatchCard match={makeMatch()} />);
-    expect(screen.getByText(/vs Hull City AFC \(A\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Hull City AFC \(A\)/)).toBeInTheDocument();
   });
 
   it('is not a link for a SCHEDULED match', () => {

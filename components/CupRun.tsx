@@ -19,7 +19,7 @@ export function CupRun({ matches, competition }: { matches: Match[]; competition
     <ol data-testid="cup-run" className={styles.list}>
       {rounds.map(m => (
         <li key={m.id} className={styles.row}>
-          <span>{new Date(m.utcDate).toLocaleDateString('en-GB')} — vs {m.venue === 'H' ? m.away.name : m.home.name} ({m.venue})</span>
+          <span>{new Date(m.utcDate).toLocaleDateString('en-GB')} — {m.venue === 'H' ? m.away.name : m.home.name} ({m.venue})</span>
           <span className={styles.score}>{m.score.display.home ?? '-'}:{m.score.display.away ?? '-'}</span>
         </li>
       ))}

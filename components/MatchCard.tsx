@@ -31,7 +31,7 @@ export function MatchCard({ match }: { match: Match }) {
           <LiveBadge match={match} />
         </div>
       )}
-      <span className={styles.opponent}>vs {opponent} ({match.venue})</span>
+      <span className={styles.opponent}>{opponent} ({match.venue})</span>
       <span className={styles.score}>{match.score.display.home ?? '-'} : {match.score.display.away ?? '-'}</span>
       {!isLive && <span className={styles.meta}>{statusLabel(match)}</span>}
     </div>
