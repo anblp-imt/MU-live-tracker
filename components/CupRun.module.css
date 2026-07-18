@@ -22,3 +22,19 @@
   color: var(--mu-gold);
   flex-shrink: 0;
 }
+
+.eliminated {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+.eliminatedTag {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  color: var(--mu-red);
+  border: 1px solid rgba(218, 41, 28, 0.4);
+  border-radius: 2px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}

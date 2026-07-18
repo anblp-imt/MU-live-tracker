@@ -25,6 +25,7 @@ export function MatchCard({ match }: { match: Match }) {
   const opponent = match.venue === 'H' ? match.away.name : match.home.name;
   const clickable = CLICKABLE_STATUSES.includes(match.status);
   const isLive = LIVE_STATUSES.includes(match.status);
+  const competitionLabel = getCompetition(match.competition).navShortLabel;
 
   // [React] usePolling refetches this match's data every 30s while live, but a prop
   // changing silently gives no visual cue that something just happened. This ref holds
@@ -55,6 +56,7 @@ export function MatchCard({ match }: { match: Match }) {
           <LiveBadge match={match} />
         </div>
       )}
+      <span className={styles.league}>{competitionLabel}</span>
       <span className={styles.opponent}>{opponent} ({match.venue})</span>
       <span className={styles.score}>{match.score.display.home ?? '-'} : {match.score.display.away ?? '-'}</span>
       {!isLive && <span className={styles.meta}>{statusLabel(match)}</span>}

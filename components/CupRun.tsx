@@ -3,6 +3,7 @@
 // of recomputing on every render is negligible. Reach for useMemo when profiling shows a
 // real cost, not by default; see FormationPitch for the contrasting case.
 import type { Match } from '@/lib/types';
+import { matchResult } from '@/lib/result';
 import styles from './CupRun.module.css';
 
 export function CupRun({ matches, competition }: { matches: Match[]; competition: 'FA' | 'EFL' }) {
@@ -17,12 +18,18 @@ export function CupRun({ matches, competition }: { matches: Match[]; competition
 
   return (
     <ol data-testid="cup-run" className={styles.list}>
-      {rounds.map(m => (
-        <li key={m.id} className={styles.row}>
-          <span>{new Date(m.utcDate).toLocaleDateString('en-GB')} — {m.venue === 'H' ? m.away.name : m.home.name} ({m.venue})</span>
-          <span className={styles.score}>{m.score.display.home ?? '-'}:{m.score.display.away ?? '-'}</span>
-        </li>
-      ))}
+      {rounds.map(m => {
+        const eliminated = matchResult(m) === 'L';
+        return (
+          <li key={m.id} className={styles.row} data-eliminated={eliminated ? 'true' : undefined}>
+            <span className={eliminated ? styles.eliminated : undefined}>
+              {new Date(m.utcDate).toLocaleDateString('en-GB')} — {m.venue === 'H' ? m.away.name : m.home.name} ({m.venue})
+            </span>
+            <span className={styles.score}>{m.score.display.home ?? '-'}:{m.score.display.away ?? '-'}</span>
+            {eliminated && <span className={styles.eliminatedTag}>OUT</span>}
+          </li>
+        );
+      })}
     </ol>
   );
 }

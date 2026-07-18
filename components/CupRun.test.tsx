@@ -3,12 +3,13 @@ import { render, screen } from '@testing-library/react';
 import { CupRun } from './CupRun';
 import type { Match } from '@/lib/types';
 
-function match(id: string, competition: Match['competition'], utcDate: string, opponent: string): Match {
+function match(id: string, competition: Match['competition'], utcDate: string, opponent: string, overrides: Partial<Match> = {}): Match {
   return {
     id, utcDate, status: 'SCHEDULED', competition,
     home: { name: 'Manchester United FC' }, away: { name: opponent }, venue: 'H',
     score: { fullTime: { home: null, away: null }, display: { home: null, away: null } },
     sources: { fd: 1 },
+    ...overrides,
   };
 }
 
@@ -29,5 +30,30 @@ describe('CupRun', () => {
   it('shows a placeholder when there are no fixtures yet', () => {
     render(<CupRun matches={[]} competition="EFL" />);
     expect(screen.getByText(/no fixtures yet/i)).toBeInTheDocument();
+  });
+
+  it('marks the round MU lost as eliminated', () => {
+    render(<CupRun matches={[
+      match('a', 'FA', '2026-12-01T15:00:00Z', 'Round 3 Opponent', {
+        status: 'FINISHED',
+        score: { fullTime: { home: 0, away: 1 }, display: { home: 0, away: 1 } },
+      }),
+    ]} competition="FA" />);
+
+    expect(screen.getByRole('listitem')).toHaveAttribute('data-eliminated', 'true');
+  });
+
+  it('does not mark a round MU won or hasn\'t played yet', () => {
+    render(<CupRun matches={[
+      match('a', 'FA', '2026-12-01T15:00:00Z', 'Won This One', {
+        status: 'FINISHED',
+        score: { fullTime: { home: 2, away: 0 }, display: { home: 2, away: 0 } },
+      }),
+      match('b', 'FA', '2027-01-10T15:00:00Z', 'Not Played Yet'),
+    ]} competition="FA" />);
+
+    for (const item of screen.getAllByRole('listitem')) {
+      expect(item).not.toHaveAttribute('data-eliminated');
+    }
   });
 });

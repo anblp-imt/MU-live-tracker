@@ -38,6 +38,18 @@
   left: 12px;
 }
 
+.league {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mu-gold);
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  border-radius: 2px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+
 .opponent {
   flex: 1;
   font-weight: 600;

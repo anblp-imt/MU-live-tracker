@@ -26,6 +26,11 @@ describe('MatchCard', () => {
     expect(screen.getByText(/Hull City AFC \(A\)/)).toBeInTheDocument();
   });
 
+  it('shows a competition tag using the shared short label', () => {
+    render(<MatchCard match={makeMatch({ competition: 'CL' })} />);
+    expect(screen.getByText('UCL')).toBeInTheDocument();
+  });
+
   it('is not a link for a SCHEDULED match', () => {
     render(<MatchCard match={makeMatch({ status: 'SCHEDULED' })} />);
     expect(screen.queryByRole('link')).not.toBeInTheDocument();

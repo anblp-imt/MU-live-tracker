@@ -6,6 +6,7 @@ import { PageHeading } from '@/components/PageHeading';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { displayTeamName, isManUtd } from '@/lib/normalize';
 import { recentForm, standingsAroundMu } from '@/lib/standings';
+import { getCompetition } from '@/lib/competitions';
 import styles from './page.module.css';
 
 type Tab = 'PL' | 'CL' | 'FA' | 'EFL';
@@ -55,7 +56,9 @@ export default function StandingsPage() {
       <PageHeading title="Standings" />
       <div role="tablist" className={styles.tabs}>
         {(['PL', 'CL', 'FA', 'EFL'] as const).map(t => (
-          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={styles.tab}>{t}</button>
+          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={styles.tab}>
+            {getCompetition(t).navShortLabel}
+          </button>
         ))}
       </div>
       {(tab === 'PL' || tab === 'CL') && (

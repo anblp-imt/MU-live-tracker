@@ -62,7 +62,7 @@ describe('StandingsPage', () => {
     await waitFor(() => expect(screen.getAllByText('Red Devils').length).toBeGreaterThan(0));
     expect(screen.queryByText(/Red Devils' Position/)).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('tab', { name: 'CL' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'UCL' }));
     await waitFor(() => expect(screen.getByText(/Red Devils' Position/)).toBeInTheDocument());
 
     // Scope to the highlight block itself — the full table below still lists all 36
@@ -94,7 +94,7 @@ describe('StandingsPage', () => {
     render(<StandingsPage />);
     await waitFor(() => expect(screen.getAllByRole('tab').length).toBeGreaterThan(0));
 
-    await userEvent.click(screen.getByRole('tab', { name: 'FA' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'FA Cup' }));
     await waitFor(() => expect(screen.getByText(/Some Opponent/)).toBeInTheDocument());
   });
 });
