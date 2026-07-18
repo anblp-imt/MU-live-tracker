@@ -1,5 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
 
+/* Font pairing history: manutd.com's actual production CSS (checked 2026-07-18) pairs
+   "Spezia Serif" (Colophon Foundry, licensed/paid — not legally reusable here) with
+   Inter for body text. Inter was already our body font, no change needed there. Two
+   heading-font attempts followed real reference points but read as too thin/editorial
+   for this app's retro-programme identity: Playfair Display (original brainstorm), then
+   Source Serif 4 (closer to Spezia Serif's restrained character, but still too delicate)
+   — landed on Roboto Slab for its blocky, square-cut slab serifs, matching the "vintage
+   sports jersey/programme" feel this identity was always meant to have. */
 :root {
   --mu-red: #DA291C;
   --mu-red-dark: #9A1F14;
@@ -9,7 +17,7 @@
   --mu-gold-bright: #FFD700;
   --mu-green: #3fae5c;
   --mu-white: #EDE6D6;
-  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-heading: 'Roboto Slab', Georgia, 'Times New Roman', serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
