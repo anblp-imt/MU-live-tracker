@@ -61,7 +61,19 @@ describe('StandingsPage', () => {
     );
     vi.stubGlobal('fetch', vi.fn((url: string) => {
       if (url.includes('/api/standings')) return Promise.resolve({ json: async () => ({ standings: bigTable }) });
-      return Promise.resolve({ ok: true, json: async () => ({ season: '2026-27', matches: [], meta: { sources: { fd: true, espn: true } } }) });
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          season: '2026-27',
+          matches: [{
+            id: 'cl1', utcDate: '2026-09-17T19:00:00Z', status: 'SCHEDULED', competition: 'CL',
+            home: { name: 'Manchester United FC' }, away: { name: 'Some European Side' }, venue: 'H',
+            score: { fullTime: { home: null, away: null }, display: { home: null, away: null } },
+            sources: { fd: 1 },
+          }],
+          meta: { sources: { fd: true, espn: true } },
+        }),
+      });
     }));
 
     render(<StandingsPage />);
@@ -78,6 +90,34 @@ describe('StandingsPage', () => {
     expect(highlight.getByText('Team 16')).toBeInTheDocument();
     expect(highlight.getByText('Team 20')).toBeInTheDocument();
     expect(highlight.queryByText('Team 1')).not.toBeInTheDocument();
+  });
+
+  it('only shows a European tab (CL/EL/ECL) when MU actually has a match in one, and routes it to CupRun', async () => {
+    vi.stubGlobal('fetch', vi.fn((url: string) => {
+      if (url.includes('/api/standings')) return Promise.resolve({ json: async () => ({ standings: [] }) });
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          season: '2026-27',
+          matches: [{
+            id: 'el1', utcDate: '2026-09-17T19:00:00Z', status: 'SCHEDULED', competition: 'EL',
+            home: { name: 'Manchester United FC' }, away: { name: 'Some Europa Side' }, venue: 'H',
+            score: { fullTime: { home: null, away: null }, display: { home: null, away: null } },
+            sources: { fd: 1 },
+          }],
+          meta: { sources: { fd: true, espn: true } },
+        }),
+      });
+    }));
+
+    render(<StandingsPage />);
+    await waitFor(() => expect(screen.getAllByRole('tab').length).toBeGreaterThan(0));
+
+    expect(screen.getByRole('tab', { name: 'UEL' })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'UCL' })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('tab', { name: 'UEL' }));
+    await waitFor(() => expect(screen.getByText(/Some Europa Side/)).toBeInTheDocument());
   });
 
   it('switches to a cup run when the FA tab is clicked', async () => {

@@ -6,7 +6,7 @@ import type { Match } from '@/lib/types';
 import { matchResult } from '@/lib/result';
 import styles from './CupRun.module.css';
 
-export function CupRun({ matches, competition }: { matches: Match[]; competition: 'FA' | 'EFL' }) {
+export function CupRun({ matches, competition }: { matches: Match[]; competition: 'FA' | 'EFL' | 'EL' | 'ECL' }) {
   const rounds = matches
     .filter(m => m.competition === competition)
     .slice()

@@ -1,17 +1,17 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Match, MatchesResponse, StandingRow } from '@/lib/types';
+import type { CompetitionId, Match, MatchesResponse, StandingRow } from '@/lib/types';
 import { CupRun } from '@/components/CupRun';
 import { PageHeading } from '@/components/PageHeading';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { displayTeamName, isManUtd } from '@/lib/normalize';
 import { recentForm, standingsAroundMu } from '@/lib/standings';
-import { getCompetition } from '@/lib/competitions';
+import { COMPETITIONS, getCompetition, visibleCompetitions } from '@/lib/competitions';
 import { usePolling } from '@/hooks/usePolling';
 import { getCached, setCached, LIVE_TTL_MS, STATIC_TTL_MS } from '@/lib/cache';
 import styles from './page.module.css';
 
-type Tab = 'PL' | 'CL' | 'FA' | 'EFL';
+type Tab = Exclude<CompetitionId, 'FRIENDLY'>;
 
 async function fetchMatches(): Promise<MatchesResponse> {
   const res = await fetch('/api/matches');
@@ -60,7 +60,7 @@ export default function StandingsPage() {
   // folded into usePolling, which only handles one fetch per hook instance) so both the
   // tab-change effect below and the manual Refresh button can trigger it.
   const loadStandings = useCallback((selectedTab: Tab) => {
-    if (selectedTab !== 'PL' && selectedTab !== 'CL') return;
+    if (!getCompetition(selectedTab).hasStandings) return;
     const requestId = ++requestIdRef.current;
     const cacheKey = `standings:${selectedTab}`;
     setStandingsLoading(true);
@@ -84,7 +84,7 @@ export default function StandingsPage() {
   // loadStandings itself writes to) — switching PL -> CL -> PL no longer blanks back to a
   // spinner if a fresh-enough copy of that tab's standings is already cached.
   useEffect(() => {
-    if (tab !== 'PL' && tab !== 'CL') { setStandings(null); return; }
+    if (!getCompetition(tab).hasStandings) { setStandings(null); return; }
     setStandings(getCached<StandingRow[]>(`standings:${tab}`) ?? null);
     loadStandings(tab);
   }, [tab, loadStandings]);
@@ -96,7 +96,7 @@ export default function StandingsPage() {
 
   // Only MU's own finished matches produce real form data (the app has no other club's
   // match history) — used on MU's row only; every other row shows a placeholder.
-  const muForm = (tab === 'PL' || tab === 'CL') ? recentForm(matches, tab, 5) : [];
+  const muForm = getCompetition(tab).hasStandings ? recentForm(matches, tab, 5) : [];
 
   return (
     <main className={styles.main}>
@@ -108,13 +108,13 @@ export default function StandingsPage() {
         error={matchesError || standingsError}
       />
       <div role="tablist" className={styles.tabs}>
-        {(['PL', 'CL', 'FA', 'EFL'] as const).map(t => (
-          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={styles.tab}>
-            {getCompetition(t).navShortLabel}
+        {visibleCompetitions(matches, COMPETITIONS.filter(c => c.id !== 'FRIENDLY')).map(c => (
+          <button key={c.id} role="tab" aria-selected={tab === c.id} onClick={() => setTab(c.id as Tab)} className={styles.tab}>
+            {c.navShortLabel}
           </button>
         ))}
       </div>
-      {(tab === 'PL' || tab === 'CL') && (
+      {getCompetition(tab).hasStandings && (
         standings ? (
           <>
             {tab === 'CL' && standingsAroundMu(standings, 2).length > 0 && (
@@ -181,7 +181,7 @@ export default function StandingsPage() {
           </>
         ) : <LoadingSpinner />
       )}
-      {(tab === 'FA' || tab === 'EFL') && <CupRun matches={matches} competition={tab} />}
+      {!getCompetition(tab).hasStandings && <CupRun matches={matches} competition={tab as 'FA' | 'EFL' | 'EL' | 'ECL'} />}
     </main>
   );
 }
