@@ -1,0 +1,64 @@
+.main {
+  padding: 14px 1.5rem 1.5rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.tab {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--mu-gold);
+  cursor: pointer;
+}
+
+.tab[aria-selected="true"] {
+  border-color: var(--mu-red);
+  background: rgba(218, 41, 28, 0.15);
+  color: var(--mu-white);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 10px;
+}
+
+.tile {
+  padding: 14px 10px;
+  background: var(--mu-surface);
+  border: 1.5px dashed rgba(201, 162, 39, 0.3);
+  border-radius: 3px;
+  text-align: center;
+}
+
+.tileValue {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--mu-white);
+}
+
+.tileLabel {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+
+.won .tileValue { color: var(--mu-green); }
+.drawn .tileValue { color: var(--mu-gold); }
+.lost .tileValue { color: var(--mu-red); }
