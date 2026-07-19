@@ -4,10 +4,11 @@ import { usePolling } from './usePolling';
 import { clearCache, getCached } from '@/lib/cache';
 
 function Probe({ fetcher, intervalMs, cache }: { fetcher: () => Promise<string>; intervalMs: number | null; cache?: { key: string; ttlMs: number | ((result: string) => number) } }) {
-  const { data, error, loading, refetch } = usePolling(fetcher, intervalMs, cache);
+  const { data, error, loading, refetch, lastSyncedAt } = usePolling(fetcher, intervalMs, cache);
   return (
     <div>
       <span>{loading ? 'loading' : error ? `error:${error.message}` : `data:${data}`}</span>
+      <span>{lastSyncedAt == null ? 'never-synced' : `synced:${lastSyncedAt}`}</span>
       <button onClick={refetch}>refetch</button>
     </div>
   );
@@ -106,6 +107,28 @@ describe('usePolling', () => {
     // The remount still refetches in the background to keep the cache from going stale.
     await act(async () => { await Promise.resolve(); });
     expect(screen.getByText('data:fresh-value')).toBeInTheDocument();
+  });
+
+  it('sets lastSyncedAt only after a fetch actually succeeds, and updates it on every success', async () => {
+    const fetcher = vi.fn().mockResolvedValue('x');
+    render(<Probe fetcher={fetcher} intervalMs={null} />);
+    expect(screen.getByText('never-synced')).toBeInTheDocument();
+
+    await act(async () => { await Promise.resolve(); });
+    const firstSync = screen.getByText(/^synced:/).textContent;
+    expect(firstSync).not.toBe('synced:');
+
+    vi.setSystemTime(Date.now() + 5000);
+    fireEvent.click(screen.getByText('refetch'));
+    await act(async () => { await Promise.resolve(); });
+    expect(screen.getByText(/^synced:/).textContent).not.toBe(firstSync);
+  });
+
+  it('leaves lastSyncedAt at null when every fetch fails', async () => {
+    const fetcher = vi.fn().mockRejectedValue(new Error('boom'));
+    render(<Probe fetcher={fetcher} intervalMs={null} />);
+    await act(async () => { await Promise.resolve(); });
+    expect(screen.getByText('never-synced')).toBeInTheDocument();
   });
 
   it('refetches on demand when refetch() is called, bypassing the interval', async () => {

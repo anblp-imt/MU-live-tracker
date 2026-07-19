@@ -47,4 +47,24 @@ describe('PageHeading', () => {
     render(<PageHeading title="Today" onRefresh={() => {}} refreshing />);
     expect(screen.getByRole('button', { name: /refresh/i })).toBeDisabled();
   });
+
+  it('shows a synced checkmark with the sync time once lastSyncedAt is set', () => {
+    render(<PageHeading title="Today" onRefresh={() => {}} lastSyncedAt={new Date('2026-07-18T12:00:05Z').getTime()} />);
+    expect(screen.getByTestId('sync-status')).toHaveTextContent('✓ Synced');
+  });
+
+  it('shows a failure marker instead of the sync time when error is set', () => {
+    render(<PageHeading title="Today" onRefresh={() => {}} lastSyncedAt={Date.now()} error={new Error('boom')} />);
+    expect(screen.getByTestId('sync-status')).toHaveTextContent('✗ Refresh failed');
+  });
+
+  it('shows neither sync marker while a refresh is in flight', () => {
+    render(<PageHeading title="Today" onRefresh={() => {}} lastSyncedAt={Date.now()} refreshing />);
+    expect(screen.queryByTestId('sync-status')).not.toBeInTheDocument();
+  });
+
+  it('shows no sync status before the first fetch has ever succeeded', () => {
+    render(<PageHeading title="Today" onRefresh={() => {}} lastSyncedAt={null} />);
+    expect(screen.queryByTestId('sync-status')).not.toBeInTheDocument();
+  });
 });

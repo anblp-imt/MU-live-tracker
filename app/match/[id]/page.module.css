@@ -13,6 +13,29 @@
   font-size: 22px;
 }
 
+.refreshGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.syncOk {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--mu-green);
+  white-space: nowrap;
+}
+
+.syncErr {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--mu-red);
+  white-space: nowrap;
+}
+
 .refreshBtn {
   font-family: var(--font-mono);
   font-size: 10.5px;

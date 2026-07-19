@@ -38,10 +38,15 @@ export default function StandingsPage() {
   // filter at all, leaving Schedule as Context's only remaining consumer — see
   // LEARNING.md section 4 for what that removal taught.)
   const [tab, setTab] = useState<Tab>('PL');
-  const { data: matchesData, loading: matchesLoading, refetch: refetchMatches } = usePolling(fetchMatches, null, { key: 'matches', ttlMs: LIVE_TTL_MS });
+  const {
+    data: matchesData, loading: matchesLoading, refetch: refetchMatches,
+    lastSyncedAt: matchesSyncedAt, error: matchesError,
+  } = usePolling(fetchMatches, null, { key: 'matches', ttlMs: LIVE_TTL_MS });
   const matches: Match[] = matchesData?.matches ?? [];
   const [standings, setStandings] = useState<StandingRow[] | null>(null);
   const [standingsLoading, setStandingsLoading] = useState(false);
+  const [standingsSyncedAt, setStandingsSyncedAt] = useState<number | null>(null);
+  const [standingsError, setStandingsError] = useState<Error | null>(null);
 
   // [React] Guards against a stale response clobbering a newer one — e.g. tab flips
   // PL -> CL -> PL fast enough that the first PL request is still in flight when the
@@ -64,7 +69,13 @@ export default function StandingsPage() {
       .then((json: { standings: StandingRow[] }) => {
         if (requestIdRef.current !== requestId) return;
         setStandings(json.standings);
+        setStandingsSyncedAt(Date.now());
+        setStandingsError(null);
         setCached(cacheKey, json.standings, STATIC_TTL_MS);
+      })
+      .catch((e: unknown) => {
+        if (requestIdRef.current !== requestId) return;
+        setStandingsError(e instanceof Error ? e : new Error(String(e)));
       })
       .finally(() => { if (requestIdRef.current === requestId) setStandingsLoading(false); });
   }, []);
@@ -89,7 +100,13 @@ export default function StandingsPage() {
 
   return (
     <main className={styles.main}>
-      <PageHeading title="Standings" onRefresh={refreshAll} refreshing={matchesLoading || standingsLoading} />
+      <PageHeading
+        title="Standings"
+        onRefresh={refreshAll}
+        refreshing={matchesLoading || standingsLoading}
+        lastSyncedAt={Math.max(matchesSyncedAt ?? 0, standingsSyncedAt ?? 0) || null}
+        error={matchesError || standingsError}
+      />
       <div role="tablist" className={styles.tabs}>
         {(['PL', 'CL', 'FA', 'EFL'] as const).map(t => (
           <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={styles.tab}>

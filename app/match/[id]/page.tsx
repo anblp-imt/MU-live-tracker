@@ -24,6 +24,10 @@ async function fetchDetail(espnId: string, slug: string): Promise<EspnDetail> {
   return res.json();
 }
 
+function formatSyncTime(ms: number): string {
+  return new Date(ms).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+}
+
 // [React] Pure formatter, tested through the page's own rendered output — same pattern
 // as MatchCard's local statusLabel(), not extracted to lib/ since it's specific to this
 // one page's header and not reused elsewhere.
@@ -48,7 +52,7 @@ export default function MatchDetailPage() {
   // re-opening the same fixture — e.g. back out to Today and click back in — renders
   // instantly from the last-known detail instead of a fresh loading spinner, while still
   // refreshing in the background.
-  const { data, error, loading, refetch } = usePolling(
+  const { data, error, loading, refetch, lastSyncedAt } = usePolling(
     () => (espnId && slug ? fetchDetail(espnId, slug) : Promise.reject(new Error('Match detail unavailable'))),
     intervalMs,
     espnId && slug ? { key: `match-detail:${slug}:${espnId}`, ttlMs: detailTtlMs } : undefined,
@@ -64,7 +68,7 @@ export default function MatchDetailPage() {
   }, [data]);
 
   if (!espnId || !slug) return <p>Match detail unavailable for this fixture.</p>;
-  if (error) return <p role="alert">{error.message}</p>;
+  if (error && !data) return <p role="alert">{error.message}</p>;
   if (!data) return <LoadingSpinner />;
 
   const headerComp = data.header?.competitions?.[0];
@@ -85,9 +89,15 @@ export default function MatchDetailPage() {
     <main className={styles.main}>
       <div className={styles.titleRow}>
         <h1 className={styles.title}>Match #{params.id}</h1>
-        <button type="button" className={styles.refreshBtn} onClick={refetch} disabled={loading}>
-          <span className={loading ? styles.spinning : undefined} aria-hidden="true">↻</span> Refresh
-        </button>
+        <div className={styles.refreshGroup}>
+          {!loading && error && <span className={styles.syncErr} data-testid="sync-status">✗ Refresh failed</span>}
+          {!loading && !error && lastSyncedAt != null && (
+            <span className={styles.syncOk} data-testid="sync-status">✓ Synced {formatSyncTime(lastSyncedAt)}</span>
+          )}
+          <button type="button" className={styles.refreshBtn} onClick={refetch} disabled={loading}>
+            <span className={loading ? styles.spinning : undefined} aria-hidden="true">↻</span> Refresh
+          </button>
+        </div>
       </div>
       <div className={styles.scoreHeader}>
         <span className={styles.teamName}>{displayTeamName(homeComp?.team?.displayName || '')}</span>

@@ -9,6 +9,10 @@ interface UsePollingResult<T> {
   // Runs the same fetch the interval would, immediately — for a manual "Refresh" button
   // that bypasses the cache TTL without the caller needing to know anything about it.
   refetch: () => void;
+  // Timestamp (Date.now()) of the last fetch that actually succeeded — lets a "Refresh"
+  // button show *when* it last synced, not just whether one is in flight right now.
+  // null until the very first fetch resolves.
+  lastSyncedAt: number | null;
 }
 
 interface CacheOptions<T> {
@@ -30,6 +34,10 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
   const [data, setData] = useState<T | null>(cachedRef.current ?? null);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(cachedRef.current === undefined);
+  // Left null even when seeded from cache (below) — this hook instance genuinely
+  // doesn't know when that cached value was originally fetched, and the mount-time
+  // run() a few lines down will set an accurate timestamp within moments anyway.
+  const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
 
   // [React] Stores the latest fetcher without putting it in the effect's dependency
   // array. Inline functions get a new identity every render — if `fetcher` itself were a
@@ -63,6 +71,7 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
         if (!cancelled) {
           setData(result);
           setError(null);
+          setLastSyncedAt(Date.now());
           if (cacheRef.current) {
             const { key, ttlMs } = cacheRef.current;
             setCached(key, result, typeof ttlMs === 'function' ? ttlMs(result) : ttlMs);
@@ -94,5 +103,5 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
 
   const refetch = useCallback(() => { setLoading(true); runRef.current(); }, []);
 
-  return { data, error, loading, refetch };
+  return { data, error, loading, refetch, lastSyncedAt };
 }
