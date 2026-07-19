@@ -116,6 +116,64 @@ describe('MatchDetailPage', () => {
     expect(screen.queryByAltText('Brighton & Hove Albion crest')).not.toBeInTheDocument();
   });
 
+  it('renders one row per scorer with a ball icon, not a single joined line', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        header: {
+          competitions: [{
+            status: { type: { state: 'post' } },
+            competitors: [
+              { homeAway: 'home', team: { id: '331', displayName: 'Brighton & Hove Albion' }, score: '1' },
+              { homeAway: 'away', team: { id: '360', displayName: 'Manchester United' }, score: '2' },
+            ],
+            details: [
+              { scoringPlay: true, clock: { displayValue: "33'" }, team: { id: '360' }, participants: [{ athlete: { displayName: 'Patrick Dorgu' } }] },
+              { scoringPlay: true, clock: { displayValue: "70'" }, team: { id: '360' }, participants: [{ athlete: { displayName: 'Patrick Dorgu' } }] },
+              { scoringPlay: true, clock: { displayValue: "80'" }, team: { id: '331' }, participants: [{ athlete: { displayName: 'Some Striker' } }] },
+            ],
+          }],
+        },
+        rosters: [],
+      }),
+    }));
+
+    render(<MatchDetailPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    // Dorgu scored twice — grouped into ONE row showing both minutes, not two rows.
+    expect(screen.getByText(/33'.*70'|70'.*33'/)).toBeInTheDocument();
+    const scorerRows = screen.getAllByTestId('scorer-row');
+    expect(scorerRows).toHaveLength(2); // one row for Dorgu (both goals), one for Some Striker
+  });
+
+  it('shows a placeholder, not an empty list, when a side has no scorers', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        header: {
+          competitions: [{
+            status: { type: { state: 'post' } },
+            competitors: [
+              { homeAway: 'home', team: { id: '331', displayName: 'Brighton & Hove Albion' }, score: '0' },
+              { homeAway: 'away', team: { id: '360', displayName: 'Manchester United' }, score: '1' },
+            ],
+            details: [
+              { scoringPlay: true, clock: { displayValue: "10'" }, team: { id: '360' }, participants: [{ athlete: { displayName: 'Bruno Fernandes' } }] },
+            ],
+          }],
+        },
+        rosters: [],
+      }),
+    }));
+
+    render(<MatchDetailPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    expect(screen.getAllByTestId('scorer-row')).toHaveLength(1);
+    expect(screen.getByTestId('scorers')).toHaveTextContent('—');
+  });
+
   it('renders stats, substitutions and a penalty shootout when the detail includes them', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,

@@ -131,10 +131,26 @@ export default function MatchDetailPage() {
         <summary className={styles.lineupSummary}>Starting Lineup</summary>
         <FormationPitch homeRoster={home} awayRoster={away} />
       </details>
-      <section className={styles.scorers}>
+      <section className={styles.scorers} data-testid="scorers">
         <h2>Scorers</h2>
-        <div>Home: {scorers.home.map(s => `${s.name} ${s.mins.join(', ')}`).join(' · ') || '—'}</div>
-        <div>Away: {scorers.away.map(s => `${s.name} ${s.mins.join(', ')}`).join(' · ') || '—'}</div>
+        <div className={styles.scorersGrid}>
+          <div>
+            {scorers.home.length === 0 && <p className={styles.scorersEmpty}>—</p>}
+            {scorers.home.map(s => (
+              <div className={styles.scorerRow} data-testid="scorer-row" key={s.name}>
+                <span aria-hidden="true">⚽</span> {s.name} <span className={styles.scorerMins}>{s.mins.join(', ')}</span>
+              </div>
+            ))}
+          </div>
+          <div>
+            {scorers.away.length === 0 && <p className={styles.scorersEmpty}>—</p>}
+            {scorers.away.map(s => (
+              <div className={`${styles.scorerRow} ${styles.scorerRowAway}`} data-testid="scorer-row" key={s.name}>
+                <span className={styles.scorerMins}>{s.mins.join(', ')}</span> {s.name} <span aria-hidden="true">⚽</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
       {shootout && (
         <section className={styles.shootout} data-testid="shootout">

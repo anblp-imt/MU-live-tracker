@@ -138,6 +138,33 @@
   border-radius: 3px;
 }
 
+.scorersGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+  font-size: 12.5px;
+}
+
+.scorerRow {
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.scorerRowAway {
+  text-align: right;
+}
+
+.scorerMins {
+  font-family: var(--font-mono);
+  color: var(--mu-gold);
+  font-size: 11px;
+}
+
+.scorersEmpty {
+  opacity: 0.5;
+  margin: 0;
+}
+
 .stats {
   margin-top: 16px;
   padding: 12px 14px 4px;
