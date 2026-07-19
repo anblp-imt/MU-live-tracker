@@ -26,14 +26,19 @@ export default function StatsPage() {
 
   if (!data) return <LoadingSpinner />;
 
-  const stats = computeSeasonStats(data.matches, selected);
+  // Season stats are a competitive-record view — pre-season/mid-season friendlies don't
+  // count toward it, so they're filtered out here rather than in computeSeasonStats
+  // (which stays generic; this exclusion is specific to what this page chooses to show).
+  const competitiveMatches = data.matches.filter(m => m.competition !== 'FRIENDLY');
+  const competitiveCompetitions = COMPETITIONS.filter(c => c.id !== 'FRIENDLY');
+  const stats = computeSeasonStats(competitiveMatches, selected);
 
   return (
     <main className={styles.main} data-testid="stats-page">
       <PageHeading title="Stats" onRefresh={refetch} refreshing={loading} lastSyncedAt={lastSyncedAt} error={error} />
       <div role="tablist" className={styles.tabs}>
         <button role="tab" aria-selected={selected === 'ALL'} onClick={() => setSelected('ALL')} className={styles.tab}>ALL</button>
-        {COMPETITIONS.map(c => (
+        {competitiveCompetitions.map(c => (
           <button key={c.id} role="tab" aria-selected={selected === c.id} onClick={() => setSelected(c.id)} className={styles.tab}>
             {c.navShortLabel}
           </button>

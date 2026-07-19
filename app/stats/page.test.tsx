@@ -81,6 +81,19 @@ describe('StatsPage', () => {
     expect(screen.getByText(/no finished matches yet/i)).toBeInTheDocument();
   });
 
+  it('excludes friendlies from the ALL tally and has no Friendly tab', async () => {
+    stubMatches([
+      match({ id: 'a', competition: 'PL' }),
+      match({ id: 'b', competition: 'FRIENDLY', score: { fullTime: { home: 9, away: 9 }, display: { home: 9, away: 9 } } }),
+    ]);
+
+    render(<StatsPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    expect(screen.getByTestId('stat-played')).toHaveTextContent('1');
+    expect(screen.queryByRole('tab', { name: 'Friendly' })).not.toBeInTheDocument();
+  });
+
   it('refetches when the Refresh button is clicked', async () => {
     stubMatches([match()]);
     render(<StatsPage />);
