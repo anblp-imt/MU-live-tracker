@@ -109,6 +109,9 @@ export default function StandingsPage() {
       />
       <div role="tablist" className={styles.tabs}>
         {visibleCompetitions(matches, COMPETITIONS.filter(c => c.id !== 'FRIENDLY')).map(c => (
+          // TS can't narrow CompetitionId -> Tab through .filter(), but the `from` list
+          // above already excludes 'FRIENDLY' (Tab's only excluded case), so c.id is
+          // always a valid Tab value here.
           <button key={c.id} role="tab" aria-selected={tab === c.id} onClick={() => setTab(c.id as Tab)} className={styles.tab}>
             {c.navShortLabel}
           </button>
@@ -181,6 +184,9 @@ export default function StandingsPage() {
           </>
         ) : <LoadingSpinner />
       )}
+      {/* Only PL/CL have hasStandings: true (lib/competitions.ts), and 'FRIENDLY' is
+          already excluded from Tab — so inside this !hasStandings branch, tab can only
+          be 'FA' | 'EFL' | 'EL' | 'ECL', exactly CupRun's prop type. */}
       {!getCompetition(tab).hasStandings && <CupRun matches={matches} competition={tab as 'FA' | 'EFL' | 'EL' | 'ECL'} />}
     </main>
   );
