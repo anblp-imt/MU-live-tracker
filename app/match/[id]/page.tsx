@@ -48,7 +48,7 @@ export default function MatchDetailPage() {
   // re-opening the same fixture — e.g. back out to Today and click back in — renders
   // instantly from the last-known detail instead of a fresh loading spinner, while still
   // refreshing in the background.
-  const { data, error } = usePolling(
+  const { data, error, loading, refetch } = usePolling(
     () => (espnId && slug ? fetchDetail(espnId, slug) : Promise.reject(new Error('Match detail unavailable'))),
     intervalMs,
     espnId && slug ? { key: `match-detail:${slug}:${espnId}`, ttlMs: detailTtlMs } : undefined,
@@ -83,7 +83,12 @@ export default function MatchDetailPage() {
 
   return (
     <main className={styles.main}>
-      <h1 className={styles.title}>Match #{params.id}</h1>
+      <div className={styles.titleRow}>
+        <h1 className={styles.title}>Match #{params.id}</h1>
+        <button type="button" className={styles.refreshBtn} onClick={refetch} disabled={loading}>
+          <span className={loading ? styles.spinning : undefined} aria-hidden="true">↻</span> Refresh
+        </button>
+      </div>
       <div className={styles.scoreHeader}>
         <span className={styles.teamName}>{displayTeamName(homeComp?.team?.displayName || '')}</span>
         <span className={styles.score}>{homeComp?.score ?? '-'} – {awayComp?.score ?? '-'}</span>

@@ -26,7 +26,7 @@ async function fetchMatches(): Promise<MatchesResponse> {
 // same "lift state up no higher than needed" idea Task 18 first introduced.
 export default function SchedulePage() {
   const [selected, setSelected] = useState<FilterValue>('ALL');
-  const { data } = usePolling(fetchMatches, null, { key: 'matches', ttlMs: LIVE_TTL_MS });
+  const { data, loading, refetch } = usePolling(fetchMatches, null, { key: 'matches', ttlMs: LIVE_TTL_MS });
   // [React] Rather than seeding this from an effect once `data` arrives (which would
   // need a "have we initialized yet" guard to avoid clobbering the user's own clicks on
   // a later re-render), `toggled` only ever tracks which groups the user has manually
@@ -51,7 +51,7 @@ export default function SchedulePage() {
 
   return (
     <main className={styles.main}>
-      <PageHeading title="Schedule" />
+      <PageHeading title="Schedule" onRefresh={refetch} refreshing={loading} />
       <div role="tablist" className={styles.tabs}>
         <button role="tab" aria-selected={selected === 'ALL'} onClick={() => setSelected('ALL')} className={styles.tab}>ALL</button>
         {COMPETITIONS.map(c => (

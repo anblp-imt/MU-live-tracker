@@ -1,11 +1,14 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getCached, setCached } from '@/lib/cache';
 
 interface UsePollingResult<T> {
   data: T | null;
   error: Error | null;
   loading: boolean;
+  // Runs the same fetch the interval would, immediately — for a manual "Refresh" button
+  // that bypasses the cache TTL without the caller needing to know anything about it.
+  refetch: () => void;
 }
 
 interface CacheOptions<T> {
@@ -42,6 +45,12 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
     cacheRef.current = cache;
   });
 
+  // [React] Holds the current effect run's `run` function so `refetch()` (called from
+  // outside the effect, e.g. a button's onClick) can trigger the same fetch-and-cache
+  // logic on demand. Reassigned every time the effect below re-runs, so it's always the
+  // version closed over the current `cancelled` flag.
+  const runRef = useRef<() => void>(() => {});
+
   useEffect(() => {
     // [React] `cancelled` is this run's private flag. If intervalMs changes (or the
     // component unmounts) before an in-flight fetch resolves, its result is discarded
@@ -66,6 +75,7 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
       }
     }
 
+    runRef.current = run;
     run();
 
     if (intervalMs === null) {
@@ -82,5 +92,7 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
     };
   }, [intervalMs]);
 
-  return { data, error, loading };
+  const refetch = useCallback(() => { setLoading(true); runRef.current(); }, []);
+
+  return { data, error, loading, refetch };
 }

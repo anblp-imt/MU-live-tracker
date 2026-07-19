@@ -14,7 +14,11 @@ function formatClock(d: Date): string {
 // render) so the very first render — the one that could theoretically be reused between
 // server and client — never bakes in a `new Date()` value; the interval then re-renders
 // this component every second purely from local state, with no data fetch involved.
-export function PageHeading({ title }: { title: string }) {
+//
+// onRefresh/refreshing are optional: the match detail page (which doesn't render
+// PageHeading at all, having its own <h1>) gets its own copy of this same button instead
+// — see app/match/[id]/page.tsx.
+export function PageHeading({ title, onRefresh, refreshing }: { title: string; onRefresh?: () => void; refreshing?: boolean }) {
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -25,7 +29,14 @@ export function PageHeading({ title }: { title: string }) {
 
   return (
     <>
-      <h1>{title}</h1>
+      <div className={styles.headRow}>
+        <h1>{title}</h1>
+        {onRefresh && (
+          <button type="button" className={styles.refreshBtn} onClick={onRefresh} disabled={refreshing}>
+            <span className={refreshing ? styles.spinning : undefined} aria-hidden="true">↻</span> Refresh
+          </button>
+        )}
+      </div>
       <div className={styles.rule} />
       <p className={styles.kicker} data-testid="page-clock">{now ? formatClock(now) : ''}</p>
     </>

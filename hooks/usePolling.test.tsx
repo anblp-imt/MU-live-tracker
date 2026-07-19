@@ -1,11 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { usePolling } from './usePolling';
 import { clearCache, getCached } from '@/lib/cache';
 
 function Probe({ fetcher, intervalMs, cache }: { fetcher: () => Promise<string>; intervalMs: number | null; cache?: { key: string; ttlMs: number | ((result: string) => number) } }) {
-  const { data, error, loading } = usePolling(fetcher, intervalMs, cache);
-  return <div>{loading ? 'loading' : error ? `error:${error.message}` : `data:${data}`}</div>;
+  const { data, error, loading, refetch } = usePolling(fetcher, intervalMs, cache);
+  return (
+    <div>
+      <span>{loading ? 'loading' : error ? `error:${error.message}` : `data:${data}`}</span>
+      <button onClick={refetch}>refetch</button>
+    </div>
+  );
 }
 
 beforeEach(() => { vi.useFakeTimers(); clearCache(); });
@@ -101,6 +106,17 @@ describe('usePolling', () => {
     // The remount still refetches in the background to keep the cache from going stale.
     await act(async () => { await Promise.resolve(); });
     expect(screen.getByText('data:fresh-value')).toBeInTheDocument();
+  });
+
+  it('refetches on demand when refetch() is called, bypassing the interval', async () => {
+    const fetcher = vi.fn().mockResolvedValue('x');
+    render(<Probe fetcher={fetcher} intervalMs={null} />);
+    await act(async () => { await Promise.resolve(); });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByText('refetch'));
+    await act(async () => { await Promise.resolve(); });
+    expect(fetcher).toHaveBeenCalledTimes(2);
   });
 
   it('does not seed from a differently-keyed or expired cache entry', async () => {

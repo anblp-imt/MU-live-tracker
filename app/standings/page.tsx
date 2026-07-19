@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Match, MatchesResponse, StandingRow } from '@/lib/types';
 import { CupRun } from '@/components/CupRun';
 import { PageHeading } from '@/components/PageHeading';
@@ -38,30 +38,50 @@ export default function StandingsPage() {
   // filter at all, leaving Schedule as Context's only remaining consumer — see
   // LEARNING.md section 4 for what that removal taught.)
   const [tab, setTab] = useState<Tab>('PL');
-  const { data: matchesData } = usePolling(fetchMatches, null, { key: 'matches', ttlMs: LIVE_TTL_MS });
+  const { data: matchesData, loading: matchesLoading, refetch: refetchMatches } = usePolling(fetchMatches, null, { key: 'matches', ttlMs: LIVE_TTL_MS });
   const matches: Match[] = matchesData?.matches ?? [];
   const [standings, setStandings] = useState<StandingRow[] | null>(null);
+  const [standingsLoading, setStandingsLoading] = useState(false);
 
-  // Seeded from the same client cache module the Today/Schedule pages write to (and that
-  // this effect itself writes to below) — switching PL -> CL -> PL no longer blanks back
-  // to a spinner if a fresh-enough copy of that tab's standings is already cached. TTL
-  // matches the server route's own cache (app/api/standings/route.ts): a league table
-  // only moves when a match finishes, not every 30s like a live score, so it can be held
-  // far longer than the 'matches' cache above.
-  useEffect(() => {
-    if (tab !== 'PL' && tab !== 'CL') { setStandings(null); return; }
-    const cacheKey = `standings:${tab}`;
-    setStandings(getCached<StandingRow[]>(cacheKey) ?? null);
-    let cancelled = false;
-    fetch(`/api/standings?comp=${tab}`)
+  // [React] Guards against a stale response clobbering a newer one — e.g. tab flips
+  // PL -> CL -> PL fast enough that the first PL request is still in flight when the
+  // second one starts. Each call claims the next id; a response only gets applied if
+  // it's still the most recent one requested by the time it resolves.
+  const requestIdRef = useRef(0);
+
+  // TTL matches the server route's own cache (app/api/standings/route.ts): a league
+  // table only moves when a match finishes, not every 30s like a live score, so it can
+  // be held far longer than the 'matches' cache above. Exposed as its own function (not
+  // folded into usePolling, which only handles one fetch per hook instance) so both the
+  // tab-change effect below and the manual Refresh button can trigger it.
+  const loadStandings = useCallback((selectedTab: Tab) => {
+    if (selectedTab !== 'PL' && selectedTab !== 'CL') return;
+    const requestId = ++requestIdRef.current;
+    const cacheKey = `standings:${selectedTab}`;
+    setStandingsLoading(true);
+    fetch(`/api/standings?comp=${selectedTab}`)
       .then(res => res.json())
       .then((json: { standings: StandingRow[] }) => {
-        if (cancelled) return;
+        if (requestIdRef.current !== requestId) return;
         setStandings(json.standings);
         setCached(cacheKey, json.standings, STATIC_TTL_MS);
-      });
-    return () => { cancelled = true; };
-  }, [tab]);
+      })
+      .finally(() => { if (requestIdRef.current === requestId) setStandingsLoading(false); });
+  }, []);
+
+  // Seeded from the same client cache module the Today/Schedule pages write to (and that
+  // loadStandings itself writes to) — switching PL -> CL -> PL no longer blanks back to a
+  // spinner if a fresh-enough copy of that tab's standings is already cached.
+  useEffect(() => {
+    if (tab !== 'PL' && tab !== 'CL') { setStandings(null); return; }
+    setStandings(getCached<StandingRow[]>(`standings:${tab}`) ?? null);
+    loadStandings(tab);
+  }, [tab, loadStandings]);
+
+  const refreshAll = () => {
+    refetchMatches();
+    loadStandings(tab);
+  };
 
   // Only MU's own finished matches produce real form data (the app has no other club's
   // match history) — used on MU's row only; every other row shows a placeholder.
@@ -69,7 +89,7 @@ export default function StandingsPage() {
 
   return (
     <main className={styles.main}>
-      <PageHeading title="Standings" />
+      <PageHeading title="Standings" onRefresh={refreshAll} refreshing={matchesLoading || standingsLoading} />
       <div role="tablist" className={styles.tabs}>
         {(['PL', 'CL', 'FA', 'EFL'] as const).map(t => (
           <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={styles.tab}>

@@ -1,3 +1,43 @@
+.headRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.refreshBtn {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--mu-gold);
+  cursor: pointer;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  border-color: var(--mu-gold);
+  background: rgba(201, 162, 39, 0.12);
+}
+
+.refreshBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.spinning {
+  display: inline-block;
+  animation: refresh-spin 0.7s linear infinite;
+}
+
+@keyframes refresh-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .rule {
   height: 1px;
   background: linear-gradient(90deg, var(--mu-gold), transparent);

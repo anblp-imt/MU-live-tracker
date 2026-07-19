@@ -19,7 +19,7 @@ export default function TodayPage() {
   // 5 minutes is a safe default before we know whether anything is live; once the first
   // response arrives, the effect below recomputes the real interval.
   const [intervalMs, setIntervalMs] = useState<number | null>(300_000);
-  const { data, error } = usePolling(fetchMatches, intervalMs, { key: 'matches', ttlMs: LIVE_TTL_MS });
+  const { data, error, loading, refetch } = usePolling(fetchMatches, intervalMs, { key: 'matches', ttlMs: LIVE_TTL_MS });
 
   // [React] This effect reacts to `data` changing (a state update from the usePolling
   // hook above) by triggering *another* state update (setIntervalMs), which in turn
@@ -37,7 +37,7 @@ export default function TodayPage() {
 
   return (
     <main className={styles.main}>
-      <PageHeading title="Today" />
+      <PageHeading title="Today" onRefresh={refetch} refreshing={loading} />
       {error && <p role="alert">Showing last known data — refresh failed</p>}
       {!data.meta.sources.espn && <p role="status">ESPN enrichment unavailable — showing football-data only</p>}
       <MatchList matches={todayMatches} emptyLabel="No Manchester United match today" />
