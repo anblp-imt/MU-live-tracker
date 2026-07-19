@@ -133,6 +133,24 @@ describe('SchedulePage', () => {
     expect(screen.getByRole('button', { name: /July 2026/ })).toHaveAttribute('aria-expanded', 'true');
   });
 
+  it('only shows a European tab (CL/EL/ECL) when MU actually has a match in one', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        season: '2026-27',
+        matches: [match('a', 'PL', 'Arsenal FC'), match('b', 'EL', 'Some European Side')],
+        meta: { sources: { fd: true, espn: true } },
+      }),
+    }));
+
+    render(<SchedulePage />);
+    await waitFor(() => expect(screen.getAllByTestId('match-card')).toHaveLength(2));
+
+    expect(screen.getByRole('tab', { name: 'UEL' })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'UCL' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'UECL' })).not.toBeInTheDocument();
+  });
+
   it("highlights and scrolls to today's fixture, since Schedule now doubles as the old Today page", async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import type { CompetitionId, MatchesResponse } from '@/lib/types';
-import { COMPETITIONS } from '@/lib/competitions';
+import { COMPETITIONS, visibleCompetitions } from '@/lib/competitions';
 import { groupMatchesByMonth, isPastMonth } from '@/lib/schedule';
 import { MatchList } from '@/components/MatchList';
 import { PageHeading } from '@/components/PageHeading';
@@ -71,7 +71,7 @@ export default function SchedulePage() {
       <PageHeading title="Schedule" onRefresh={refetch} refreshing={loading} lastSyncedAt={lastSyncedAt} error={error} />
       <div role="tablist" className={styles.tabs}>
         <button role="tab" aria-selected={selected === 'ALL'} onClick={() => setSelected('ALL')} className={styles.tab}>ALL</button>
-        {COMPETITIONS.map(c => (
+        {visibleCompetitions(data.matches).map(c => (
           <button key={c.id} role="tab" aria-selected={selected === c.id} onClick={() => setSelected(c.id)} className={styles.tab}>
             {c.navShortLabel}
           </button>
