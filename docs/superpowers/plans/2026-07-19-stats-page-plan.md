@@ -251,8 +251,11 @@ describe('StatsPage', () => {
     expect(screen.getByTestId('stat-won')).toHaveTextContent('1');
     expect(screen.getByTestId('stat-drawn')).toHaveTextContent('1');
     expect(screen.getByTestId('stat-goalsFor')).toHaveTextContent('2');
-    expect(screen.getByTestId('stat-goalsAgainst')).toHaveTextContent('2');
-    expect(screen.getByTestId('stat-goalDifference')).toHaveTextContent('0');
+    // Match a: venue A, score home:1/away:2 -> muScore=2 (away), oppScore=1 (home).
+    // Match b: venue H, score home:0/away:0 -> muScore=0, oppScore=0.
+    // GA = 1 + 0 = 1, GD = GF(2) - GA(1) = 1.
+    expect(screen.getByTestId('stat-goalsAgainst')).toHaveTextContent('1');
+    expect(screen.getByTestId('stat-goalDifference')).toHaveTextContent('1');
   });
 
   it('filters to one competition when its tab is clicked', async () => {
