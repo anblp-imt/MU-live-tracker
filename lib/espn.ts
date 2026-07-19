@@ -1,7 +1,7 @@
 import type { EspnDetail, EspnScheduleEvent } from './types';
 
 const ESPN_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
-const MU_ESPN_ID = 360;
+export const MU_ESPN_ID = 360;
 
 async function espnFetch(path: string): Promise<unknown> {
   let res: Response;

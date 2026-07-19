@@ -81,6 +81,17 @@ export interface ShootoutSummary {
   }>;
 }
 
+export interface PlayerTally {
+  name: string;
+  count: number;
+}
+
+export interface SeasonLeaders {
+  topScorers: PlayerTally[];
+  topAssists: PlayerTally[];
+  topYellowCards: PlayerTally[];
+}
+
 // --- football-data.org v4 wire types (subset actually used; verified live 2026-07-16) ---
 
 export interface FdMatch {
