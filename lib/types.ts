@@ -188,7 +188,12 @@ export interface EspnDetail {
     competitions: Array<{
       status: { type: { state: 'pre' | 'in' | 'post'; name?: string }; displayClock?: string };
       details?: EspnScoringDetail[];
-      competitors?: Array<{ homeAway: 'home' | 'away'; team?: { id?: string; displayName?: string }; score?: string; shootoutScore?: string }>;
+      competitors?: Array<{
+        homeAway: 'home' | 'away';
+        team?: { id?: string; displayName?: string; color?: string; logos?: Array<{ href: string; rel?: string[] }> };
+        score?: string;
+        shootoutScore?: string;
+      }>;
     }>;
   };
   rosters?: EspnRoster[];

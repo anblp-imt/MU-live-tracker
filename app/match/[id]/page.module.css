@@ -78,8 +78,33 @@
   font-weight: 700;
 }
 
+.teamBlock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--team-accent, transparent);
+}
+
+.scoreHeader .teamBlock:last-child {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.crest {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .teamName {
   color: var(--mu-white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .score {

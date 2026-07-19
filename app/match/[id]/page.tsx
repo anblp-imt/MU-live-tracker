@@ -41,6 +41,14 @@ function matchStatusText(detail: EspnDetail): string {
   return 'Kickoff soon';
 }
 
+// Same dark-mode-variant preference as FormationPitch.tsx's jerseyKitUrl — a dark-on-
+// transparent crest suits this page's dark background better than ESPN's default
+// (light-background) render, when ESPN provides one at all.
+function teamCrestUrl(team: { logos?: Array<{ href: string; rel?: string[] }> } | undefined): string | undefined {
+  const logos = team?.logos || [];
+  return logos.find(l => l.rel?.includes('dark'))?.href || logos[0]?.href;
+}
+
 export default function MatchDetailPage() {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
@@ -100,9 +108,19 @@ export default function MatchDetailPage() {
         </div>
       </div>
       <div className={styles.scoreHeader}>
-        <span className={styles.teamName}>{displayTeamName(homeComp?.team?.displayName || '')}</span>
+        <div className={styles.teamBlock} style={{ '--team-accent': homeComp?.team?.color ? `#${homeComp.team.color}` : 'var(--mu-red)' } as React.CSSProperties}>
+          {teamCrestUrl(homeComp?.team) && (
+            <img className={styles.crest} src={teamCrestUrl(homeComp?.team)} alt={`${homeComp?.team?.displayName} crest`} loading="lazy" />
+          )}
+          <span className={styles.teamName}>{displayTeamName(homeComp?.team?.displayName || '')}</span>
+        </div>
         <span className={styles.score}>{homeComp?.score ?? '-'} – {awayComp?.score ?? '-'}</span>
-        <span className={styles.teamName}>{displayTeamName(awayComp?.team?.displayName || '')}</span>
+        <div className={styles.teamBlock} style={{ '--team-accent': awayComp?.team?.color ? `#${awayComp.team.color}` : 'var(--mu-gold)' } as React.CSSProperties}>
+          <span className={styles.teamName}>{displayTeamName(awayComp?.team?.displayName || '')}</span>
+          {teamCrestUrl(awayComp?.team) && (
+            <img className={styles.crest} src={teamCrestUrl(awayComp?.team)} alt={`${awayComp?.team?.displayName} crest`} loading="lazy" />
+          )}
+        </div>
       </div>
       <p className={styles.status}>{matchStatusText(data)}</p>
       {/* key={matchState} remounts only when pre/in/post actually changes, resetting

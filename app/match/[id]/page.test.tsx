@@ -57,6 +57,65 @@ describe('MatchDetailPage', () => {
     expect(screen.getByText('Full Time')).toBeInTheDocument();
   });
 
+  it('shows each team\'s crest and a team-colored accent in the score header when ESPN provides them', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        header: {
+          competitions: [{
+            status: { type: { state: 'post' } },
+            competitors: [
+              {
+                homeAway: 'home', score: '1',
+                team: {
+                  id: '331', displayName: 'Brighton & Hove Albion', color: '0057B8',
+                  logos: [{ href: 'https://example.com/331-default.png', rel: ['full', 'default'] }, { href: 'https://example.com/331-dark.png', rel: ['full', 'dark'] }],
+                },
+              },
+              {
+                homeAway: 'away', score: '2',
+                team: { id: '360', displayName: 'Manchester United', color: 'DA020E' },
+              },
+            ],
+          }],
+        },
+        rosters: [],
+      }),
+    }));
+
+    render(<MatchDetailPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    const homeCrest = screen.getByAltText('Brighton & Hove Albion crest') as HTMLImageElement;
+    expect(homeCrest.src).toBe('https://example.com/331-dark.png');
+    // Manchester United has no `logos` in this fixture — no crest image should render for it.
+    expect(screen.queryByAltText('Manchester United crest')).not.toBeInTheDocument();
+  });
+
+  it('does not crash the score header when ESPN omits team color and logos entirely', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        header: {
+          competitions: [{
+            status: { type: { state: 'post' } },
+            competitors: [
+              { homeAway: 'home', team: { id: '331', displayName: 'Brighton & Hove Albion' }, score: '1' },
+              { homeAway: 'away', team: { id: '360', displayName: 'Manchester United' }, score: '2' },
+            ],
+          }],
+        },
+        rosters: [],
+      }),
+    }));
+
+    render(<MatchDetailPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    expect(screen.getByText('Brighton & Hove Albion')).toBeInTheDocument();
+    expect(screen.queryByAltText('Brighton & Hove Albion crest')).not.toBeInTheDocument();
+  });
+
   it('renders stats, substitutions and a penalty shootout when the detail includes them', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
