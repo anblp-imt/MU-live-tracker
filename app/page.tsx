@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import type { CompetitionId, MatchesResponse } from '@/lib/types';
-import { COMPETITIONS, visibleCompetitions } from '@/lib/competitions';
+import { visibleCompetitions } from '@/lib/competitions';
 import { groupMatchesByMonth, isPastMonth } from '@/lib/schedule';
 import { MatchList } from '@/components/MatchList';
 import { PageHeading } from '@/components/PageHeading';
