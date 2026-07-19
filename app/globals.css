@@ -55,6 +55,22 @@ body {
   }
 }
 
+/* mu-bg.jpg is landscape (1536x1024); on portrait/narrow viewports "cover"
+   crops most of the image away, so switch to "contain" to show it in full.
+   "contain" leaves flat black below the image, so a red-to-black radial
+   glow fills that space instead, keeping it in tone with the rest of the UI. */
+@media (max-width: 768px) {
+  body {
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.28)),
+      url('/mu-bg.jpg'),
+      radial-gradient(ellipse 140% 60% at top, rgba(154, 31, 20, 0.35), rgba(13, 13, 13, 0) 70%);
+    background-size: cover, contain, cover;
+    background-position: center, top center, top center;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+  }
+}
+
 h1, h2, h3 {
   font-family: var(--font-heading);
   font-weight: 900;
