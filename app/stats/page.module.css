@@ -62,3 +62,52 @@
 .won .tileValue { color: var(--mu-green); }
 .drawn .tileValue { color: var(--mu-gold); }
 .lost .tileValue { color: var(--mu-red); }
+
+.leaders {
+  margin-top: 20px;
+}
+
+.leadersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.leaderBoard {
+  padding: 12px 14px;
+  background: var(--mu-surface);
+  border: 1.5px dashed rgba(201, 162, 39, 0.3);
+  border-radius: 3px;
+}
+
+.leaderBoardTitle {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--mu-gold);
+  margin: 0 0 8px;
+}
+
+.leaderRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 12.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.leaderRow:last-child {
+  border-bottom: none;
+}
+
+.leaderCount {
+  font-family: var(--font-mono);
+  color: var(--mu-gold);
+  font-weight: 700;
+}
+
+.leaderEmpty {
+  font-size: 11px;
+  opacity: 0.5;
+}

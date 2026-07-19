@@ -1,10 +1,10 @@
 'use client';
 import { useState } from 'react';
-import type { CompetitionId, MatchesResponse } from '@/lib/types';
+import type { CompetitionId, MatchesResponse, SeasonLeaders } from '@/lib/types';
 import { COMPETITIONS } from '@/lib/competitions';
 import { computeSeasonStats } from '@/lib/seasonStats';
 import { usePolling } from '@/hooks/usePolling';
-import { LIVE_TTL_MS } from '@/lib/cache';
+import { LIVE_TTL_MS, LEADERS_TTL_MS } from '@/lib/cache';
 import { PageHeading } from '@/components/PageHeading';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import styles from './page.module.css';
@@ -17,12 +17,19 @@ async function fetchMatches(): Promise<MatchesResponse> {
   return res.json();
 }
 
+async function fetchLeaders(): Promise<SeasonLeaders> {
+  const res = await fetch('/api/leaders');
+  if (!res.ok) throw new Error('Failed to load leaders');
+  return res.json();
+}
+
 export default function StatsPage() {
   const [selected, setSelected] = useState<FilterValue>('ALL');
   // Same 'matches' cache key as Today/Schedule/Standings — same endpoint, same data, so
   // arriving here after visiting any of those three renders instantly instead of
   // re-fetching (see hooks/usePolling.ts's client-cache doc comment for why).
   const { data, loading, refetch, lastSyncedAt, error } = usePolling(fetchMatches, null, { key: 'matches', ttlMs: LIVE_TTL_MS });
+  const { data: leaders } = usePolling(fetchLeaders, null, { key: 'leaders', ttlMs: LEADERS_TTL_MS });
 
   if (!data) return <LoadingSpinner />;
 
@@ -78,6 +85,50 @@ export default function StatsPage() {
           </div>
         </div>
       )}
+      <section className={styles.leaders}>
+        <h2>Season Leaders</h2>
+        <div className={styles.leadersGrid}>
+          <div className={styles.leaderBoard}>
+            <p className={styles.leaderBoardTitle}>Top Scorers</p>
+            {leaders?.topScorers && leaders.topScorers.length > 0 ? (
+              leaders.topScorers.map(p => (
+                <div className={styles.leaderRow} key={p.name}>
+                  <span>{p.name}</span>
+                  <span className={styles.leaderCount}>{p.count}</span>
+                </div>
+              ))
+            ) : (
+              <p className={styles.leaderEmpty}>No data yet</p>
+            )}
+          </div>
+          <div className={styles.leaderBoard}>
+            <p className={styles.leaderBoardTitle}>Top Assists</p>
+            {leaders?.topAssists && leaders.topAssists.length > 0 ? (
+              leaders.topAssists.map(p => (
+                <div className={styles.leaderRow} key={p.name}>
+                  <span>{p.name}</span>
+                  <span className={styles.leaderCount}>{p.count}</span>
+                </div>
+              ))
+            ) : (
+              <p className={styles.leaderEmpty}>No data yet</p>
+            )}
+          </div>
+          <div className={styles.leaderBoard}>
+            <p className={styles.leaderBoardTitle}>Top Yellow Cards</p>
+            {leaders?.topYellowCards && leaders.topYellowCards.length > 0 ? (
+              leaders.topYellowCards.map(p => (
+                <div className={styles.leaderRow} key={p.name}>
+                  <span>{p.name}</span>
+                  <span className={styles.leaderCount}>{p.count}</span>
+                </div>
+              ))
+            ) : (
+              <p className={styles.leaderEmpty}>No data yet</p>
+            )}
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

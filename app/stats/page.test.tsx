@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act, fireEvent } from '@testing-library/react';
 import StatsPage from './page';
 import { clearCache } from '@/lib/cache';
-import type { Match, MatchesResponse } from '@/lib/types';
+import type { Match, MatchesResponse, SeasonLeaders } from '@/lib/types';
 
 // usePolling's client cache is a module-level Map shared across every test in this file
 // (and with app/page.test.tsx / app/schedule/page.test.tsx, which use the same
@@ -28,6 +28,14 @@ function match(overrides: Partial<Match> = {}): Match {
 function stubMatches(matches: Match[]) {
   const response: MatchesResponse = { season: '2026-27', matches, meta: { sources: { fd: true, espn: true } } };
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => response }));
+}
+
+function stubMatchesAndLeaders(matches: Match[], leaders: SeasonLeaders) {
+  const matchesResponse: MatchesResponse = { season: '2026-27', matches, meta: { sources: { fd: true, espn: true } } };
+  vi.stubGlobal('fetch', vi.fn((url: string) => {
+    if (url.includes('/api/leaders')) return Promise.resolve({ ok: true, json: async () => leaders });
+    return Promise.resolve({ ok: true, json: async () => matchesResponse });
+  }));
 }
 
 describe('StatsPage', () => {
@@ -107,5 +115,29 @@ describe('StatsPage', () => {
 
     expect(fetchMock).toHaveBeenCalled();
     expect(screen.getByTestId('stat-played')).toHaveTextContent('2');
+  });
+
+  it('shows Season Leaders once /api/leaders resolves', async () => {
+    stubMatchesAndLeaders([match()], {
+      topScorers: [{ name: 'Bruno Fernandes', count: 5 }],
+      topAssists: [{ name: 'Amad Diallo', count: 3 }],
+      topYellowCards: [{ name: 'Casemiro', count: 2 }],
+    });
+
+    render(<StatsPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    expect(screen.getByText('Bruno Fernandes')).toBeInTheDocument();
+    expect(screen.getByText('Amad Diallo')).toBeInTheDocument();
+    expect(screen.getByText('Casemiro')).toBeInTheDocument();
+  });
+
+  it('shows an empty state for a leader category with no data yet', async () => {
+    stubMatchesAndLeaders([match()], { topScorers: [], topAssists: [], topYellowCards: [] });
+
+    render(<StatsPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    expect(screen.getAllByText(/no data yet/i).length).toBeGreaterThan(0);
   });
 });
