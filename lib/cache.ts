@@ -27,6 +27,7 @@ export function clearCache(): void {
 
 export const LIVE_TTL_MS = 30_000;
 export const STATIC_TTL_MS = 300_000;
+export const LEADERS_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours — see plan's Global Constraints
 
 export function matchesTtlMs(matches: Array<{ status: string }>): number {
   const hasLive = matches.some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
