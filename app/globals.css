@@ -26,7 +26,13 @@
   box-sizing: border-box;
 }
 
+html {
+  min-height: 100%;
+}
+
 body {
+  min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--mu-black);
   background-image:
     linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.28)),
@@ -39,6 +45,14 @@ body {
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
   font-family: var(--font-body);
   margin: 0;
+}
+
+/* background-attachment: fixed causes rendering bugs on iOS Safari
+   (image can fail to cover the viewport during scroll/URL-bar changes) */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  body {
+    background-attachment: scroll;
+  }
 }
 
 h1, h2, h3 {
