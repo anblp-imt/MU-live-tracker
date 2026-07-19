@@ -7,6 +7,10 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+  /* The header sits over the busiest part of the background photo (faces, jersey
+     numbers) — a dedicated scrim behind just the nav strip keeps it legible without
+     darkening the rest of the page. */
+  background: linear-gradient(rgba(13, 13, 13, 0.55), rgba(13, 13, 13, 0));
 }
 
 .nav a {

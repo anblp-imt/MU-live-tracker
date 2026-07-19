@@ -34,15 +34,21 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   background-color: var(--mu-black);
+  /* mu-bg.jpg is a busy player-collage photo with baked-in text/numbers — a light 0.28
+     scrim (the original value) left body copy fighting bright patches of the image for
+     contrast. Darkened to 0.55 so the photo still reads clearly as a background, just
+     dimmer, the same tradeoff a hero-image site makes to keep foreground text legible. */
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.28)),
+    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
     url('/mu-bg.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
   color: var(--mu-white);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
+  /* Two stacked shadows: a tight near-black one for a crisp readable edge against
+     high-detail parts of the photo, plus the original soft blur for depth. */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 1px 6px rgba(0, 0, 0, 0.6);
   font-family: var(--font-body);
   margin: 0;
 }
@@ -65,7 +71,7 @@ body {
 @media (max-width: 768px) {
   body {
     background-image:
-      linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.28)),
+      linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
       url('/mu-bg.jpg'),
       radial-gradient(circle at top, rgba(154, 31, 20, 0.35), var(--mu-black) 75%);
     background-size: cover, contain, cover;
@@ -78,7 +84,7 @@ h1, h2, h3 {
   font-family: var(--font-heading);
   font-weight: 900;
   color: var(--mu-red);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
 a {
