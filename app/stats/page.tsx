@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import type { CompetitionId, MatchesResponse, SeasonLeaders } from '@/lib/types';
-import { COMPETITIONS } from '@/lib/competitions';
+import { COMPETITIONS, visibleCompetitions } from '@/lib/competitions';
 import { computeSeasonStats } from '@/lib/seasonStats';
 import { usePolling } from '@/hooks/usePolling';
 import { LIVE_TTL_MS, LEADERS_TTL_MS } from '@/lib/cache';
@@ -37,7 +37,10 @@ export default function StatsPage() {
   // count toward it, so they're filtered out here rather than in computeSeasonStats
   // (which stays generic; this exclusion is specific to what this page chooses to show).
   const competitiveMatches = data.matches.filter(m => m.competition !== 'FRIENDLY');
-  const competitiveCompetitions = COMPETITIONS.filter(c => c.id !== 'FRIENDLY');
+  const competitiveCompetitions = visibleCompetitions(
+    competitiveMatches,
+    COMPETITIONS.filter(c => c.id !== 'FRIENDLY'),
+  );
   const stats = computeSeasonStats(competitiveMatches, selected);
 
   return (

@@ -117,6 +117,20 @@ describe('StatsPage', () => {
     expect(screen.getByTestId('stat-played')).toHaveTextContent('2');
   });
 
+  it('only shows a European tab (CL/EL/ECL) when MU actually has a match in one', async () => {
+    stubMatches([
+      match({ id: 'a', competition: 'PL' }),
+      match({ id: 'b', competition: 'ECL' }),
+    ]);
+
+    render(<StatsPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    expect(screen.getByRole('tab', { name: 'UECL' })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'UCL' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'UEL' })).not.toBeInTheDocument();
+  });
+
   it('shows Season Leaders once /api/leaders resolves', async () => {
     stubMatchesAndLeaders([match()], {
       topScorers: [{ name: 'Bruno Fernandes', count: 5 }],
