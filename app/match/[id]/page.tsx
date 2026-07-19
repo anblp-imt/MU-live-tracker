@@ -110,14 +110,14 @@ export default function MatchDetailPage() {
         </div>
       </div>
       <div className={styles.scoreHeader}>
-        <div className={styles.teamBlock} style={{ '--team-accent': homeComp?.team?.color ? `#${homeComp.team.color}` : 'var(--mu-red)' } as React.CSSProperties}>
+        <div className={styles.teamBlock} style={{ '--team-accent': homeColor } as React.CSSProperties}>
           {teamCrestUrl(homeComp?.team) && (
             <img className={styles.crest} src={teamCrestUrl(homeComp?.team)} alt={`${homeComp?.team?.displayName} crest`} loading="lazy" />
           )}
           <span className={styles.teamName}>{displayTeamName(homeComp?.team?.displayName || '')}</span>
         </div>
         <span className={styles.score}>{homeComp?.score ?? '-'} – {awayComp?.score ?? '-'}</span>
-        <div className={styles.teamBlock} style={{ '--team-accent': awayComp?.team?.color ? `#${awayComp.team.color}` : 'var(--mu-gold)' } as React.CSSProperties}>
+        <div className={styles.teamBlock} style={{ '--team-accent': awayColor } as React.CSSProperties}>
           <span className={styles.teamName}>{displayTeamName(awayComp?.team?.displayName || '')}</span>
           {teamCrestUrl(awayComp?.team) && (
             <img className={styles.crest} src={teamCrestUrl(awayComp?.team)} alt={`${awayComp?.team?.displayName} crest`} loading="lazy" />
@@ -186,8 +186,8 @@ export default function MatchDetailPage() {
                   <span className={styles.statAway}>{row.away.display}</span>
                 </div>
                 <div className={styles.statBar}>
-                  <span className={styles.statBarHome} data-testid="stat-bar-home" style={{ width: `${homePct}%`, background: homeColor }} />
-                  <span className={styles.statBarAway} data-testid="stat-bar-away" style={{ width: `${100 - homePct}%`, background: awayColor }} />
+                  <span data-testid="stat-bar-home" style={{ width: `${homePct}%`, background: homeColor }} />
+                  <span data-testid="stat-bar-away" style={{ width: `${100 - homePct}%`, background: awayColor }} />
                 </div>
               </div>
             );
