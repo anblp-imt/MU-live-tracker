@@ -87,6 +87,8 @@ export default function MatchDetailPage() {
   const stats = extractStats(data);
   const subs = extractSubstitutions(data, homeTeamEspnId);
   const shootout = extractShootout(data, homeTeamEspnId);
+  const homeColor = homeComp?.team?.color ? `#${homeComp.team.color}` : 'var(--mu-red)';
+  const awayColor = awayComp?.team?.color ? `#${awayComp.team.color}` : 'var(--mu-gold)';
   const rosters = data.rosters || [];
   const home = rosters.find(r => r.homeAway === 'home');
   const away = rosters.find(r => r.homeAway === 'away');
@@ -184,8 +186,8 @@ export default function MatchDetailPage() {
                   <span className={styles.statAway}>{row.away.display}</span>
                 </div>
                 <div className={styles.statBar}>
-                  <span className={styles.statBarHome} style={{ width: `${homePct}%` }} />
-                  <span className={styles.statBarAway} style={{ width: `${100 - homePct}%` }} />
+                  <span className={styles.statBarHome} data-testid="stat-bar-home" style={{ width: `${homePct}%`, background: homeColor }} />
+                  <span className={styles.statBarAway} data-testid="stat-bar-away" style={{ width: `${100 - homePct}%`, background: awayColor }} />
                 </div>
               </div>
             );

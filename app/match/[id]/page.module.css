@@ -219,14 +219,6 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-.statBarHome {
-  background: var(--mu-red);
-}
-
-.statBarAway {
-  background: var(--mu-gold);
-}
-
 .subsDetails {
   margin-top: 16px;
   padding: 12px 14px;

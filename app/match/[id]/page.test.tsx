@@ -174,6 +174,41 @@ describe('MatchDetailPage', () => {
     expect(screen.getByTestId('scorers')).toHaveTextContent('—');
   });
 
+  it('colors the match stat bars with each team\'s real ESPN color, falling back to red/gold', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        header: {
+          competitions: [{
+            status: { type: { state: 'post' } },
+            competitors: [
+              { homeAway: 'home', team: { id: '331', displayName: 'Brighton & Hove Albion', color: '0057B8' }, score: '1' },
+              { homeAway: 'away', team: { id: '360', displayName: 'Manchester United' }, score: '2' }, // no color -> fallback
+            ],
+          }],
+        },
+        rosters: [],
+        boxscore: {
+          teams: [
+            { homeAway: 'home', statistics: [{ name: 'totalShots', displayValue: '10' }] },
+            { homeAway: 'away', statistics: [{ name: 'totalShots', displayValue: '14' }] },
+          ],
+        },
+      }),
+    }));
+
+    render(<MatchDetailPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    // extractStats always returns a fixed set of stat rows, so multiple bars share this
+    // testid; homeColor/awayColor are computed once and applied to every row uniformly,
+    // so checking the first is representative of all.
+    const homeBar = screen.getAllByTestId('stat-bar-home')[0];
+    const awayBar = screen.getAllByTestId('stat-bar-away')[0];
+    expect(homeBar.style.background).toBe('rgb(0, 87, 184)'); // #0057B8
+    expect(awayBar.style.getPropertyValue('background')).toContain('var(--mu-gold)');
+  });
+
   it('renders stats, substitutions and a penalty shootout when the detail includes them', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
