@@ -58,6 +58,29 @@ export interface Scorers {
   };
 }
 
+export interface Substitution {
+  min: string;
+  playerIn: string;
+  playerOut: string;
+}
+
+export interface MatchStatRow {
+  label: string;
+  home: { display: string; value: number };
+  away: { display: string; value: number };
+}
+
+export interface ShootoutSummary {
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: string;
+  awayScore: string;
+  rounds: Array<{
+    home?: { player: string; scored: boolean };
+    away?: { player: string; scored: boolean };
+  }>;
+}
+
 // --- football-data.org v4 wire types (subset actually used; verified live 2026-07-16) ---
 
 export interface FdMatch {
@@ -131,13 +154,34 @@ export interface EspnRoster {
   roster: EspnRosterPlayer[];
 }
 
+export interface EspnKeyEvent {
+  type?: { type?: string };
+  clock?: { displayValue?: string; value?: number };
+  team?: { id?: string };
+  participants?: Array<{ athlete?: { displayName?: string } }>;
+}
+
+export interface EspnBoxscoreTeam {
+  homeAway: 'home' | 'away';
+  statistics?: Array<{ name?: string; displayValue?: string; label?: string }>;
+}
+
+export interface EspnShootoutTeam {
+  id?: string;
+  team?: string;
+  shots?: Array<{ player: string; didScore: boolean }>;
+}
+
 export interface EspnDetail {
   header: {
     competitions: Array<{
       status: { type: { state: 'pre' | 'in' | 'post'; name?: string }; displayClock?: string };
       details?: EspnScoringDetail[];
-      competitors?: Array<{ homeAway: 'home' | 'away'; team?: { id?: string; displayName?: string }; score?: string }>;
+      competitors?: Array<{ homeAway: 'home' | 'away'; team?: { id?: string; displayName?: string }; score?: string; shootoutScore?: string }>;
     }>;
   };
   rosters?: EspnRoster[];
+  keyEvents?: EspnKeyEvent[];
+  boxscore?: { teams?: EspnBoxscoreTeam[] };
+  shootout?: EspnShootoutTeam[];
 }

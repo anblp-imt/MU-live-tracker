@@ -1,5 +1,5 @@
 // lib/merge.ts
-import type { CompetitionId, EspnDetail, EspnScheduleEvent, EspnScoringDetail, FdMatch, Match, Scorers } from './types';
+import type { CompetitionId, EspnDetail, EspnScheduleEvent, EspnScoringDetail, FdMatch, Match, MatchStatRow, Scorers, ShootoutSummary, Substitution } from './types';
 import { normalizeTeamName, isManUtd } from './normalize';
 import { COMPETITIONS, competitionIdForFdCode } from './competitions';
 
@@ -120,6 +120,13 @@ export function mergeMatches(
         if (converted.status === 'IN_PLAY' || converted.status === 'PAUSED' || converted.status === 'FINISHED') {
           existing.status = converted.status;
           existing.minute = converted.minute;
+          // FD's own score can lag behind its own status (see comment above this
+          // function) — if ESPN already reports this match live/finished but FD hasn't
+          // published a score yet, use ESPN's (now correctly parsed, see
+          // espnToMatch) score instead of leaving the card showing "-  :  -".
+          if (existing.score.display.home === null || existing.score.display.away === null) {
+            existing.score = converted.score;
+          }
         }
         continue;
       }
@@ -167,4 +174,106 @@ export function extractScorers(detail: EspnDetail, homeTeamEspnId: string): Scor
   };
 
   return { home, away, redCards };
+}
+
+// keyEvents (unlike header.competitions[0].details) is only present on the /summary
+// detail response, same as extractScorers above. Ported from
+// WC-2026-live-tracker/render.js's subEvts: participants[0] is the player coming on,
+// participants[1] is the player going off — ESPN doesn't label them, that positional
+// order is the only signal.
+export function extractSubstitutions(detail: EspnDetail, homeTeamEspnId: string): { home: Substitution[]; away: Substitution[] } {
+  const subs = (detail.keyEvents || [])
+    .filter(e => e.type?.type === 'substitution')
+    .map(e => ({
+      min: e.clock?.displayValue || '',
+      minVal: e.clock?.value ?? 0,
+      teamId: e.team?.id,
+      playerIn: e.participants?.[0]?.athlete?.displayName || '?',
+      playerOut: e.participants?.[1]?.athlete?.displayName || '?',
+    }))
+    .sort((a, b) => a.minVal - b.minVal);
+  const toSub = ({ min, playerIn, playerOut }: typeof subs[number]): Substitution => ({ min, playerIn, playerOut });
+  return {
+    home: subs.filter(s => s.teamId === homeTeamEspnId).map(toSub),
+    away: subs.filter(s => s.teamId !== homeTeamEspnId).map(toSub),
+  };
+}
+
+// Ported from WC-2026-live-tracker/render.js's STAT_DEFS, in the same display order.
+// possessionPct and pass accuracy aren't plain passthrough fields — ESPN reports raw
+// possessionPct without a '%' suffix, and doesn't report pass accuracy at all (it has to
+// be computed from accuratePasses/totalPasses).
+const PLAIN_STAT_DEFS: Array<{ label: string; name: string }> = [
+  { label: 'Fouls', name: 'foulsCommitted' },
+  { label: 'Yellow Cards', name: 'yellowCards' },
+  { label: 'Red Cards', name: 'redCards' },
+  { label: 'Offsides', name: 'offsides' },
+  { label: 'Corners', name: 'wonCorners' },
+];
+
+export function extractStats(detail: EspnDetail): MatchStatRow[] {
+  const teams = detail.boxscore?.teams || [];
+  const home = teams.find(t => t.homeAway === 'home');
+  const away = teams.find(t => t.homeAway === 'away');
+  if (!home?.statistics?.length || !away?.statistics?.length) return [];
+
+  const raw = (team: typeof home, name: string) => team?.statistics?.find(s => s.name === name)?.displayValue;
+  const num = (v: string | undefined) => { const n = parseFloat(v || ''); return Number.isFinite(n) ? n : 0; };
+  const plainRow = (label: string, name: string): MatchStatRow => {
+    const h = raw(home, name);
+    const a = raw(away, name);
+    return { label, home: { display: h ?? '–', value: num(h) }, away: { display: a ?? '–', value: num(a) } };
+  };
+  const percentRow = (label: string, homePct: number, awayPct: number): MatchStatRow => ({
+    label,
+    home: { display: `${homePct}%`, value: homePct },
+    away: { display: `${awayPct}%`, value: awayPct },
+  });
+  const passAccuracy = (team: typeof home) => {
+    const total = num(raw(team, 'totalPasses'));
+    return total ? Math.round(num(raw(team, 'accuratePasses')) / total * 100) : 0;
+  };
+
+  return [
+    plainRow('Shots', 'totalShots'),
+    plainRow('Shots on Target', 'shotsOnTarget'),
+    percentRow('Possession', Math.round(num(raw(home, 'possessionPct'))), Math.round(num(raw(away, 'possessionPct')))),
+    plainRow('Passes', 'totalPasses'),
+    percentRow('Pass Accuracy', passAccuracy(home), passAccuracy(away)),
+    ...PLAIN_STAT_DEFS.map(({ label, name }) => plainRow(label, name)),
+  ];
+}
+
+// Ported from WC-2026-live-tracker/render.js's renderShootout. `shootout[].id` is the
+// team id (matched against homeTeamEspnId the same way extractScorers/extractSubstitutions
+// are), not to be confused with `shootout[].team`, which is the display name.
+export function extractShootout(detail: EspnDetail, homeTeamEspnId: string): ShootoutSummary | null {
+  const shootout = detail.shootout;
+  if (!shootout?.length) return null;
+
+  const headerCompetitors = detail.header.competitions[0]?.competitors || [];
+  const homeC = headerCompetitors.find(c => c.homeAway === 'home');
+  const awayC = headerCompetitors.find(c => c.homeAway === 'away');
+  const homeTeam = shootout.find(s => s.id === homeTeamEspnId);
+  const awayTeam = shootout.find(s => s.id !== homeTeamEspnId);
+  if (!homeTeam || !awayTeam) return null;
+
+  const maxRounds = Math.max(homeTeam.shots?.length || 0, awayTeam.shots?.length || 0);
+  const rounds: ShootoutSummary['rounds'] = [];
+  for (let i = 0; i < maxRounds; i++) {
+    const h = homeTeam.shots?.[i];
+    const a = awayTeam.shots?.[i];
+    rounds.push({
+      home: h ? { player: h.player, scored: h.didScore } : undefined,
+      away: a ? { player: a.player, scored: a.didScore } : undefined,
+    });
+  }
+
+  return {
+    homeTeam: homeTeam.team || '',
+    awayTeam: awayTeam.team || '',
+    homeScore: homeC?.shootoutScore ?? '',
+    awayScore: awayC?.shootoutScore ?? '',
+    rounds,
+  };
 }

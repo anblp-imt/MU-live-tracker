@@ -3,11 +3,12 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { usePolling } from '@/hooks/usePolling';
 import { FormationPitch } from '@/components/FormationPitch';
-import { extractScorers } from '@/lib/merge';
+import { extractScorers, extractStats, extractSubstitutions, extractShootout } from '@/lib/merge';
 import { displayTeamName } from '@/lib/normalize';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { LIVE_TTL_MS, STATIC_TTL_MS } from '@/lib/cache';
 import type { EspnDetail } from '@/lib/types';
+import styles from './page.module.css';
 
 // A live match's detail is stale in 30s; a not-yet-started or finished one barely
 // changes and can be held far longer (matches the STATIC_TTL_MS the server route and
@@ -16,7 +17,6 @@ function detailTtlMs(detail: EspnDetail): number {
   const state = detail.header?.competitions?.[0]?.status?.type?.state;
   return state === 'in' ? LIVE_TTL_MS : STATIC_TTL_MS;
 }
-import styles from './page.module.css';
 
 async function fetchDetail(espnId: string, slug: string): Promise<EspnDetail> {
   const res = await fetch(`/api/match/${espnId}?slug=${slug}`);
@@ -72,10 +72,14 @@ export default function MatchDetailPage() {
   const awayComp = headerComp?.competitors?.find(c => c.homeAway === 'away');
   const homeTeamEspnId = homeComp?.team?.id || '';
   const scorers = extractScorers(data, homeTeamEspnId);
+  const stats = extractStats(data);
+  const subs = extractSubstitutions(data, homeTeamEspnId);
+  const shootout = extractShootout(data, homeTeamEspnId);
   const rosters = data.rosters || [];
   const home = rosters.find(r => r.homeAway === 'home');
   const away = rosters.find(r => r.homeAway === 'away');
   const matchState = headerComp?.status?.type?.state;
+  const subCount = subs.home.length + subs.away.length;
 
   return (
     <main className={styles.main}>
@@ -99,6 +103,69 @@ export default function MatchDetailPage() {
         <div>Home: {scorers.home.map(s => `${s.name} ${s.mins.join(', ')}`).join(' · ') || '—'}</div>
         <div>Away: {scorers.away.map(s => `${s.name} ${s.mins.join(', ')}`).join(' · ') || '—'}</div>
       </section>
+      {shootout && (
+        <section className={styles.shootout} data-testid="shootout">
+          <h2>Penalty Shootout <span className={styles.shootoutScore}>{shootout.homeScore} – {shootout.awayScore}</span></h2>
+          <div className={styles.shootoutGrid}>
+            {shootout.rounds.map((round, i) => (
+              <div className={styles.shootoutRow} key={i}>
+                <span className={`${styles.shootoutShot} ${styles.shootoutHome} ${round.home ? (round.home.scored ? styles.scored : styles.missed) : ''}`}>
+                  {round.home ? `${round.home.scored ? '✓' : '✗'} ${round.home.player}` : ''}
+                </span>
+                <span className={styles.shootoutRound}>{i + 1}</span>
+                <span className={`${styles.shootoutShot} ${styles.shootoutAway} ${round.away ? (round.away.scored ? styles.scored : styles.missed) : ''}`}>
+                  {round.away ? `${round.away.scored ? '✓' : '✗'} ${round.away.player}` : ''}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+      {stats.length > 0 && (
+        <section className={styles.stats} data-testid="stats">
+          <h2>Match Stats</h2>
+          {stats.map(row => {
+            const total = row.home.value + row.away.value;
+            const homePct = total ? (row.home.value / total) * 100 : 50;
+            return (
+              <div className={styles.statRow} key={row.label}>
+                <div className={styles.statVals}>
+                  <span className={styles.statHome}>{row.home.display}</span>
+                  <span className={styles.statLabel}>{row.label}</span>
+                  <span className={styles.statAway}>{row.away.display}</span>
+                </div>
+                <div className={styles.statBar}>
+                  <span className={styles.statBarHome} style={{ width: `${homePct}%` }} />
+                  <span className={styles.statBarAway} style={{ width: `${100 - homePct}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </section>
+      )}
+      {subCount > 0 && (
+        <details className={styles.subsDetails} data-testid="substitutions">
+          <summary className={styles.lineupSummary}>{subCount} Substitution{subCount === 1 ? '' : 's'}</summary>
+          <div className={styles.subsGrid}>
+            <div>
+              {subs.home.map((s, i) => (
+                <div className={styles.subRow} key={i}>
+                  <span className={styles.subMin}>{s.min}</span>
+                  <span><span className={styles.subIn}>↑</span> {s.playerIn} <span className={styles.subOut}>↓ {s.playerOut}</span></span>
+                </div>
+              ))}
+            </div>
+            <div>
+              {subs.away.map((s, i) => (
+                <div className={styles.subRow} key={i}>
+                  <span className={styles.subMin}>{s.min}</span>
+                  <span><span className={styles.subIn}>↑</span> {s.playerIn} <span className={styles.subOut}>↓ {s.playerOut}</span></span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </details>
+      )}
     </main>
   );
 }

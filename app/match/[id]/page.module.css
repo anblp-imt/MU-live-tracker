@@ -48,3 +48,154 @@
   border: 1.5px dashed rgba(201, 162, 39, 0.3);
   border-radius: 3px;
 }
+
+.stats {
+  margin-top: 16px;
+  padding: 12px 14px 4px;
+  background: var(--mu-surface);
+  border: 1.5px dashed rgba(201, 162, 39, 0.3);
+  border-radius: 3px;
+}
+
+.stats h2 {
+  margin-top: 0;
+}
+
+.statRow {
+  margin-bottom: 10px;
+}
+
+.statVals {
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+
+.statHome {
+  flex: 1;
+  text-align: left;
+  color: var(--mu-white);
+}
+
+.statAway {
+  flex: 1;
+  text-align: right;
+  color: var(--mu-white);
+}
+
+.statLabel {
+  flex: 0 0 auto;
+  padding: 0 10px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+.statBar {
+  display: flex;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.statBarHome {
+  background: var(--mu-red);
+}
+
+.statBarAway {
+  background: var(--mu-gold);
+}
+
+.subsDetails {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: var(--mu-surface);
+  border: 1.5px dashed rgba(201, 162, 39, 0.3);
+  border-radius: 3px;
+}
+
+.subsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+  font-size: 12px;
+}
+
+.subRow {
+  display: flex;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.subMin {
+  font-family: var(--font-mono);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.subIn {
+  color: var(--mu-green);
+}
+
+.subOut {
+  opacity: 0.6;
+}
+
+.shootout {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: var(--mu-surface);
+  border: 1.5px dashed rgba(201, 162, 39, 0.3);
+  border-radius: 3px;
+}
+
+.shootoutScore {
+  font-family: var(--font-mono);
+  color: var(--mu-gold);
+}
+
+.shootoutGrid {
+  margin-top: 8px;
+}
+
+.shootoutRow {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  padding: 3px 0;
+}
+
+.shootoutShot {
+  flex: 1;
+}
+
+.shootoutHome {
+  text-align: left;
+}
+
+.shootoutAway {
+  text-align: right;
+}
+
+.shootoutRound {
+  flex: 0 0 auto;
+  width: 22px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+.scored {
+  color: var(--mu-green);
+}
+
+.missed {
+  color: var(--mu-red);
+}

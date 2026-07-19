@@ -95,6 +95,38 @@ describe('mergeMatches', () => {
     expect(result[0].minute).toBe("23'");
   });
 
+  it('falls back to ESPN\'s score when FD reports FINISHED but hasn\'t published its own score yet', () => {
+    // FD's status/score can lag its own faster-updating counterpart — this reproduces a
+    // match ESPN already has final numbers for while FD's fullTime is still null:null.
+    const finishedEspn = espnEvent({
+      competitions: [{
+        competitors: [
+          { homeAway: 'home', team: { id: '999', displayName: 'Hull City' }, score: '1' },
+          { homeAway: 'away', team: { id: '360', displayName: 'Manchester United' }, score: '3' },
+        ],
+        status: { type: { state: 'post' } },
+      }],
+    });
+    const result = mergeMatches([fd()], { PL: [finishedEspn] });
+    expect(result[0].status).toBe('FINISHED');
+    expect(result[0].score.display).toEqual({ home: 1, away: 3 });
+  });
+
+  it('keeps FD\'s own score once it has one, even after ESPN enrichment', () => {
+    const finishedEspn = espnEvent({
+      competitions: [{
+        competitors: [
+          { homeAway: 'home', team: { id: '999', displayName: 'Hull City' }, score: '9' },
+          { homeAway: 'away', team: { id: '360', displayName: 'Manchester United' }, score: '9' },
+        ],
+        status: { type: { state: 'post' } },
+      }],
+    });
+    const fdWithScore = fd({ status: 'FINISHED', score: { duration: 'REGULAR', fullTime: { home: 1, away: 3 } } });
+    const result = mergeMatches([fdWithScore], { PL: [finishedEspn] });
+    expect(result[0].score.display).toEqual({ home: 1, away: 3 });
+  });
+
   it('includes an ESPN-only friendly fixture with no FD counterpart', () => {
     const friendly = espnEvent({
       id: 'f1',
@@ -140,7 +172,7 @@ describe('mergeMatches', () => {
   });
 });
 
-import { extractScorers } from './merge';
+import { extractScorers, extractStats, extractSubstitutions, extractShootout } from './merge';
 import type { EspnDetail } from './types';
 
 describe('extractScorers', () => {
@@ -184,5 +216,99 @@ describe('extractScorers', () => {
     const result = extractScorers(detail, '331');
     expect(result.redCards.home).toEqual([{ name: 'Some Defender', min: "80'" }]);
     expect(result.redCards.away).toEqual([]);
+  });
+});
+
+describe('extractSubstitutions', () => {
+  it('splits substitution key events by team and sorts by minute', () => {
+    const detail: EspnDetail = {
+      header: { competitions: [{ status: { type: { state: 'post' } } }] },
+      keyEvents: [
+        {
+          type: { type: 'substitution' }, clock: { displayValue: "70'", value: 4200 },
+          team: { id: '360' }, participants: [{ athlete: { displayName: 'Amad Diallo' } }, { athlete: { displayName: 'Antony' } }],
+        },
+        {
+          type: { type: 'substitution' }, clock: { displayValue: "45'", value: 2700 },
+          team: { id: '331' }, participants: [{ athlete: { displayName: 'Yankuba Minteh' } }, { athlete: { displayName: 'Maxim De Cuyper' } }],
+        },
+        { type: { type: 'goal' }, clock: { displayValue: "10'" }, team: { id: '360' } },
+      ],
+    };
+    const result = extractSubstitutions(detail, '331');
+    expect(result.away).toEqual([{ min: "70'", playerIn: 'Amad Diallo', playerOut: 'Antony' }]);
+    expect(result.home).toEqual([{ min: "45'", playerIn: 'Yankuba Minteh', playerOut: 'Maxim De Cuyper' }]);
+  });
+
+  it('returns empty arrays when there are no substitutions', () => {
+    const detail: EspnDetail = { header: { competitions: [{ status: { type: { state: 'pre' } } }] } };
+    expect(extractSubstitutions(detail, '331')).toEqual({ home: [], away: [] });
+  });
+});
+
+describe('extractStats', () => {
+  it('computes possession and pass accuracy, and passes through the plain counting stats', () => {
+    const detail: EspnDetail = {
+      header: { competitions: [{ status: { type: { state: 'post' } } }] },
+      boxscore: {
+        teams: [
+          { homeAway: 'home', statistics: [
+            { name: 'totalShots', displayValue: '13' }, { name: 'shotsOnTarget', displayValue: '2' },
+            { name: 'possessionPct', displayValue: '52.4' }, { name: 'totalPasses', displayValue: '484' },
+            { name: 'accuratePasses', displayValue: '415' }, { name: 'foulsCommitted', displayValue: '11' },
+            { name: 'yellowCards', displayValue: '0' }, { name: 'redCards', displayValue: '0' },
+            { name: 'offsides', displayValue: '1' }, { name: 'wonCorners', displayValue: '0' },
+          ] },
+          { homeAway: 'away', statistics: [
+            { name: 'totalShots', displayValue: '11' }, { name: 'shotsOnTarget', displayValue: '7' },
+            { name: 'possessionPct', displayValue: '47.6' }, { name: 'totalPasses', displayValue: '450' },
+            { name: 'accuratePasses', displayValue: '372' }, { name: 'foulsCommitted', displayValue: '9' },
+            { name: 'yellowCards', displayValue: '2' }, { name: 'redCards', displayValue: '0' },
+            { name: 'offsides', displayValue: '3' }, { name: 'wonCorners', displayValue: '4' },
+          ] },
+        ],
+      },
+    };
+    const result = extractStats(detail);
+    expect(result.find(r => r.label === 'Shots')).toEqual({ label: 'Shots', home: { display: '13', value: 13 }, away: { display: '11', value: 11 } });
+    expect(result.find(r => r.label === 'Possession')).toEqual({ label: 'Possession', home: { display: '52%', value: 52 }, away: { display: '48%', value: 48 } });
+    expect(result.find(r => r.label === 'Pass Accuracy')).toEqual({ label: 'Pass Accuracy', home: { display: '86%', value: 86 }, away: { display: '83%', value: 83 } });
+  });
+
+  it('returns an empty list when boxscore stats are unavailable (e.g. a friendly)', () => {
+    const detail: EspnDetail = { header: { competitions: [{ status: { type: { state: 'post' } } }] } };
+    expect(extractStats(detail)).toEqual([]);
+  });
+});
+
+describe('extractShootout', () => {
+  it('pairs up rounds by index and reads each side\'s shootout score', () => {
+    const detail: EspnDetail = {
+      header: {
+        competitions: [{
+          status: { type: { state: 'post' } },
+          competitors: [
+            { homeAway: 'home', team: { id: '331' }, shootoutScore: '3' },
+            { homeAway: 'away', team: { id: '360' }, shootoutScore: '4' },
+          ],
+        }],
+      },
+      shootout: [
+        { id: '331', team: 'Brighton & Hove Albion', shots: [{ player: 'A', didScore: true }, { player: 'B', didScore: false }] },
+        { id: '360', team: 'Manchester United', shots: [{ player: 'C', didScore: true }, { player: 'D', didScore: true }, { player: 'E', didScore: true }] },
+      ],
+    };
+    const result = extractShootout(detail, '331');
+    expect(result).not.toBeNull();
+    expect(result!.homeScore).toBe('3');
+    expect(result!.awayScore).toBe('4');
+    expect(result!.rounds).toHaveLength(3);
+    expect(result!.rounds[1]).toEqual({ home: { player: 'B', scored: false }, away: { player: 'D', scored: true } });
+    expect(result!.rounds[2]).toEqual({ home: undefined, away: { player: 'E', scored: true } });
+  });
+
+  it('returns null when the match never went to a shootout', () => {
+    const detail: EspnDetail = { header: { competitions: [{ status: { type: { state: 'post' } } }] } };
+    expect(extractShootout(detail, '331')).toBeNull();
   });
 });

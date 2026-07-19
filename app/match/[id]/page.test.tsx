@@ -57,6 +57,74 @@ describe('MatchDetailPage', () => {
     expect(screen.getByText('Full Time')).toBeInTheDocument();
   });
 
+  it('renders stats, substitutions and a penalty shootout when the detail includes them', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        header: {
+          competitions: [{
+            status: { type: { state: 'post' } },
+            competitors: [
+              { homeAway: 'home', team: { id: '331', displayName: 'Brighton & Hove Albion' }, score: '1', shootoutScore: '3' },
+              { homeAway: 'away', team: { id: '360', displayName: 'Manchester United' }, score: '1', shootoutScore: '4' },
+            ],
+          }],
+        },
+        rosters: [],
+        boxscore: {
+          teams: [
+            { homeAway: 'home', statistics: [{ name: 'totalShots', displayValue: '10' }] },
+            { homeAway: 'away', statistics: [{ name: 'totalShots', displayValue: '14' }] },
+          ],
+        },
+        keyEvents: [{
+          type: { type: 'substitution' }, clock: { displayValue: "60'", value: 3600 },
+          team: { id: '360' }, participants: [{ athlete: { displayName: 'Amad Diallo' } }, { athlete: { displayName: 'Antony' } }],
+        }],
+        shootout: [
+          { id: '331', team: 'Brighton & Hove Albion', shots: [{ player: 'A', didScore: true }] },
+          { id: '360', team: 'Manchester United', shots: [{ player: 'B', didScore: true }] },
+        ],
+      }),
+    }));
+
+    render(<MatchDetailPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    expect(screen.getByTestId('stats')).toBeInTheDocument();
+    expect(screen.getAllByText('10').length).toBeGreaterThan(0);
+    expect(screen.getByTestId('substitutions')).toBeInTheDocument();
+    expect(screen.getByText('1 Substitution')).toBeInTheDocument();
+    expect(screen.getByText(/Amad Diallo/)).toBeInTheDocument();
+    expect(screen.getByTestId('shootout')).toBeInTheDocument();
+    expect(screen.getByText('3 – 4')).toBeInTheDocument();
+  });
+
+  it('omits stats/substitutions/shootout sections when the detail has none of that data', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        header: {
+          competitions: [{
+            status: { type: { state: 'post' } },
+            competitors: [
+              { homeAway: 'home', team: { id: '331', displayName: 'Brighton & Hove Albion' }, score: '1' },
+              { homeAway: 'away', team: { id: '360', displayName: 'Manchester United' }, score: '2' },
+            ],
+          }],
+        },
+        rosters: [],
+      }),
+    }));
+
+    render(<MatchDetailPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    expect(screen.queryByTestId('stats')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('substitutions')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('shootout')).not.toBeInTheDocument();
+  });
+
   it('keeps polling and updates once a pre-match fixture goes live', async () => {
     const preDetail = {
       header: { competitions: [{ status: { type: { state: 'pre' } }, competitors: [] }] },
