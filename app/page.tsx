@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CompetitionId, MatchesResponse } from '@/lib/types';
 import { COMPETITIONS } from '@/lib/competitions';
 import { groupMatchesByMonth, isPastMonth } from '@/lib/schedule';
@@ -43,11 +43,28 @@ export default function SchedulePage() {
     });
   }
 
+  // Scrolls to today's fixture (if any) once, the first time it appears in the DOM —
+  // guarded by a ref rather than state so later polls (which keep refreshing `data`)
+  // don't yank the page back down every 30s while the user is reading something else.
+  const scrolledToTodayRef = useRef(false);
+  useEffect(() => {
+    if (scrolledToTodayRef.current || !data) return;
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const todayMatch = data.matches.find(m => m.utcDate.slice(0, 10) === todayKey);
+    if (!todayMatch) return;
+    const el = document.getElementById(`match-${todayMatch.id}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    scrolledToTodayRef.current = true;
+  }, [data]);
+
   if (!data) return <LoadingSpinner />;
   const filtered: typeof data.matches = selected === 'ALL'
     ? data.matches
     : data.matches.filter(m => m.competition === (selected as CompetitionId));
   const groups = groupMatchesByMonth(filtered);
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayMatchId = data.matches.find(m => m.utcDate.slice(0, 10) === todayKey)?.id;
 
   return (
     <main className={styles.main}>
@@ -78,7 +95,7 @@ export default function SchedulePage() {
                   {group.label}
                 </button>
               </h2>
-              {!isCollapsed && <MatchList matches={group.matches} />}
+              {!isCollapsed && <MatchList matches={group.matches} highlightId={todayMatchId} />}
             </section>
           );
         })

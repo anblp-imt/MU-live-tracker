@@ -132,4 +132,41 @@ describe('SchedulePage', () => {
     expect(screen.getByRole('button', { name: /May 2026/ })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByRole('button', { name: /July 2026/ })).toHaveAttribute('aria-expanded', 'true');
   });
+
+  it("highlights and scrolls to today's fixture, since Schedule now doubles as the old Today page", async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        season: '2026-27',
+        matches: [
+          match('a', 'PL', 'Arsenal FC', '2026-07-01T15:00:00Z'),
+          match('b', 'PL', 'Chelsea FC', '2026-07-18T15:00:00Z'), // "today" per the pinned clock
+        ],
+        meta: { sources: { fd: true, espn: true } },
+      }),
+    }));
+
+    render(<SchedulePage />);
+    await waitFor(() => expect(screen.getAllByTestId('match-card')).toHaveLength(2));
+
+    const todayRow = document.getElementById('match-b');
+    expect(todayRow).toHaveAttribute('data-today', 'true');
+    expect(document.getElementById('match-a')).not.toHaveAttribute('data-today');
+    expect(todayRow?.scrollIntoView).toHaveBeenCalled();
+  });
+
+  it("doesn't mark or scroll to anything when no fixture falls on today", async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        season: '2026-27',
+        matches: [match('a', 'PL', 'Arsenal FC', '2026-07-01T15:00:00Z')],
+        meta: { sources: { fd: true, espn: true } },
+      }),
+    }));
+
+    render(<SchedulePage />);
+    await waitFor(() => expect(screen.getAllByTestId('match-card')).toHaveLength(1));
+    expect(document.getElementById('match-a')).not.toHaveAttribute('data-today');
+  });
 });

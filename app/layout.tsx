@@ -12,8 +12,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <header>
           <nav className={styles.nav}>
-            <Link href="/">Today</Link>
-            <Link href="/schedule">Schedule</Link>
+            <Link href="/">Schedule</Link>
             <Link href="/standings">Standings</Link>
             <Link href="/stats">Stats</Link>
             <span className={styles.chant}>Glory Glory Man United</span>

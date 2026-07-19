@@ -2,7 +2,7 @@ import type { Match } from '@/lib/types';
 import { MatchCard } from './MatchCard';
 import styles from './MatchList.module.css';
 
-export function MatchList({ matches, emptyLabel = 'No matches' }: { matches: Match[]; emptyLabel?: string }) {
+export function MatchList({ matches, emptyLabel = 'No matches', highlightId }: { matches: Match[]; emptyLabel?: string; highlightId?: string }) {
   if (matches.length === 0) {
     return <p data-testid="match-list-empty">{emptyLabel}</p>;
   }
@@ -12,7 +12,9 @@ export function MatchList({ matches, emptyLabel = 'No matches' }: { matches: Mat
         // [React] key must be stable and unique per item so React can match old/new DOM
         // nodes across re-renders instead of tearing everything down and rebuilding it —
         // Match.id (day + normalized opponent) is stable across polls, unlike array index.
-        <li key={match.id}>
+        // The `id` attribute (not the React key) is what Schedule's auto-scroll-to-today
+        // effect looks up via document.getElementById.
+        <li key={match.id} id={`match-${match.id}`} data-today={match.id === highlightId ? 'true' : undefined}>
           <MatchCard match={match} />
         </li>
       ))}

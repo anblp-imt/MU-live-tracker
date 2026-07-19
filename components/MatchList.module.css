@@ -7,3 +7,10 @@
 .list li {
   margin-bottom: 8px;
 }
+
+.list li[data-today='true'] {
+  outline: 1.5px solid var(--mu-gold-bright);
+  outline-offset: 3px;
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.35);
+}
