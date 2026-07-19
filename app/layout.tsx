@@ -15,6 +15,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Link href="/">Today</Link>
             <Link href="/schedule">Schedule</Link>
             <Link href="/standings">Standings</Link>
+            <Link href="/stats">Stats</Link>
             <span className={styles.chant}>Glory Glory Man United</span>
           </nav>
         </header>
