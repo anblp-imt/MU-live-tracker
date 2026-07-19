@@ -1,6 +1,6 @@
 // lib/types.ts
 
-export type CompetitionId = 'PL' | 'CL' | 'FA' | 'EFL' | 'FRIENDLY';
+export type CompetitionId = 'PL' | 'CL' | 'EL' | 'ECL' | 'FA' | 'EFL' | 'FRIENDLY';
 
 export type MatchStatus = 'SCHEDULED' | 'TIMED' | 'IN_PLAY' | 'PAUSED' | 'FINISHED' | 'POSTPONED';
 

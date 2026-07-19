@@ -6,6 +6,7 @@ vi.mock('@/lib/espn', () => ({ fetchEspnSchedule: vi.fn(), fetchEspnDetail: vi.f
 import { fetchMuMatches } from '@/lib/fd';
 import { fetchEspnSchedule, fetchEspnDetail } from '@/lib/espn';
 import { clearCache } from '@/lib/cache';
+import { COMPETITIONS } from '@/lib/competitions';
 import { GET } from './route';
 import type { EspnScheduleEvent, EspnDetail } from '@/lib/types';
 
@@ -103,8 +104,6 @@ describe('GET /api/leaders', () => {
     await GET();
     await GET();
 
-    expect(mockEspnSchedule).toHaveBeenCalledTimes(COMPETITIONS_COUNT);
+    expect(mockEspnSchedule).toHaveBeenCalledTimes(COMPETITIONS.length);
   });
 });
-
-const COMPETITIONS_COUNT = 5; // PL, CL, FA, EFL, FRIENDLY — matches lib/competitions.ts
