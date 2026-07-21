@@ -48,9 +48,41 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.tableDesktop tbody tr {
+  transition: background-color 0.12s ease;
+}
+
+/* Row-scanning aid only, not a click affordance — muRow already carries its own
+   red tint and stays untouched so hover never competes with it. */
+.tableDesktop tbody tr:hover:not(.muRow) {
+  background: rgba(201, 162, 39, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tableDesktop tbody tr {
+    transition: none;
+  }
+}
+
 .muRow {
   background: rgba(218, 41, 28, 0.1);
   border-left: 3px solid var(--mu-red);
+}
+
+.posCell {
+  font-family: var(--font-mono);
+  color: rgba(237, 230, 214, 0.6);
+}
+
+.playedCell {
+  font-family: var(--font-mono);
+  opacity: 0.6;
+}
+
+.ptsCell {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--mu-gold);
 }
 
 .muName {

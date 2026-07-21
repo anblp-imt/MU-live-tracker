@@ -153,11 +153,11 @@ export default function StandingsPage() {
                   const isMu = isManUtd(row.team.name);
                   return (
                     <tr key={row.team.name} className={isMu ? styles.muRow : undefined}>
-                      <td>{row.position}</td>
+                      <td className={styles.posCell}>{row.position}</td>
                       <td className={isMu ? styles.muName : undefined}>{displayTeamName(row.team.name)}</td>
-                      <td>{row.playedGames}</td>
+                      <td className={styles.playedCell}>{row.playedGames}</td>
                       <td>{isMu ? <FormDots form={muForm} /> : <span className={styles.formPlaceholder}>—</span>}</td>
-                      <td>{row.points}</td>
+                      <td className={styles.ptsCell}>{row.points}</td>
                     </tr>
                   );
                 })}

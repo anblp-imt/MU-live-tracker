@@ -34,8 +34,14 @@ export async function fetchMuMatches(apiKey: string): Promise<FdMatch[]> {
 
 export async function fetchStandings(apiKey: string, comp: 'PL' | 'CL'): Promise<FdStandingRow[]> {
   const data = (await fdFetch(`/competitions/${comp}/standings`, apiKey)) as {
+    season?: { startDate?: string };
     standings?: Array<{ type: string; table: FdStandingRow[] }>;
   };
+  // Before a new season's fixtures exist, football-data.org still returns a `standings`
+  // table under that season's object — but it's the previous season's completed table,
+  // carried over rather than reset. A future startDate means the table describes a
+  // season that hasn't kicked off yet, so it shouldn't be shown as "current".
+  if (data.season?.startDate && new Date(data.season.startDate) > new Date()) return [];
   return data.standings?.find(s => s.type === 'TOTAL')?.table || [];
 }
 

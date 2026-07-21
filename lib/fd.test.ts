@@ -57,6 +57,28 @@ describe('fetchStandings', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ standings: [] }) }));
     expect(await fetchStandings('k', 'CL')).toEqual([]);
   });
+
+  it('returns an empty array when the season has not started yet, even if the table has rows', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true, status: 200,
+      json: async () => ({
+        season: { startDate: '2099-08-21' },
+        standings: [{ type: 'TOTAL', table: [{ position: 1, playedGames: 38 }] }],
+      }),
+    }));
+    expect(await fetchStandings('k', 'PL')).toEqual([]);
+  });
+
+  it('returns the table when the season has already started', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true, status: 200,
+      json: async () => ({
+        season: { startDate: '2020-08-21' },
+        standings: [{ type: 'TOTAL', table: [{ position: 1, playedGames: 8 }] }],
+      }),
+    }));
+    expect(await fetchStandings('k', 'PL')).toEqual([{ position: 1, playedGames: 8 }]);
+  });
 });
 
 describe('fetchSquad', () => {
