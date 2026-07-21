@@ -126,7 +126,6 @@ export default function MatchDetailPage() {
       </div>
       <p className={styles.status}>{matchStatusText(data)}</p>
       <section className={styles.scorers} data-testid="scorers">
-        <h2>Scorers</h2>
         <div className={styles.scorersGrid}>
           <div>
             {scorers.home.length === 0 && <p className={styles.scorersEmpty}>—</p>}
