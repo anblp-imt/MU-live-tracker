@@ -70,6 +70,12 @@
   to { transform: rotate(360deg); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .spinning {
+    animation: none;
+  }
+}
+
 .scoreHeader {
   display: flex;
   align-items: center;

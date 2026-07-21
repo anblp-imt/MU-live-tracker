@@ -8,6 +8,21 @@
   border: 1.5px dashed;
   border-radius: 3px;
   font-family: var(--font-body);
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+}
+
+a:has(> .card) {
+  text-decoration: none;
+  display: block;
+}
+
+a:hover > .card {
+  border-color: var(--mu-gold);
+  background: rgba(201, 162, 39, 0.06);
+}
+
+a:active > .card {
+  transform: scale(0.99);
 }
 
 .live {
@@ -30,6 +45,15 @@
 @keyframes live-flash {
   0% { background: rgba(201, 162, 39, 0.35); }
   100% { background: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+  .card[data-live-update="true"] {
+    animation: none;
+  }
 }
 
 .stamp {

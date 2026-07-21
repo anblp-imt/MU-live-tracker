@@ -91,6 +91,12 @@ a {
   color: var(--mu-gold);
 }
 
+:focus-visible {
+  outline: 2px solid var(--mu-gold-bright);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .badge-live {
   display: inline-block;
   font-family: var(--font-mono);
@@ -138,4 +144,10 @@ a {
 @keyframes fergie-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge-fergie {
+    animation: none;
+  }
 }

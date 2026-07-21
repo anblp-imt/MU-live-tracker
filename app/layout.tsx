@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { NavLink } from '@/components/NavLink';
 import styles from './layout.module.css';
 import './globals.css';
 
@@ -34,10 +34,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <header>
           <nav className={styles.nav}>
-            <Link href="/">Schedule</Link>
-            <Link href="/standings">Standings</Link>
-            <Link href="/stats">Stats</Link>
-            <Link href="/team">Team</Link>
+            <NavLink href="/">Schedule</NavLink>
+            <NavLink href="/standings">Standings</NavLink>
+            <NavLink href="/stats">Stats</NavLink>
+            <NavLink href="/team">Team</NavLink>
             <span className={styles.chant}>Glory Glory Man United</span>
           </nav>
         </header>

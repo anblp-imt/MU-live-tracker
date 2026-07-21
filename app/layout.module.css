@@ -4,7 +4,7 @@
   padding: 14px 20px;
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   border-bottom: 1px solid rgba(201, 162, 39, 0.2);
   /* The header sits over the busiest part of the background photo (faces, jersey
@@ -14,12 +14,28 @@
 }
 
 .nav a {
+  position: relative;
   color: var(--mu-gold);
   text-decoration: none;
+  padding-bottom: 2px;
 }
 
 .nav a:hover {
   color: var(--mu-white);
+}
+
+.nav a[aria-current="page"] {
+  color: var(--mu-white);
+}
+
+.nav a[aria-current="page"]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 2px;
+  background: var(--mu-red);
 }
 
 .chant {

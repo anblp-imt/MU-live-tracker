@@ -101,9 +101,9 @@
 
 .highlightBlock {
   margin-bottom: 18px;
-  padding: 10px 10px 4px;
-  border: 1px solid rgba(201, 162, 39, 0.3);
-  border-radius: 4px;
+  padding: 12px 14px;
+  border: 1.5px dashed rgba(201, 162, 39, 0.3);
+  border-radius: 3px;
   background: var(--mu-surface);
 }
 
@@ -111,7 +111,7 @@
   font-family: var(--font-mono);
   font-size: 9.5px;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   color: var(--mu-gold);
   margin: 0 0 8px;
 }

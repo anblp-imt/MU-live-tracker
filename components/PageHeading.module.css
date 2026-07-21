@@ -61,6 +61,12 @@
   to { transform: rotate(360deg); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .spinning {
+    animation: none;
+  }
+}
+
 .rule {
   height: 1px;
   background: linear-gradient(90deg, var(--mu-gold), transparent);
@@ -71,7 +77,7 @@
 .kicker {
   font-family: var(--font-mono);
   font-size: 10.5px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--mu-gold);
   opacity: 0.85;
