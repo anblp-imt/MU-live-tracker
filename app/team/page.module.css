@@ -57,6 +57,21 @@
   align-items: center;
   text-align: center;
   gap: 6px;
+  padding: 6px 4px;
+  border-radius: 4px;
+  transition: background-color 0.12s ease;
+}
+
+/* Same non-clickable scan aid as Standings' row hover and Stats' leaderboard rows —
+   players aren't links here, just a tint while browsing the roster. */
+.player:hover {
+  background: rgba(201, 162, 39, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player {
+    transition: none;
+  }
 }
 
 .name {
