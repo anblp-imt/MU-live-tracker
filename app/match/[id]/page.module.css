@@ -130,6 +130,13 @@
   margin-bottom: 8px;
 }
 
+.lineupDetails {
+  padding: 12px 14px;
+  background: var(--mu-surface);
+  border: 1.5px dashed rgba(201, 162, 39, 0.3);
+  border-radius: 3px;
+}
+
 .scorers {
   margin-top: 0;
   margin-bottom: 16px;
@@ -175,45 +182,38 @@
 }
 
 .statRow {
-  margin-bottom: 10px;
-}
-
-.statVals {
   display: flex;
   align-items: center;
   font-family: var(--font-mono);
   font-size: 12px;
-  margin-bottom: 3px;
+  margin-bottom: 8px;
 }
 
-.statHome {
-  flex: 1;
-  text-align: left;
+.statBadge {
+  flex: 0 0 auto;
+  min-width: 34px;
+  padding: 3px 0;
+  text-align: center;
   color: var(--mu-white);
 }
 
-.statAway {
-  flex: 1;
-  text-align: right;
+.statBadgeActive {
+  min-width: 30px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 700;
   color: var(--mu-white);
 }
 
 .statLabel {
-  flex: 0 0 auto;
+  flex: 1;
+  text-align: center;
   padding: 0 10px;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   opacity: 0.6;
   white-space: nowrap;
-}
-
-.statBar {
-  display: flex;
-  height: 4px;
-  border-radius: 2px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
 }
 
 .subsDetails {

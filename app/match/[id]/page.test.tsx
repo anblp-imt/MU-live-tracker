@@ -202,7 +202,7 @@ describe('MatchDetailPage', () => {
     expect(scorersSection.compareDocumentPosition(lineupDetails) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it('colors the match stat bars with each team\'s real ESPN color, falling back to red/gold', async () => {
+  it('badges only the higher stat value, colored with that side\'s real ESPN color', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -211,7 +211,7 @@ describe('MatchDetailPage', () => {
             status: { type: { state: 'post' } },
             competitors: [
               { homeAway: 'home', team: { id: '331', displayName: 'Brighton & Hove Albion', color: '0057B8' }, score: '1' },
-              { homeAway: 'away', team: { id: '360', displayName: 'Manchester United' }, score: '2' }, // no color -> fallback
+              { homeAway: 'away', team: { id: '360', displayName: 'Manchester United', color: 'da020e' }, score: '2' },
             ],
           }],
         },
@@ -228,13 +228,41 @@ describe('MatchDetailPage', () => {
     render(<MatchDetailPage />);
     await act(async () => { await Promise.resolve(); });
 
-    // extractStats always returns a fixed set of stat rows, so multiple bars share this
-    // testid; homeColor/awayColor are computed once and applied to every row uniformly,
-    // so checking the first is representative of all.
-    const homeBar = screen.getAllByTestId('stat-bar-home')[0];
-    const awayBar = screen.getAllByTestId('stat-bar-away')[0];
-    expect(homeBar.style.background).toBe('rgb(0, 87, 184)'); // #0057B8
-    expect(awayBar.style.getPropertyValue('background')).toContain('var(--mu-gold)');
+    const homeValue = screen.getByText('10');
+    const awayValue = screen.getByText('14');
+    expect(homeValue.style.background).toBe(''); // Brighton, lower (10) — no badge color
+    expect(awayValue.style.background).toBe('rgb(218, 2, 14)'); // MU, higher (14) — badged in its real color
+  });
+
+  it('badges neither side when a stat is tied', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        header: {
+          competitions: [{
+            status: { type: { state: 'post' } },
+            competitors: [
+              { homeAway: 'home', team: { id: '331', displayName: 'Brighton & Hove Albion', color: '0057B8' }, score: '1' },
+              { homeAway: 'away', team: { id: '360', displayName: 'Manchester United', color: 'da020e' }, score: '1' },
+            ],
+          }],
+        },
+        rosters: [],
+        boxscore: {
+          teams: [
+            { homeAway: 'home', statistics: [{ name: 'totalShots', displayValue: '10' }] },
+            { homeAway: 'away', statistics: [{ name: 'totalShots', displayValue: '10' }] },
+          ],
+        },
+      }),
+    }));
+
+    render(<MatchDetailPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    const values = screen.getAllByText('10');
+    expect(values[0].style.background).toBe('');
+    expect(values[1].style.background).toBe('');
   });
 
   it('renders stats, substitutions and a penalty shootout when the detail includes them', async () => {

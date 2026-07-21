@@ -149,7 +149,7 @@ export default function MatchDetailPage() {
           the default open/closed state at that transition — a poll within the same
           phase re-renders without remounting, so a manual toggle by the user survives
           it instead of snapping back open/closed every 30s. */}
-      <details key={matchState} open={matchState === 'pre'}>
+      <details className={styles.lineupDetails} key={matchState} open={matchState === 'pre'}>
         <summary className={styles.lineupSummary}>Starting Lineup</summary>
         <FormationPitch homeRoster={home} awayRoster={away} />
       </details>
@@ -157,19 +157,23 @@ export default function MatchDetailPage() {
         <section className={styles.stats} data-testid="stats">
           <h2>Match Stats</h2>
           {stats.map(row => {
-            const total = row.home.value + row.away.value;
-            const homePct = total ? (row.home.value / total) * 100 : 50;
+            const homeWins = row.home.value > row.away.value;
+            const awayWins = row.away.value > row.home.value;
             return (
               <div className={styles.statRow} key={row.label}>
-                <div className={styles.statVals}>
-                  <span className={styles.statHome}>{row.home.display}</span>
-                  <span className={styles.statLabel}>{row.label}</span>
-                  <span className={styles.statAway}>{row.away.display}</span>
-                </div>
-                <div className={styles.statBar}>
-                  <span data-testid="stat-bar-home" style={{ width: `${homePct}%`, background: homeColor }} />
-                  <span data-testid="stat-bar-away" style={{ width: `${100 - homePct}%`, background: awayColor }} />
-                </div>
+                <span
+                  className={homeWins ? `${styles.statBadge} ${styles.statBadgeActive}` : styles.statBadge}
+                  style={homeWins ? { background: homeColor } : undefined}
+                >
+                  {row.home.display}
+                </span>
+                <span className={styles.statLabel}>{row.label}</span>
+                <span
+                  className={awayWins ? `${styles.statBadge} ${styles.statBadgeActive}` : styles.statBadge}
+                  style={awayWins ? { background: awayColor } : undefined}
+                >
+                  {row.away.display}
+                </span>
               </div>
             );
           })}
