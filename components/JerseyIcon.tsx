@@ -24,7 +24,12 @@ export function JerseyIcon({ jersey }: { jersey: number | null }) {
         <path d="M9,40 L21,46 L19.5,49.5 L7.5,43.5 Z" fill="#EDE6D6" stroke="#0d0d0d" strokeWidth="1" />
         <path d="M91,40 L79,46 L80.5,49.5 L92.5,43.5 Z" fill="#EDE6D6" stroke="#0d0d0d" strokeWidth="1" />
       </svg>
-      <span className={jersey === null ? `${styles.number} ${styles.noNumber}` : styles.number}>
+      <span
+        className={jersey === null ? `${styles.number} ${styles.noNumber}` : styles.number}
+        {...(jersey === null
+          ? { title: 'Squad number not yet confirmed', 'aria-label': 'Squad number not yet confirmed' }
+          : {})}
+      >
         {jersey === null ? '–' : jersey}
       </span>
     </div>

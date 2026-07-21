@@ -18,6 +18,9 @@ const GROUP_ORDER: PositionGroupLabel[] = ['Goalkeepers', 'Defenders', 'Midfield
 // football-data.org's /teams/{id} squad uses exactly these four position strings —
 // verified live 2026-07-21 against MU's own squad. 'Offence' is the only value that
 // isn't Goalkeeper/Defence/Midfield, so it's the default case rather than an explicit one.
+// Fallback only (see groupByNormalizedName below) — football-data's own position data
+// can be stale (it has Patrick Dorgu, a left-back, tagged 'Offence', verified live
+// 2026-07-21), so ESPN's roster position is preferred whenever it has the player.
 function groupForFdPosition(position: string): PositionGroupLabel {
   switch (position) {
     case 'Goalkeeper': return 'Goalkeepers';
@@ -25,6 +28,22 @@ function groupForFdPosition(position: string): PositionGroupLabel {
     case 'Midfield': return 'Midfielders';
     default: return 'Forwards';
   }
+}
+
+const ESPN_POSITION_GROUP: Record<string, PositionGroupLabel> = {
+  Goalkeeper: 'Goalkeepers',
+  Defender: 'Defenders',
+  Midfielder: 'Midfielders',
+  Forward: 'Forwards',
+};
+
+function groupByNormalizedName(roster: EspnTeamRoster): Map<string, PositionGroupLabel> {
+  const map = new Map<string, PositionGroupLabel>();
+  for (const athlete of roster.athletes) {
+    const label = athlete.position?.displayName ? ESPN_POSITION_GROUP[athlete.position.displayName] : undefined;
+    if (label) map.set(normalizeTeamName(athlete.displayName), label);
+  }
+  return map;
 }
 
 // ESPN's roster is missing some current signings entirely and uses different
@@ -43,11 +62,13 @@ function jerseyByNormalizedName(roster: EspnTeamRoster): Map<string, number> {
 
 export function buildSquad(fdSquad: FdSquadPlayer[], espnRoster: EspnTeamRoster): TeamGroup[] {
   const jerseyByName = jerseyByNormalizedName(espnRoster);
+  const groupByName = groupByNormalizedName(espnRoster);
   const groups = new Map<PositionGroupLabel, TeamPlayer[]>(GROUP_ORDER.map(label => [label, []]));
 
   for (const p of fdSquad) {
-    const label = groupForFdPosition(p.position);
-    const jersey = jerseyByName.get(normalizeTeamName(p.name)) ?? null;
+    const normalized = normalizeTeamName(p.name);
+    const label = groupByName.get(normalized) ?? groupForFdPosition(p.position);
+    const jersey = jerseyByName.get(normalized) ?? null;
     groups.get(label)!.push({ name: p.name, jersey });
   }
 

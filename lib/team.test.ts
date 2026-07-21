@@ -33,6 +33,18 @@ describe('buildSquad', () => {
     expect(groups.find(g => g.label === 'Goalkeepers')!.players).toEqual([{ name: 'Altay Bayındır', jersey: 1 }]);
   });
 
+  it('prefers the ESPN roster position over a stale football-data one when both are present', () => {
+    // Real case, verified live 2026-07-21: football-data.org tags Patrick Dorgu (a
+    // left-back) as 'Offence', but ESPN's roster correctly has him as 'Defender'.
+    const fdSquad = [fdPlayer({ name: 'Patrick Dorgu', position: 'Offence' })];
+    const espnRoster: EspnTeamRoster = {
+      athletes: [{ displayName: 'Patrick Dorgu', jersey: '13', position: { displayName: 'Defender' } }],
+    };
+    const groups = buildSquad(fdSquad, espnRoster);
+    expect(groups.find(g => g.label === 'Defenders')!.players).toEqual([{ name: 'Patrick Dorgu', jersey: 13 }]);
+    expect(groups.find(g => g.label === 'Forwards')!.players).toEqual([]);
+  });
+
   it('keeps a football-data player with no ESPN match, with jersey: null instead of dropping them', () => {
     const fdSquad = [fdPlayer({ name: 'Andrey Santos', position: 'Midfield' })];
     const groups = buildSquad(fdSquad, { athletes: [] });
