@@ -224,20 +224,35 @@ export function extractStats(detail: EspnDetail): MatchStatRow[] {
     const a = raw(away, name);
     return { label, home: { display: h ?? '–', value: num(h) }, away: { display: a ?? '–', value: num(a) } };
   };
-  const percentRow = (label: string, homePct: number, awayPct: number): MatchStatRow => ({
+  // homeVal/awayVal are `null` when there's no underlying data for that side — displayed
+  // as '–' rather than a misleading '0%'. `value` stays 0 in that case so the stat-bar
+  // width calc in page.tsx (which divides by home.value + away.value) is unaffected.
+  const percentRow = (label: string, homeVal: number | null, awayVal: number | null): MatchStatRow => ({
     label,
-    home: { display: `${homePct}%`, value: homePct },
-    away: { display: `${awayPct}%`, value: awayPct },
+    home: { display: homeVal === null ? '–' : `${homeVal}%`, value: homeVal ?? 0 },
+    away: { display: awayVal === null ? '–' : `${awayVal}%`, value: awayVal ?? 0 },
   });
-  const passAccuracy = (team: typeof home) => {
+  // Home and away possession always sum to 100% in the raw data (same 90 minutes split
+  // two ways) — round home only and derive away from it, so independent per-side
+  // rounding (e.g. 49.5/50.5 -> 50%/51%) can never break that invariant.
+  const possessionRow = (): MatchStatRow => {
+    const h = raw(home, 'possessionPct');
+    const a = raw(away, 'possessionPct');
+    if (h == null && a == null) return percentRow('Possession', null, null);
+    const homePct = Math.round(num(h));
+    return percentRow('Possession', homePct, 100 - homePct);
+  };
+  // Unlike possession, each team's pass accuracy is independent (both can legitimately
+  // be at 85%) — rounded separately, never derived from the other side.
+  const passAccuracy = (team: typeof home): number | null => {
     const total = num(raw(team, 'totalPasses'));
-    return total ? Math.round(num(raw(team, 'accuratePasses')) / total * 100) : 0;
+    return total ? Math.round(num(raw(team, 'accuratePasses')) / total * 100) : null;
   };
 
   return [
     plainRow('Shots', 'totalShots'),
     plainRow('Shots on Target', 'shotsOnTarget'),
-    percentRow('Possession', Math.round(num(raw(home, 'possessionPct'))), Math.round(num(raw(away, 'possessionPct')))),
+    possessionRow(),
     plainRow('Passes', 'totalPasses'),
     percentRow('Pass Accuracy', passAccuracy(home), passAccuracy(away)),
     ...PLAIN_STAT_DEFS.map(({ label, name }) => plainRow(label, name)),

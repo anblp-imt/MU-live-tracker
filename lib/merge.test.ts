@@ -279,6 +279,63 @@ describe('extractStats', () => {
     const detail: EspnDetail = { header: { competitions: [{ status: { type: { state: 'post' } } }] } };
     expect(extractStats(detail)).toEqual([]);
   });
+
+  it('rounds possession so home and away always sum to 100%, even when independent rounding would not', () => {
+    const detail: EspnDetail = {
+      header: { competitions: [{ status: { type: { state: 'post' } } }] },
+      boxscore: {
+        teams: [
+          { homeAway: 'home', statistics: [{ name: 'possessionPct', displayValue: '49.5' }] },
+          { homeAway: 'away', statistics: [{ name: 'possessionPct', displayValue: '50.5' }] },
+        ],
+      },
+    };
+    const result = extractStats(detail);
+    // Independent rounding would give 50%/51% (sums to 101) — home must be rounded first
+    // and away derived as 100 - home, so the pair always sums to exactly 100.
+    expect(result.find(r => r.label === 'Possession')).toEqual({
+      label: 'Possession', home: { display: '50%', value: 50 }, away: { display: '50%', value: 50 },
+    });
+  });
+
+  it('computes pass accuracy independently per team — the two are not forced to sum to 100%', () => {
+    const detail: EspnDetail = {
+      header: { competitions: [{ status: { type: { state: 'post' } } }] },
+      boxscore: {
+        teams: [
+          { homeAway: 'home', statistics: [{ name: 'totalPasses', displayValue: '400' }, { name: 'accuratePasses', displayValue: '340' }] },
+          { homeAway: 'away', statistics: [{ name: 'totalPasses', displayValue: '300' }, { name: 'accuratePasses', displayValue: '180' }] },
+        ],
+      },
+    };
+    const result = extractStats(detail);
+    // 340/400 = 85%, 180/300 = 60% — deliberately not summing to 100, proving neither
+    // side is derived from the other (unlike Possession).
+    expect(result.find(r => r.label === 'Pass Accuracy')).toEqual({
+      label: 'Pass Accuracy', home: { display: '85%', value: 85 }, away: { display: '60%', value: 60 },
+    });
+  });
+
+  it('shows a dash instead of 0% when a percentage stat has no underlying data', () => {
+    const detail: EspnDetail = {
+      header: { competitions: [{ status: { type: { state: 'post' } } }] },
+      boxscore: {
+        teams: [
+          { homeAway: 'home', statistics: [{ name: 'totalPasses', displayValue: '0' }, { name: 'foulsCommitted', displayValue: '3' }] },
+          { homeAway: 'away', statistics: [{ name: 'totalPasses', displayValue: '0' }, { name: 'foulsCommitted', displayValue: '2' }] },
+        ],
+      },
+    };
+    const result = extractStats(detail);
+    // possessionPct is absent entirely for both teams; totalPasses is present but 0 for
+    // both — neither case has real data, so both must read '–', not a misleading '0%'.
+    expect(result.find(r => r.label === 'Possession')).toEqual({
+      label: 'Possession', home: { display: '–', value: 0 }, away: { display: '–', value: 0 },
+    });
+    expect(result.find(r => r.label === 'Pass Accuracy')).toEqual({
+      label: 'Pass Accuracy', home: { display: '–', value: 0 }, away: { display: '–', value: 0 },
+    });
+  });
 });
 
 describe('extractShootout', () => {
