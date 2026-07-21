@@ -1,4 +1,4 @@
-import type { EspnDetail, EspnScheduleEvent } from './types';
+import type { EspnDetail, EspnScheduleEvent, EspnTeamRoster } from './types';
 
 const ESPN_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
 export const MU_ESPN_ID = 360;
@@ -47,4 +47,8 @@ export async function fetchEspnSchedule(slug: string, now: Date = new Date()): P
 
 export async function fetchEspnDetail(slug: string, eventId: string): Promise<EspnDetail> {
   return (await espnFetch(`/${slug}/summary?event=${eventId}`)) as EspnDetail;
+}
+
+export async function fetchEspnRoster(): Promise<EspnTeamRoster> {
+  return (await espnFetch(`/eng.1/teams/${MU_ESPN_ID}/roster`)) as EspnTeamRoster;
 }

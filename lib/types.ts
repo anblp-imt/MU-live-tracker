@@ -172,6 +172,16 @@ export interface EspnRoster {
   roster: EspnRosterPlayer[];
 }
 
+export interface EspnTeamAthlete {
+  displayName: string;
+  jersey?: string;
+  position?: { displayName?: string };
+}
+
+export interface EspnTeamRoster {
+  athletes: EspnTeamAthlete[];
+}
+
 export interface EspnKeyEvent {
   type?: { type?: string };
   clock?: { displayValue?: string; value?: number };
