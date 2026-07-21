@@ -86,9 +86,8 @@ export function MatchCard({ match }: { match: Match }) {
 
   if (!clickable) return content;
 
-  const slug = getCompetition(match.competition).espnSlug;
   return (
-    <Link href={`/match/${match.id}?espnId=${match.sources.espn ?? ''}&slug=${slug}`}>
+    <Link href={`/match/${match.id}`}>
       {content}
     </Link>
   );

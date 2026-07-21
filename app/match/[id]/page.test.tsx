@@ -3,28 +3,20 @@ import { render, screen, act } from '@testing-library/react';
 import { clearCache } from '@/lib/cache';
 
 const mockParams = { id: '2026-08-22_hullcityafc' };
-let mockSearchParams = new URLSearchParams({ espnId: '740966', slug: 'eng.1' });
 
 vi.mock('next/navigation', () => ({
   useParams: () => mockParams,
-  useSearchParams: () => mockSearchParams,
 }));
 
 import MatchDetailPage from './page';
 
 // usePolling's client cache is a module-level Map shared across every test in this file
-// (several reuse the same espnId/slug) — clear it so each test starts from a real fetch,
+// (several reuse the same match id) — clear it so each test starts from a real fetch,
 // except the one test below that deliberately exercises the cache.
 beforeEach(() => { clearCache(); vi.useFakeTimers(); });
-afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); mockSearchParams = new URLSearchParams({ espnId: '740966', slug: 'eng.1' }); });
+afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe('MatchDetailPage', () => {
-  it('shows an unavailable message when espnId/slug are missing (FD-only fixture)', () => {
-    mockSearchParams = new URLSearchParams();
-    render(<MatchDetailPage />);
-    expect(screen.getByText(/detail unavailable/i)).toBeInTheDocument();
-  });
-
   it('renders scorers and lineups once the detail loads', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,

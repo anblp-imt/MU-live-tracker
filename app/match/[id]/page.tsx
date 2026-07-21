@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { usePolling } from '@/hooks/usePolling';
 import { FormationPitch } from '@/components/FormationPitch';
 import { extractScorers, extractStats, extractSubstitutions, extractShootout } from '@/lib/merge';
@@ -18,8 +18,8 @@ function detailTtlMs(detail: EspnDetail): number {
   return state === 'in' ? LIVE_TTL_MS : STATIC_TTL_MS;
 }
 
-async function fetchDetail(espnId: string, slug: string): Promise<EspnDetail> {
-  const res = await fetch(`/api/match/${espnId}?slug=${slug}`);
+async function fetchDetail(id: string): Promise<EspnDetail> {
+  const res = await fetch(`/api/match/${id}`);
   if (!res.ok) throw new Error('Failed to load match detail');
   return res.json();
 }
@@ -51,9 +51,6 @@ function teamCrestUrl(team: { logos?: Array<{ href: string; rel?: string[] }> } 
 
 export default function MatchDetailPage() {
   const params = useParams<{ id: string }>();
-  const searchParams = useSearchParams();
-  const espnId = searchParams.get('espnId');
-  const slug = searchParams.get('slug');
 
   const [intervalMs, setIntervalMs] = useState<number | null>(null);
   // Keyed the same way as the server route's own cache (app/api/match/[id]/route.ts) so
@@ -61,9 +58,9 @@ export default function MatchDetailPage() {
   // instantly from the last-known detail instead of a fresh loading spinner, while still
   // refreshing in the background.
   const { data, error, loading, refetch, lastSyncedAt } = usePolling(
-    () => (espnId && slug ? fetchDetail(espnId, slug) : Promise.reject(new Error('Match detail unavailable'))),
+    () => fetchDetail(params.id),
     intervalMs,
-    espnId && slug ? { key: `match-detail:${slug}:${espnId}`, ttlMs: detailTtlMs } : undefined,
+    { key: `match-detail:${params.id}`, ttlMs: detailTtlMs },
   );
 
   useEffect(() => {
@@ -75,7 +72,6 @@ export default function MatchDetailPage() {
     setIntervalMs(state === 'in' || state === 'pre' ? 30_000 : null);
   }, [data]);
 
-  if (!espnId || !slug) return <p>Match detail unavailable for this fixture.</p>;
   if (error && !data) return <p role="alert">{error.message}</p>;
   if (!data) return <LoadingSpinner />;
 
