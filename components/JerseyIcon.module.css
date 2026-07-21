@@ -1,0 +1,30 @@
+.wrap {
+  position: relative;
+  width: 64px;
+}
+
+.shirt {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+}
+
+.number {
+  position: absolute;
+  top: 56%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--mu-white);
+}
+
+.noNumber {
+  font-size: 15px;
+  color: rgba(237, 230, 214, 0.55);
+}
+
+@media (max-width: 460px) {
+  .wrap { width: 54px; }
+}
