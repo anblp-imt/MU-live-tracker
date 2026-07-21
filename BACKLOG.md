@@ -2,9 +2,9 @@
 
 Tracked items not yet implemented, so a future session doesn't lose context.
 
-## Match Stats accuracy vs Google (raised 2026-07-21, not started)
+## Match Stats accuracy vs Google (raised 2026-07-21, closed — decided not to pursue)
 
-**Status:** researched, no design/spec yet.
+**Status:** researched, tested live with a real API key, decision made: not worth it.
 
 User compared Match Stats numbers against Google's own match-stats card and found them
 not closely matching. Root cause confirmed by inspection, not a bug: both this app and
@@ -16,15 +16,25 @@ counting rules — some disagreement between the two is expected and isn't fixab
 changing our calculation logic (already fixed the two real calc bugs there were:
 possession rounding, missing-data 0% — see `2026-07-21-match-detail-restructure-design.md`).
 
-Only real lever: add or switch to a second data source. Discussed API-Football
-(api-football.com / API-Sports) as a candidate — has a documented `/players/squads` +
-`transfers` endpoint (see the roster-staleness item below, same candidate), but free tier
-is 100 requests/day shared across all endpoints, too tight for live-match stat polling;
-would only be viable for slow-changing data, not stats during a live match. No guarantee
-its numbers match Google either — different provider, same fundamental issue.
+Explored API-Football (api-football.com / API-Sports) as a second source, tested live
+with a real free-tier key (`GET /fixtures/statistics?fixture=ID` — confirmed it returns
+proper Shots/Possession/Corners/Cards data when accessible). **Free tier is not viable at
+all for this app**, not just rate-limited: `GET /fixtures?team=33&date=2026-07-18`
+(Man Utd, id 33, the Wrexham friendly) returned `"Free plans do not have access to this
+date, try from 2026-07-20 to 2026-07-22"` — access is restricted to a ~3-day rolling
+window around the real-world current date. `GET /fixtures?team=33&season=2025` (MU's
+current season) returned `"Free plans do not have access to this season, try from 2022
+to 2024"` — the current/upcoming season is blocked outright on free tier, only 2022-2024
+are open. So free tier can't fetch stats for any MU fixture this app actually needs,
+past or upcoming — not a request-budget problem, an access problem.
 
-Needs a brainstorm session to decide: is closer-to-Google accuracy worth a paid API-Football
-plan (or another provider), and if so scoped to which data (live stats? roster only? both)?
+Paid tiers unlock current-season data: Pro $19/mo (7,500 req/day), Ultra $29/mo (75,000
+req/day). User's call, 2026-07-21: not worth a recurring cost for this improvement — kept
+ESPN as the only source, closing this item. Revisit only if the user's cost/benefit
+calculus changes; if so, the fallback design ("try API-Football for FINISHED matches,
+fall back to ESPN's existing `extractStats` on failure/missing data — no regression risk
+either way") was agreed as the implementation approach and still stands, along with the
+Man Utd team id (33) confirmed above.
 
 ## Roster jersey numbers stale after real-world transfers (raised 2026-07-21, not started)
 
