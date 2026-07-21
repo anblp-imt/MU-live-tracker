@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { fetchEspnSchedule, fetchEspnDetail } from './espn';
+import { fetchEspnSchedule, fetchEspnDetail, fetchEspnRoster } from './espn';
 import type { EspnScheduleEvent } from './types';
 
 const MU_ESPN_ID = 360;
@@ -92,5 +92,25 @@ describe('fetchEspnDetail', () => {
       'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=740966',
       { headers: { 'User-Agent': 'Mozilla/5.0' } },
     );
+  });
+});
+
+describe('fetchEspnRoster', () => {
+  it('hits the team roster endpoint for MU in the Premier League', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ athletes: [] }) });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await fetchEspnRoster();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/${MU_ESPN_ID}/roster`,
+      { headers: { 'User-Agent': 'Mozilla/5.0' } },
+    );
+  });
+
+  it('returns the athletes array from the response', async () => {
+    const athletes = [{ displayName: 'Bruno Fernandes', jersey: '8', position: { displayName: 'Midfielder' } }];
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ athletes }) }));
+    expect(await fetchEspnRoster()).toEqual({ athletes });
   });
 });
