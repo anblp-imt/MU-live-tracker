@@ -13,6 +13,10 @@ describe('normalizeTeamName', () => {
   it('handles empty/undefined input without throwing', () => {
     expect(normalizeTeamName('')).toBe('');
   });
+
+  it('converts Turkish dotless ı to plain i (NFD does not decompose it)', () => {
+    expect(normalizeTeamName('Altay Bayındır')).toBe('altaybayindir');
+  });
 });
 
 describe('isManUtd', () => {
