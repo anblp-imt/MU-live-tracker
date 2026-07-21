@@ -1,9 +1,12 @@
 // NFD decomposition splits accented letters into base+combining-mark, so stripping the
 // combining marks (U+0300–U+036F) removes accents without a manual character map —
 // "München" → "Munchen". Ported from WC-2026-live-tracker/utils.js's normTeam.
+// Also handles Turkish characters (e.g. ı → i) to match names across sources with
+// different character encodings.
 export function normalizeTeamName(name: string): string {
   return (name || '')
     .toLowerCase()
+    .replace(/ı/g, 'i') // Turkish lowercase dotless i → regular i
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]/g, '');
