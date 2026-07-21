@@ -61,13 +61,19 @@ describe('MatchCard', () => {
     expect(screen.getByText('HT')).toBeInTheDocument();
   });
 
+  it('shows no score placeholder for a match that has not kicked off', () => {
+    render(<MatchCard match={makeMatch({ status: 'SCHEDULED' })} />);
+    expect(screen.queryByText('- - -')).not.toBeInTheDocument();
+    expect(screen.getByTestId('match-score')).toHaveTextContent('');
+  });
+
   it('shows FT for a FINISHED match with the display score', () => {
     render(<MatchCard match={makeMatch({
       status: 'FINISHED',
       score: { fullTime: { home: 0, away: 2 }, display: { home: 0, away: 2 } },
     })} />);
     expect(screen.getByText('FT')).toBeInTheDocument();
-    expect(screen.getByText('0 : 2')).toBeInTheDocument();
+    expect(screen.getByText('0 - 2')).toBeInTheDocument();
   });
 
   it('shows FERGIE TIME instead of the minute when MU is not winning in the 90th', () => {
@@ -76,6 +82,39 @@ describe('MatchCard', () => {
       score: { fullTime: { home: 0, away: 0 }, display: { home: 0, away: 0 } },
     })} />);
     expect(screen.getByText('FERGIE TIME')).toBeInTheDocument();
+  });
+
+  it('colors the score green when MU wins as the home side', () => {
+    render(<MatchCard match={makeMatch({
+      status: 'FINISHED', venue: 'H',
+      score: { fullTime: { home: 2, away: 1 }, display: { home: 2, away: 1 } },
+    })} />);
+    expect(screen.getByText('2 - 1').className).toMatch(/_win_/);
+  });
+
+  it('colors the score gold when MU draws', () => {
+    render(<MatchCard match={makeMatch({
+      status: 'FINISHED', venue: 'H',
+      score: { fullTime: { home: 1, away: 1 }, display: { home: 1, away: 1 } },
+    })} />);
+    expect(screen.getByText('1 - 1').className).toMatch(/_draw_/);
+  });
+
+  it('colors the score red when MU loses as the away side', () => {
+    render(<MatchCard match={makeMatch({
+      status: 'FINISHED', venue: 'A',
+      score: { fullTime: { home: 2, away: 0 }, display: { home: 2, away: 0 } },
+    })} />);
+    expect(screen.getByText('2 - 0').className).toMatch(/_loss_/);
+  });
+
+  it('does not apply a result color before the match is finished', () => {
+    render(<MatchCard match={makeMatch({
+      status: 'IN_PLAY', minute: '23',
+      score: { fullTime: { home: 1, away: 0 }, display: { home: 1, away: 0 } },
+    })} />);
+    const score = screen.getByText('1 - 0');
+    expect(score.className).not.toMatch(/_win_|_draw_|_loss_/);
   });
 
   it('briefly flags a live update when the score changes between polls, then clears it', () => {

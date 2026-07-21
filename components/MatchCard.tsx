@@ -20,6 +20,17 @@ function statusLabel(match: Match): string {
   });
 }
 
+function matchResult(match: Match): 'win' | 'draw' | 'loss' | null {
+  if (match.status !== 'FINISHED') return null;
+  const { home, away } = match.score.display;
+  if (home == null || away == null) return null;
+  const muScore = match.venue === 'H' ? home : away;
+  const oppScore = match.venue === 'H' ? away : home;
+  if (muScore > oppScore) return 'win';
+  if (muScore < oppScore) return 'loss';
+  return 'draw';
+}
+
 function cardStateClass(match: Match): string {
   if (LIVE_STATUSES.includes(match.status)) return styles.live;
   if (match.status === 'FINISHED') return styles.finished;
@@ -31,6 +42,7 @@ export function MatchCard({ match }: { match: Match }) {
   const clickable = CLICKABLE_STATUSES.includes(match.status);
   const isLive = LIVE_STATUSES.includes(match.status);
   const competitionLabel = getCompetition(match.competition).navShortLabel;
+  const result = matchResult(match);
 
   // [React] usePolling refetches this match's data every 30s while live, but a prop
   // changing silently gives no visual cue that something just happened. This ref holds
@@ -63,7 +75,11 @@ export function MatchCard({ match }: { match: Match }) {
       )}
       <span className={styles.league}>{competitionLabel}</span>
       <span className={styles.opponent}>{opponent} ({match.venue})</span>
-      <span className={styles.score}>{match.score.display.home ?? '-'} : {match.score.display.away ?? '-'}</span>
+      <span className={`${styles.score} ${result ? styles[result] : ''}`} data-testid="match-score">
+        {match.score.display.home != null && match.score.display.away != null
+          ? `${match.score.display.home} - ${match.score.display.away}`
+          : ''}
+      </span>
       {!isLive && <span className={styles.meta}>{statusLabel(match)}</span>}
     </div>
   );

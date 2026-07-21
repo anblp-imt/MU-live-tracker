@@ -57,11 +57,17 @@
 
 .score {
   font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
   color: var(--mu-gold);
 }
 
+.win { color: var(--mu-green); }
+.draw { color: var(--mu-gold); }
+.loss { color: var(--mu-red); }
+
 .meta {
   font-family: var(--font-mono);
-  font-size: 11px;
-  opacity: 0.6;
+  font-size: 13px;
+  opacity: 0.8;
 }
