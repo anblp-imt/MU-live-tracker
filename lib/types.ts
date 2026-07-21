@@ -120,6 +120,13 @@ export interface FdStandingRow {
   goalDifference: number;
 }
 
+export interface FdSquadPlayer {
+  name: string;
+  position: string;
+  dateOfBirth: string;
+  nationality: string;
+}
+
 // --- ESPN site-api wire types (subset actually used; verified live 2026-07-16) ---
 
 export interface EspnScheduleEvent {

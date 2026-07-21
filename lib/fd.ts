@@ -1,4 +1,4 @@
-import type { FdMatch, FdStandingRow } from './types';
+import type { FdMatch, FdStandingRow, FdSquadPlayer } from './types';
 
 const FD_BASE = 'https://api.football-data.org/v4';
 const MU_FD_ID = 66;
@@ -37,4 +37,9 @@ export async function fetchStandings(apiKey: string, comp: 'PL' | 'CL'): Promise
     standings?: Array<{ type: string; table: FdStandingRow[] }>;
   };
   return data.standings?.find(s => s.type === 'TOTAL')?.table || [];
+}
+
+export async function fetchSquad(apiKey: string): Promise<FdSquadPlayer[]> {
+  const data = (await fdFetch(`/teams/${MU_FD_ID}`, apiKey)) as { squad?: FdSquadPlayer[] };
+  return data.squad || [];
 }
