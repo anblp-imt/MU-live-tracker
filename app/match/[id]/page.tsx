@@ -125,14 +125,6 @@ export default function MatchDetailPage() {
         </div>
       </div>
       <p className={styles.status}>{matchStatusText(data)}</p>
-      {/* key={matchState} remounts only when pre/in/post actually changes, resetting
-          the default open/closed state at that transition — a poll within the same
-          phase re-renders without remounting, so a manual toggle by the user survives
-          it instead of snapping back open/closed every 30s. */}
-      <details key={matchState} open={matchState === 'pre'}>
-        <summary className={styles.lineupSummary}>Starting Lineup</summary>
-        <FormationPitch homeRoster={home} awayRoster={away} />
-      </details>
       <section className={styles.scorers} data-testid="scorers">
         <h2>Scorers</h2>
         <div className={styles.scorersGrid}>
@@ -154,24 +146,14 @@ export default function MatchDetailPage() {
           </div>
         </div>
       </section>
-      {shootout && (
-        <section className={styles.shootout} data-testid="shootout">
-          <h2>Penalty Shootout <span className={styles.shootoutScore}>{shootout.homeScore} – {shootout.awayScore}</span></h2>
-          <div className={styles.shootoutGrid}>
-            {shootout.rounds.map((round, i) => (
-              <div className={styles.shootoutRow} key={i}>
-                <span className={`${styles.shootoutShot} ${styles.shootoutHome} ${round.home ? (round.home.scored ? styles.scored : styles.missed) : ''}`}>
-                  {round.home ? `${round.home.scored ? '✓' : '✗'} ${round.home.player}` : ''}
-                </span>
-                <span className={styles.shootoutRound}>{i + 1}</span>
-                <span className={`${styles.shootoutShot} ${styles.shootoutAway} ${round.away ? (round.away.scored ? styles.scored : styles.missed) : ''}`}>
-                  {round.away ? `${round.away.scored ? '✓' : '✗'} ${round.away.player}` : ''}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* key={matchState} remounts only when pre/in/post actually changes, resetting
+          the default open/closed state at that transition — a poll within the same
+          phase re-renders without remounting, so a manual toggle by the user survives
+          it instead of snapping back open/closed every 30s. */}
+      <details key={matchState} open={matchState === 'pre'}>
+        <summary className={styles.lineupSummary}>Starting Lineup</summary>
+        <FormationPitch homeRoster={home} awayRoster={away} />
+      </details>
       {stats.length > 0 && (
         <section className={styles.stats} data-testid="stats">
           <h2>Match Stats</h2>
@@ -216,6 +198,24 @@ export default function MatchDetailPage() {
             </div>
           </div>
         </details>
+      )}
+      {shootout && (
+        <section className={styles.shootout} data-testid="shootout">
+          <h2>Penalty Shootout <span className={styles.shootoutScore}>{shootout.homeScore} – {shootout.awayScore}</span></h2>
+          <div className={styles.shootoutGrid}>
+            {shootout.rounds.map((round, i) => (
+              <div className={styles.shootoutRow} key={i}>
+                <span className={`${styles.shootoutShot} ${styles.shootoutHome} ${round.home ? (round.home.scored ? styles.scored : styles.missed) : ''}`}>
+                  {round.home ? `${round.home.scored ? '✓' : '✗'} ${round.home.player}` : ''}
+                </span>
+                <span className={styles.shootoutRound}>{i + 1}</span>
+                <span className={`${styles.shootoutShot} ${styles.shootoutAway} ${round.away ? (round.away.scored ? styles.scored : styles.missed) : ''}`}>
+                  {round.away ? `${round.away.scored ? '✓' : '✗'} ${round.away.player}` : ''}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
     </main>
   );

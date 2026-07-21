@@ -131,11 +131,7 @@
 }
 
 .scorers {
-  margin-top: 16px;
-  padding: 12px 14px;
-  background: var(--mu-surface);
-  border: 1.5px dashed rgba(201, 162, 39, 0.3);
-  border-radius: 3px;
+  margin-top: 4px;
 }
 
 .scorersGrid {

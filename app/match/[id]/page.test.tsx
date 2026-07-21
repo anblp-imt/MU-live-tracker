@@ -174,6 +174,34 @@ describe('MatchDetailPage', () => {
     expect(screen.getByTestId('scorers')).toHaveTextContent('—');
   });
 
+  it('places Scorers before the Starting Lineup details, so it reads as part of the persistent header', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        header: {
+          competitions: [{
+            status: { type: { state: 'post' } },
+            competitors: [
+              { homeAway: 'home', team: { id: '331', displayName: 'Brighton & Hove Albion' }, score: '1' },
+              { homeAway: 'away', team: { id: '360', displayName: 'Manchester United' }, score: '2' },
+            ],
+            details: [{ scoringPlay: true, clock: { displayValue: "33'" }, team: { id: '360' }, participants: [{ athlete: { displayName: 'Patrick Dorgu' } }] }],
+          }],
+        },
+        rosters: [],
+      }),
+    }));
+
+    render(<MatchDetailPage />);
+    await act(async () => { await Promise.resolve(); });
+
+    const scorersSection = screen.getByTestId('scorers');
+    const lineupDetails = screen.getByText('Starting Lineup').closest('details')!;
+    // DOCUMENT_POSITION_FOLLOWING on lineupDetails (from scorersSection's perspective)
+    // means scorersSection comes first in the DOM.
+    expect(scorersSection.compareDocumentPosition(lineupDetails) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('colors the match stat bars with each team\'s real ESPN color, falling back to red/gold', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
