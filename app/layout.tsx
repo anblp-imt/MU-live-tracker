@@ -37,6 +37,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Link href="/">Schedule</Link>
             <Link href="/standings">Standings</Link>
             <Link href="/stats">Stats</Link>
+            <Link href="/team">Team</Link>
             <span className={styles.chant}>Glory Glory Man United</span>
           </nav>
         </header>
