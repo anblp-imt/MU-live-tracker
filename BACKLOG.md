@@ -2,6 +2,48 @@
 
 Tracked items not yet implemented, so a future session doesn't lose context.
 
+## Match Stats accuracy vs Google (raised 2026-07-21, not started)
+
+**Status:** researched, no design/spec yet.
+
+User compared Match Stats numbers against Google's own match-stats card and found them
+not closely matching. Root cause confirmed by inspection, not a bug: both this app and
+its predecessor `wc-2026-live-tracker` (`lib/merge.ts`'s `extractStats`/`STAT_DEFS` was
+ported directly from `WC-2026-live-tracker/render.js`'s `STAT_DEFS`, same ESPN field
+names) pull stats exclusively from ESPN's summary endpoint. Google's match-stats card is
+sourced from a different data provider (likely Opta/Gracenote), which uses different
+counting rules — some disagreement between the two is expected and isn't fixable by
+changing our calculation logic (already fixed the two real calc bugs there were:
+possession rounding, missing-data 0% — see `2026-07-21-match-detail-restructure-design.md`).
+
+Only real lever: add or switch to a second data source. Discussed API-Football
+(api-football.com / API-Sports) as a candidate — has a documented `/players/squads` +
+`transfers` endpoint (see the roster-staleness item below, same candidate), but free tier
+is 100 requests/day shared across all endpoints, too tight for live-match stat polling;
+would only be viable for slow-changing data, not stats during a live match. No guarantee
+its numbers match Google either — different provider, same fundamental issue.
+
+Needs a brainstorm session to decide: is closer-to-Google accuracy worth a paid API-Football
+plan (or another provider), and if so scoped to which data (live stats? roster only? both)?
+
+## Roster jersey numbers stale after real-world transfers (raised 2026-07-21, not started)
+
+**Status:** researched, no design/spec yet.
+
+ESPN's per-match roster (`EspnRoster`, used by `FormationPitch`) lags real transfers —
+e.g. shirt numbers 17/18 didn't reflect real signings (Andrey Santos, Youri Tielemans)
+at time of writing. API-Football's `/players/squads?team=X` endpoint returns the current
+registered squad in one call and has a dedicated `transfers` endpoint — a better fit for
+this specific problem than for the live-stats accuracy problem above, since squad/transfer
+data changes slowly and comfortably fits the free tier's 100 req/day (cacheable ~24h).
+Would need: API key as an env secret, a merge strategy against the existing ESPN roster
+(match by name — no shared ID between providers), and handling requests exceeding the
+daily quota gracefully.
+
+Candidate for the same brainstorm session as the Stats-accuracy item above, since both
+point at the same external API — worth deciding together whether to integrate it at all
+before scoping either piece individually.
+
 ## Stats page (paused mid-brainstorm, 2026-07-18)
 
 **Status:** architecture agreed, spec not yet written, not implemented.
