@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { NavLink } from '@/components/NavLink';
+import { Footer } from '@/components/Footer';
 import { buildMetadata, buildJsonLd, SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION } from '@/lib/seo';
 import styles from './layout.module.css';
 import './globals.css';
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </nav>
         </header>
         {children}
+        <Footer />
       </body>
     </html>
   );
