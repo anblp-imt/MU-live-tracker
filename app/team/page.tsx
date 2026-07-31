@@ -3,8 +3,8 @@ import { buildMetadata } from '@/lib/seo';
 import TeamClient from './TeamClient';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Team — Glory Glory Man United',
-  description: "Manchester United's current first-team squad, grouped by position.",
+  title: 'Squad — Glory Glory Man United',
+  description: "Manchester United's full first-team roster by position, with shirt numbers and nationalities.",
   path: '/team',
 });
 
