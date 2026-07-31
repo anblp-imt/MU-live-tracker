@@ -12,7 +12,7 @@
   --mu-red: #DA291C;
   --mu-red-dark: #9A1F14;
   --mu-black: #0d0d0d;
-  --mu-surface: #161310;
+  --mu-surface: rgba(36, 28, 20, 0.45);
   --mu-gold: #C9A227;
   --mu-gold-bright: #FFD700;
   --mu-green: #3fae5c;
@@ -55,11 +55,11 @@ body::before {
   inset: 0;
   z-index: -1;
   /* mu-bg.jpg is a busy player-collage photo with baked-in text/numbers — a light 0.28
-     scrim (the original value) left body copy fighting bright patches of the image for
-     contrast. Darkened to 0.55 so the photo still reads clearly as a background, just
-     dimmer, the same tradeoff a hero-image site makes to keep foreground text legible. */
+     scrim left body copy fighting bright patches of the image for contrast, but 0.55
+     (the prior value) made the whole page read as too dark/muddy. 0.42 keeps enough
+     contrast for foreground text while letting the photo itself read brighter. */
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+    linear-gradient(rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.42)),
     url('/mu-bg.jpg');
   background-size: cover;
   background-position: center;
@@ -76,7 +76,7 @@ body::before {
 @media (max-width: 768px) {
   body::before {
     background-image:
-      linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+      linear-gradient(rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.42)),
       url('/mu-bg.jpg'),
       radial-gradient(circle at top, rgba(154, 31, 20, 0.35), var(--mu-black) 75%);
     background-size: cover, contain, cover;

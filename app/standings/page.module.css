@@ -37,7 +37,7 @@
   font-size: 9.5px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(237, 230, 214, 0.55);
+  color: rgba(237, 230, 214, 0.7);
   text-align: left;
   padding: 5px 4px;
   border-bottom: 1px solid rgba(201, 162, 39, 0.25);
@@ -71,12 +71,12 @@
 
 .posCell {
   font-family: var(--font-mono);
-  color: rgba(237, 230, 214, 0.6);
+  color: rgba(237, 230, 214, 0.8);
 }
 
 .playedCell {
   font-family: var(--font-mono);
-  opacity: 0.6;
+  opacity: 0.75;
 }
 
 .ptsCell {
@@ -112,7 +112,7 @@
 .dotL { background: var(--mu-red); color: #fff; }
 
 .formPlaceholder {
-  color: rgba(237, 230, 214, 0.3);
+  color: rgba(237, 230, 214, 0.45);
 }
 
 .listMobile {
@@ -192,7 +192,7 @@
 .played {
   display: block;
   font-size: 9px;
-  opacity: 0.5;
+  opacity: 0.65;
 }
 
 @media (max-width: 640px) {

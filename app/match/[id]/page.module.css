@@ -124,7 +124,7 @@
   font-size: 10.5px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  opacity: 0.6;
+  opacity: 0.75;
   margin: 2px 0 4px;
 }
 
@@ -172,7 +172,7 @@
 }
 
 .scorersEmpty {
-  opacity: 0.5;
+  opacity: 0.65;
   margin: 0;
 }
 
@@ -222,7 +222,7 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  opacity: 0.6;
+  opacity: 0.75;
   white-space: nowrap;
 }
 
@@ -250,7 +250,7 @@
 
 .subMin {
   font-family: var(--font-mono);
-  opacity: 0.6;
+  opacity: 0.75;
   flex-shrink: 0;
 }
 
@@ -259,7 +259,7 @@
 }
 
 .subOut {
-  opacity: 0.6;
+  opacity: 0.75;
 }
 
 .shootout {
@@ -304,7 +304,7 @@
   text-align: center;
   font-family: var(--font-mono);
   font-size: 10px;
-  opacity: 0.5;
+  opacity: 0.65;
 }
 
 .scored {
