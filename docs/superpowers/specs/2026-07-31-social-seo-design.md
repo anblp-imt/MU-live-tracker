@@ -42,12 +42,15 @@ tags.
 ## Architecture
 
 Split each `page.tsx` into a thin Server wrapper (owns metadata) + a Client component
-(owns the existing logic, moved verbatim, no behavior changes):
+(owns the existing logic, moved verbatim, no behavior changes). `/` is excluded: its
+title/description are identical to the root layout's own default metadata, so it
+already gets the right OG tags with zero changes — splitting it would be a change with
+no behavioral effect.
 
 | Route | New client file | Server `page.tsx` |
 |---|---|---|
-| `/` | `app/HomeClient.tsx` | `export const metadata = buildMetadata({...})` |
-| `/standings` | `app/standings/StandingsClient.tsx` | same pattern |
+| `/` | *(unchanged — inherits the root layout's default metadata as-is)* | *(unchanged)* |
+| `/standings` | `app/standings/StandingsClient.tsx` | `export const metadata = buildMetadata({...})` |
 | `/stats` | `app/stats/StatsClient.tsx` | same pattern |
 | `/team` | `app/team/TeamClient.tsx` | same pattern |
 | `/match/[id]` | `app/match/[id]/MatchDetailClient.tsx` | `export async function generateMetadata({ params })` |
