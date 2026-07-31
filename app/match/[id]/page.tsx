@@ -31,7 +31,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const cacheKey = `match-detail:${id}`;
   let detail = getCached<EspnDetail>(cacheKey);
   if (!detail) {
-    detail = await fetchEspnDetail(slug, match.sources.espn);
+    try {
+      detail = await fetchEspnDetail(slug, match.sources.espn);
+    } catch {
+      return fallbackMetadata(id);
+    }
     const state = detail.header?.competitions?.[0]?.status?.type?.state;
     setCached(cacheKey, detail, state === 'in' ? LIVE_TTL_MS : STATIC_TTL_MS);
   }

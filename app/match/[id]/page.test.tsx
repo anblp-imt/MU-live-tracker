@@ -79,4 +79,17 @@ describe('Match detail generateMetadata', () => {
     expect(result.title).toBe('Match Detail — Glory Glory Man United');
     expect(mockFetchDetail).not.toHaveBeenCalled();
   });
+
+  it('falls back to a generic title when the ESPN detail fetch throws', async () => {
+    mockGetMatches.mockResolvedValue({
+      season: '2026-27',
+      matches: [makeMatch()],
+      meta: { sources: { fd: true, espn: true } },
+    });
+    mockFetchDetail.mockRejectedValue(new Error('ESPN request failed: 503'));
+
+    const result = await generateMetadata({ params: Promise.resolve({ id: '2026-08-16_arsenal' }) });
+
+    expect(result.title).toBe('Match Detail — Glory Glory Man United');
+  });
 });
