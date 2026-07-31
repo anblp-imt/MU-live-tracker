@@ -40,7 +40,9 @@
 
 .chant {
   margin-left: auto;
-  color: var(--mu-red);
-  opacity: 0.75;
-  font-style: italic;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--mu-red-dark);
 }

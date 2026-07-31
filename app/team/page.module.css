@@ -91,7 +91,7 @@
 }
 
 .surname {
-  font-family: var(--font-heading);
+  font-family: 'Zilla Slab', var(--font-heading);
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.03em;

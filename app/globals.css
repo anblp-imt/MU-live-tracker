@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bevan&family=Zilla+Slab:wght@700&family=Roboto+Slab:wght@600;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
 
 /* Font pairing history: manutd.com's actual production CSS (checked 2026-07-18) pairs
    "Spezia Serif" (Colophon Foundry, licensed/paid — not legally reusable here) with
@@ -17,7 +17,7 @@
   --mu-gold-bright: #FFD700;
   --mu-green: #3fae5c;
   --mu-white: #EDE6D6;
-  --font-heading: 'Roboto Slab', Georgia, 'Times New Roman', serif;
+  --font-heading: 'Bevan', 'Roboto Slab', Georgia, 'Times New Roman', serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
@@ -34,6 +34,26 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   background-color: var(--mu-black);
+  color: var(--mu-white);
+  /* Two stacked shadows: a tight near-black one for a crisp readable edge against
+     high-detail parts of the photo, plus the original soft blur for depth. */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 1px 6px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-body);
+  margin: 0;
+}
+
+/* The background photo lives on a `position: fixed` pseudo-element instead of directly
+   on `body` with `background-attachment: fixed`. That property forced the browser to
+   repaint the whole photo on every scroll frame (visible as scroll jank on Schedule/ALL,
+   the app's longest page) — a fixed-position layer is composited once and never
+   repainted on scroll. It also sizes `cover` against the viewport (100vh via inset: 0),
+   not the full scrollable page height, which `background-attachment: scroll` on `body`
+   got wrong (the photo stretched to cover the whole document instead of the screen). */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   /* mu-bg.jpg is a busy player-collage photo with baked-in text/numbers — a light 0.28
      scrim (the original value) left body copy fighting bright patches of the image for
      contrast. Darkened to 0.55 so the photo still reads clearly as a background, just
@@ -44,21 +64,6 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
-  color: var(--mu-white);
-  /* Two stacked shadows: a tight near-black one for a crisp readable edge against
-     high-detail parts of the photo, plus the original soft blur for depth. */
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 1px 6px rgba(0, 0, 0, 0.6);
-  font-family: var(--font-body);
-  margin: 0;
-}
-
-/* background-attachment: fixed causes rendering bugs on iOS Safari
-   (image can fail to cover the viewport during scroll/URL-bar changes) */
-@media (max-width: 768px), (hover: none) and (pointer: coarse) {
-  body {
-    background-attachment: scroll;
-  }
 }
 
 /* mu-bg.jpg is landscape (1536x1024); on portrait/narrow viewports "cover"
@@ -69,7 +74,7 @@ body {
    Standings tab, etc.) stay in tone all the way down instead of hitting a
    flat, visibly-cut-off black void partway through. */
 @media (max-width: 768px) {
-  body {
+  body::before {
     background-image:
       linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
       url('/mu-bg.jpg'),
@@ -82,8 +87,8 @@ body {
 
 h1, h2, h3 {
   font-family: var(--font-heading);
-  font-weight: 900;
-  color: var(--mu-red);
+  font-weight: 400;
+  color: var(--mu-red-dark);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 

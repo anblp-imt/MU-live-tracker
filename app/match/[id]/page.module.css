@@ -131,8 +131,9 @@
 .lineupSummary {
   cursor: pointer;
   font-family: var(--font-heading);
-  font-weight: 900;
-  color: var(--mu-red);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--mu-red-dark);
   margin-bottom: 8px;
 }
 
@@ -183,8 +184,11 @@
   border-radius: 3px;
 }
 
-.stats h2 {
+.stats h2,
+.shootout h2 {
   margin-top: 0;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .statRow {
