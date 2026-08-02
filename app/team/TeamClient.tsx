@@ -42,7 +42,7 @@ export default function TeamClient() {
                 const surname = rest.join(' ') || given;
                 return (
                   <div key={player.name} className={styles.player}>
-                    <JerseyIcon jersey={player.jersey} />
+                    <JerseyIcon jersey={player.jersey} isGoalkeeper={group.label === 'Goalkeepers'} />
                     <span className={styles.name}>
                       <span className={styles.given}>{given}</span>
                       <span className={styles.surname}>{surname}</span>

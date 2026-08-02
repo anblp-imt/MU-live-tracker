@@ -172,7 +172,7 @@ describe('mergeMatches', () => {
   });
 });
 
-import { extractScorers, extractStats, extractSubstitutions, extractShootout } from './merge';
+import { extractScorers, extractStats, extractSubstitutions, extractShootout, extractGoalContributions } from './merge';
 import type { EspnDetail } from './types';
 
 describe('extractScorers', () => {
@@ -216,6 +216,52 @@ describe('extractScorers', () => {
     const result = extractScorers(detail, '331');
     expect(result.redCards.home).toEqual([{ name: 'Some Defender', min: "80'" }]);
     expect(result.redCards.away).toEqual([]);
+  });
+});
+
+describe('extractGoalContributions', () => {
+  it('credits a goal to the scorer and an assist to the second participant', () => {
+    const detail: EspnDetail = {
+      header: { competitions: [{ status: { type: { state: 'post' } }, details: [
+        {
+          scoringPlay: true, clock: { displayValue: "10'" }, team: { id: '360' },
+          participants: [{ athlete: { id: '1' } }, { athlete: { id: '2' } }],
+        },
+      ] }] },
+    };
+    expect(extractGoalContributions(detail)).toEqual({
+      '1': { goals: 1, assists: 0 },
+      '2': { goals: 0, assists: 1 },
+    });
+  });
+
+  it('counts multiple goals by the same player', () => {
+    const detail: EspnDetail = {
+      header: { competitions: [{ status: { type: { state: 'post' } }, details: [
+        { scoringPlay: true, clock: { displayValue: "10'" }, team: { id: '360' }, participants: [{ athlete: { id: '1' } }] },
+        { scoringPlay: true, clock: { displayValue: "50'" }, team: { id: '360' }, participants: [{ athlete: { id: '1' } }] },
+      ] }] },
+    };
+    expect(extractGoalContributions(detail)).toEqual({ '1': { goals: 2, assists: 0 } });
+  });
+
+  it('excludes own goals, penalties still counted, and shootout goals entirely', () => {
+    const detail: EspnDetail = {
+      header: { competitions: [{ status: { type: { state: 'post' } }, details: [
+        { scoringPlay: true, ownGoal: true, clock: { displayValue: "5'" }, team: { id: '360' }, participants: [{ athlete: { id: 'og' } }] },
+        { scoringPlay: true, penaltyKick: true, clock: { displayValue: "20'" }, team: { id: '360' }, participants: [{ athlete: { id: 'pen' } }] },
+        { scoringPlay: true, shootout: true, clock: { displayValue: "120'" }, team: { id: '360' }, participants: [{ athlete: { id: 'shoot' } }] },
+      ] }] },
+    };
+    const result = extractGoalContributions(detail);
+    expect(result.og).toBeUndefined();
+    expect(result.shoot).toBeUndefined();
+    expect(result.pen).toEqual({ goals: 1, assists: 0 });
+  });
+
+  it('returns an empty object when there are no goals', () => {
+    const detail: EspnDetail = { header: { competitions: [{ status: { type: { state: 'pre' } } }] } };
+    expect(extractGoalContributions(detail)).toEqual({});
   });
 });
 

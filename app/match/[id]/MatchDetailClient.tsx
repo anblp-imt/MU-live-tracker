@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { usePolling } from '@/hooks/usePolling';
 import { FormationPitch } from '@/components/FormationPitch';
-import { extractScorers, extractStats, extractSubstitutions, extractShootout } from '@/lib/merge';
+import { extractScorers, extractStats, extractSubstitutions, extractShootout, extractGoalContributions } from '@/lib/merge';
 import { displayTeamName } from '@/lib/normalize';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { LIVE_TTL_MS, STATIC_TTL_MS } from '@/lib/cache';
@@ -83,6 +83,7 @@ export default function MatchDetailClient() {
   const stats = extractStats(data);
   const subs = extractSubstitutions(data, homeTeamEspnId);
   const shootout = extractShootout(data, homeTeamEspnId);
+  const contributions = extractGoalContributions(data);
   const homeColor = homeComp?.team?.color ? `#${homeComp.team.color}` : 'var(--mu-red)';
   const awayColor = awayComp?.team?.color ? `#${awayComp.team.color}` : 'var(--mu-gold)';
   const rosters = data.rosters || [];
@@ -96,12 +97,14 @@ export default function MatchDetailClient() {
       <div className={styles.titleRow}>
         <h1 className={styles.title}>Match #{params.id}</h1>
         <div className={styles.refreshGroup}>
-          {!loading && error && <span className={styles.syncErr} data-testid="sync-status">✗ Refresh failed</span>}
-          {!loading && !error && lastSyncedAt != null && (
-            <span className={styles.syncOk} data-testid="sync-status">✓ Synced {formatSyncTime(lastSyncedAt)}</span>
+          {!loading && error && (
+            <span className={styles.syncErr} data-testid="sync-status">✗<span className={styles.srOnlyMobile}> Refresh failed</span></span>
           )}
-          <button type="button" className={styles.refreshBtn} onClick={refetch} disabled={loading}>
-            <span className={loading ? styles.spinning : undefined} aria-hidden="true">↻</span> Refresh
+          {!loading && !error && lastSyncedAt != null && (
+            <span className={styles.syncOk} data-testid="sync-status">✓<span className={styles.srOnlyMobile}> Synced {formatSyncTime(lastSyncedAt)}</span></span>
+          )}
+          <button type="button" className={styles.refreshBtn} onClick={refetch} disabled={loading} aria-label="Refresh">
+            <span className={loading ? styles.spinning : undefined} aria-hidden="true">↻</span><span className={styles.srOnlyMobile}> Refresh</span>
           </button>
         </div>
       </div>
@@ -110,11 +113,17 @@ export default function MatchDetailClient() {
           {teamCrestUrl(homeComp?.team) && (
             <img className={styles.crest} src={teamCrestUrl(homeComp?.team)} alt={`${homeComp?.team?.displayName} crest`} loading="lazy" />
           )}
-          <span className={styles.teamName}>{displayTeamName(homeComp?.team?.displayName || '')}</span>
+          <button type="button" className={styles.teamName}>
+            {displayTeamName(homeComp?.team?.displayName || '')}
+            <span className={styles.teamNameTooltip}>{homeComp?.team?.displayName}</span>
+          </button>
         </div>
         <span className={styles.score}>{homeComp?.score ?? '-'} – {awayComp?.score ?? '-'}</span>
         <div className={styles.teamBlock} style={{ '--team-accent': awayColor } as React.CSSProperties}>
-          <span className={styles.teamName}>{displayTeamName(awayComp?.team?.displayName || '')}</span>
+          <button type="button" className={`${styles.teamName} ${styles.teamNameAway}`}>
+            {displayTeamName(awayComp?.team?.displayName || '')}
+            <span className={styles.teamNameTooltip}>{awayComp?.team?.displayName}</span>
+          </button>
           {teamCrestUrl(awayComp?.team) && (
             <img className={styles.crest} src={teamCrestUrl(awayComp?.team)} alt={`${awayComp?.team?.displayName} crest`} loading="lazy" />
           )}
@@ -147,7 +156,7 @@ export default function MatchDetailClient() {
           it instead of snapping back open/closed every 30s. */}
       <details className={styles.lineupDetails} key={matchState} open={matchState === 'pre'}>
         <summary className={styles.lineupSummary}>Starting Lineup</summary>
-        <FormationPitch homeRoster={home} awayRoster={away} />
+        <FormationPitch homeRoster={home} awayRoster={away} contributions={contributions} />
       </details>
       {stats.length > 0 && (
         <section className={styles.stats} data-testid="stats">

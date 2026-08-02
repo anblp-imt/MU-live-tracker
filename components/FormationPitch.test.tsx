@@ -72,6 +72,30 @@ describe('FormationPitch', () => {
     expect(screen.getByText('Brighton & Hove Albion')).toBeInTheDocument();
   });
 
+  it('renders a goal/assist badge for a player with a contribution, matched by athlete id', () => {
+    const scorerRoster: EspnRoster = {
+      homeAway: 'home',
+      team: { displayName: 'Manchester United' },
+      formation: '4-3-3',
+      roster: [{ starter: true, formationPlace: '9', position: { abbreviation: 'F' }, athlete: { id: '99', displayName: 'Hojlund' } }],
+    };
+    render(<FormationPitch homeRoster={scorerRoster} contributions={{ '99': { goals: 2, assists: 1 } }} />);
+    expect(screen.getByText(/⚽2/)).toBeInTheDocument();
+    expect(screen.getByText(/🅰️/)).toBeInTheDocument();
+  });
+
+  it('does not render a badge for a player with no goals or assists', () => {
+    render(<FormationPitch homeRoster={roster} contributions={{}} />);
+    expect(screen.queryByText(/⚽|🅰️/)).not.toBeInTheDocument();
+  });
+
+  it('renders the MU goalkeeper in green, not the red outfield color', () => {
+    const { container } = render(<FormationPitch homeRoster={roster} />);
+    const circle = container.querySelector('[class*="gkCircle"]');
+    expect(circle).toBeInTheDocument();
+    expect(container.querySelector('[class*="muCircle"]')).not.toBeInTheDocument();
+  });
+
   it('memoizes buildFormationRows: re-rendering with the same roster reference does not recompute it', () => {
     const spy = vi.spyOn(formationLib, 'buildFormationRows');
     const { rerender } = render(<FormationPitch homeRoster={roster} />);

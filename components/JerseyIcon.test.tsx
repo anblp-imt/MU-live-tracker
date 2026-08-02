@@ -22,4 +22,14 @@ describe('JerseyIcon', () => {
     render(<JerseyIcon jersey={8} />);
     expect(screen.queryByLabelText('Squad number not yet confirmed')).not.toBeInTheDocument();
   });
+
+  it('shows the outfield jersey by default', () => {
+    const { container } = render(<JerseyIcon jersey={8} />);
+    expect(container.querySelector('img')).toHaveAttribute('src', '/jersey-back.png');
+  });
+
+  it('shows the goalkeeper jersey when isGoalkeeper is set', () => {
+    const { container } = render(<JerseyIcon jersey={1} isGoalkeeper />);
+    expect(container.querySelector('img')).toHaveAttribute('src', '/jersey-gk.png');
+  });
 });

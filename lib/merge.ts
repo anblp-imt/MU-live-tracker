@@ -176,6 +176,29 @@ export function extractScorers(detail: EspnDetail, homeTeamEspnId: string): Scor
   return { home, away, redCards };
 }
 
+export interface GoalContribution { goals: number; assists: number }
+
+// Keyed by athlete id (not name) so FormationPitch can look a contribution up directly
+// from a roster player's own athlete.id — exact, unlike name matching. Own goals are
+// excluded entirely, same convention as lib/leaders.ts's season-long tallies: an own
+// goal's participants[0] is the opposing player who put it in their own net, not
+// someone to credit with a goal on this side's pitch.
+export function extractGoalContributions(detail: EspnDetail): Record<string, GoalContribution> {
+  const details = detail.header.competitions[0]?.details || [];
+  const result: Record<string, GoalContribution> = {};
+  const bump = (id: string | undefined, field: 'goals' | 'assists') => {
+    if (!id) return;
+    if (!result[id]) result[id] = { goals: 0, assists: 0 };
+    result[id][field]++;
+  };
+  for (const d of details) {
+    if (!d.scoringPlay || d.shootout || d.ownGoal) continue;
+    bump(d.participants?.[0]?.athlete?.id, 'goals');
+    bump(d.participants?.[1]?.athlete?.id, 'assists');
+  }
+  return result;
+}
+
 // keyEvents (unlike header.competitions[0].details) is only present on the /summary
 // detail response, same as extractScorers above. Ported from
 // WC-2026-live-tracker/render.js's subEvts: participants[0] is the player coming on,

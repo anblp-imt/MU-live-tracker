@@ -150,7 +150,7 @@ export interface EspnScoringDetail {
   type?: { text?: string; abbreviation?: string };
   clock?: { displayValue?: string };
   team?: { id?: string };
-  participants?: Array<{ athlete?: { displayName?: string } }>;
+  participants?: Array<{ athlete?: { id?: string; displayName?: string } }>;
 }
 
 export interface EspnRosterPlayer {
@@ -159,6 +159,7 @@ export interface EspnRosterPlayer {
   position?: { abbreviation?: string };
   jersey?: string;
   athlete?: {
+    id?: string;
     displayName?: string;
     shortName?: string;
     jerseyImages?: Array<{ href: string; rel?: string[] }>;

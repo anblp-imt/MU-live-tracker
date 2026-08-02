@@ -49,13 +49,13 @@ export function PageHeading({
                 without this, the spinning icon during the fetch is the only feedback,
                 and it's gone by the time you'd look for it. */}
             {!refreshing && error && (
-              <span className={styles.syncErr} data-testid="sync-status">✗ Refresh failed</span>
+              <span className={styles.syncErr} data-testid="sync-status">✗<span className={styles.srOnlyMobile}> Refresh failed</span></span>
             )}
             {!refreshing && !error && lastSyncedAt != null && (
-              <span className={styles.syncOk} data-testid="sync-status">✓ Synced {formatSyncTime(lastSyncedAt)}</span>
+              <span className={styles.syncOk} data-testid="sync-status">✓<span className={styles.srOnlyMobile}> Synced {formatSyncTime(lastSyncedAt)}</span></span>
             )}
-            <button type="button" className={styles.refreshBtn} onClick={onRefresh} disabled={refreshing}>
-              <span className={refreshing ? styles.spinning : undefined} aria-hidden="true">↻</span> Refresh
+            <button type="button" className={styles.refreshBtn} onClick={onRefresh} disabled={refreshing} aria-label="Refresh">
+              <span className={refreshing ? styles.spinning : undefined} aria-hidden="true">↻</span><span className={styles.srOnlyMobile}> Refresh</span>
             </button>
           </div>
         )}

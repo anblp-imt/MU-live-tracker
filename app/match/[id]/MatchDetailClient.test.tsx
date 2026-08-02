@@ -44,7 +44,10 @@ describe('MatchDetailClient', () => {
     expect(screen.getByText(/Patrick Dorgu/)).toBeInTheDocument();
     expect(screen.getByTestId('formation-pitch')).toBeInTheDocument();
     expect(screen.getAllByText('Red Devils').length).toBeGreaterThan(0);
-    expect(screen.getByText('Brighton & Hove Albion')).toBeInTheDocument();
+    expect(screen.getAllByText('Brighton & Hove Albion').length).toBeGreaterThan(0);
+    // The away side displays the "Red Devils" nickname but its tooltip still carries
+    // the full official name, proving the tooltip isn't just a copy of the visible text.
+    expect(screen.getByText('Manchester United')).toBeInTheDocument();
     expect(screen.getByText(/1 – 2/)).toBeInTheDocument();
     expect(screen.getByText('Full Time')).toBeInTheDocument();
   });
@@ -104,7 +107,7 @@ describe('MatchDetailClient', () => {
     render(<MatchDetailClient />);
     await act(async () => { await Promise.resolve(); });
 
-    expect(screen.getByText('Brighton & Hove Albion')).toBeInTheDocument();
+    expect(screen.getAllByText('Brighton & Hove Albion').length).toBeGreaterThan(0);
     expect(screen.queryByAltText('Brighton & Hove Albion crest')).not.toBeInTheDocument();
   });
 

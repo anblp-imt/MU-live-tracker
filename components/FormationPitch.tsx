@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { buildFormationRows } from '@/lib/formation';
 import { displayTeamName, isManUtd } from '@/lib/normalize';
 import type { EspnRoster, EspnRosterPlayer } from '@/lib/types';
+import type { GoalContribution } from '@/lib/merge';
 import styles from './FormationPitch.module.css';
 
 // Prefer ESPN's own short form (surname only, e.g. "B. Fernandes"); fall back to the
@@ -25,9 +26,12 @@ function jerseyKitUrl(p: EspnRosterPlayer): string | undefined {
 // Wrexham, both red) then render as visually identical shirts. Rather than trust that
 // coincidence, the away side always gets a fixed gold ring instead of its real team
 // color, so the two sides stay tellable apart regardless of how close their colors are.
-function PlayerNode({ player, isMu, side, teamColor }: { player: EspnRosterPlayer; isMu: boolean; side: 'home' | 'away'; teamColor?: string }) {
+function PlayerNode({
+  player, isMu, side, teamColor, contribution,
+}: { player: EspnRosterPlayer; isMu: boolean; side: 'home' | 'away'; teamColor?: string; contribution?: GoalContribution }) {
   const kitUrl = jerseyKitUrl(player);
-  const ringColor = side === 'away' ? 'var(--mu-gold-bright)' : teamColor;
+  const isGk = player.position?.abbreviation === 'G';
+  const ringColor = isMu && isGk ? 'var(--mu-green)' : side === 'away' ? 'var(--mu-gold-bright)' : teamColor;
   return (
     <span className={styles.node}>
       {kitUrl ? (
@@ -35,14 +39,22 @@ function PlayerNode({ player, isMu, side, teamColor }: { player: EspnRosterPlaye
           <img className={styles.kitImage} src={kitUrl} alt={player.jersey || ''} loading="lazy" />
         </span>
       ) : (
-        <span className={`${styles.circle} ${isMu ? styles.muCircle : ''}`}>{player.jersey || player.formationPlace}</span>
+        <span className={`${styles.circle} ${isMu ? (isGk ? styles.gkCircle : styles.muCircle) : ''}`}>{player.jersey || player.formationPlace}</span>
+      )}
+      {contribution && (contribution.goals > 0 || contribution.assists > 0) && (
+        <span className={styles.contribBadge}>
+          {contribution.goals > 0 && `⚽${contribution.goals > 1 ? contribution.goals : ''}`}
+          {contribution.assists > 0 && `🅰️${contribution.assists > 1 ? contribution.assists : ''}`}
+        </span>
       )}
       <span className={styles.name}>{playerLabel(player)}</span>
     </span>
   );
 }
 
-export function FormationPitch({ homeRoster, awayRoster }: { homeRoster?: EspnRoster; awayRoster?: EspnRoster }) {
+export function FormationPitch({
+  homeRoster, awayRoster, contributions,
+}: { homeRoster?: EspnRoster; awayRoster?: EspnRoster; contributions?: Record<string, GoalContribution> }) {
   // [React] buildFormationRows re-sorts and re-groups every starter on every call. It's
   // cheap for 11 players, but this page re-renders every 30s from usePolling while a
   // match is live — useMemo means it only re-runs when the roster/formation actually
@@ -80,7 +92,7 @@ export function FormationPitch({ homeRoster, awayRoster }: { homeRoster?: EspnRo
           {awayRows.map((row, i) => (
             <div key={i} className={styles.row}>
               {row.map((p, j) => (
-                <PlayerNode key={j} player={p} isMu={awayIsMu} side="away" teamColor={awayColor} />
+                <PlayerNode key={j} player={p} isMu={awayIsMu} side="away" teamColor={awayColor} contribution={p.athlete?.id ? contributions?.[p.athlete.id] : undefined} />
               ))}
             </div>
           ))}
@@ -95,7 +107,7 @@ export function FormationPitch({ homeRoster, awayRoster }: { homeRoster?: EspnRo
           {homeRows.map((row, i) => (
             <div key={i} className={styles.row}>
               {row.map((p, j) => (
-                <PlayerNode key={j} player={p} isMu={homeIsMu} side="home" teamColor={homeColor} />
+                <PlayerNode key={j} player={p} isMu={homeIsMu} side="home" teamColor={homeColor} contribution={p.athlete?.id ? contributions?.[p.athlete.id] : undefined} />
               ))}
             </div>
           ))}
