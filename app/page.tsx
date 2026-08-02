@@ -68,7 +68,7 @@ export default function SchedulePage() {
 
   return (
     <main className={styles.main}>
-      <PageHeading title="Schedule" onRefresh={refetch} refreshing={loading} lastSyncedAt={lastSyncedAt} error={error} />
+      <PageHeading title="Match" onRefresh={refetch} refreshing={loading} lastSyncedAt={lastSyncedAt} error={error} />
       <div role="tablist" className={styles.tabs}>
         <button role="tab" aria-selected={selected === 'ALL'} onClick={() => setSelected('ALL')} className={styles.tab}>ALL</button>
         {visibleCompetitions(data.matches).map(c => (

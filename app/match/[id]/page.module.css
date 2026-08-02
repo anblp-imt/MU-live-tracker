@@ -76,6 +76,21 @@
   }
 }
 
+@media (max-width: 460px) {
+  .titleRow {
+    flex-wrap: wrap;
+  }
+
+  .title {
+    font-size: 15px;
+    overflow-wrap: anywhere;
+  }
+
+  .refreshGroup {
+    margin-left: auto;
+  }
+}
+
 .scoreHeader {
   display: flex;
   align-items: center;

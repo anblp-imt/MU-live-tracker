@@ -9,7 +9,10 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   ...buildMetadata({ title: SITE_NAME, description: DEFAULT_DESCRIPTION, path: '/' }),
+  appleWebApp: { title: 'Glory Glory', statusBarStyle: 'black-translucent' },
 };
+
+export const viewport = { themeColor: '#0d0d0d' };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -21,7 +24,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
         <header>
           <nav className={styles.nav}>
-            <NavLink href="/">Schedule</NavLink>
+            <NavLink href="/">Match</NavLink>
             <NavLink href="/standings">Standings</NavLink>
             <NavLink href="/stats">Stats</NavLink>
             <NavLink href="/team">Team</NavLink>

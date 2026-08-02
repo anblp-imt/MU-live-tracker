@@ -67,6 +67,16 @@
   }
 }
 
+@media (max-width: 460px) {
+  .headRow {
+    flex-wrap: wrap;
+  }
+
+  .refreshGroup {
+    margin-left: auto;
+  }
+}
+
 .rule {
   height: 1px;
   background: linear-gradient(90deg, var(--mu-gold), transparent);
