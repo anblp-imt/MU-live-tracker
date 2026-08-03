@@ -49,6 +49,33 @@ describe('fetchEspnNews', () => {
     expect(await fetchEspnNews()).toEqual([]);
   });
 
+  it('filters out articles that merely tag MU as a related team without being about MU', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        articles: [
+          {
+            headline: 'Man United rally to beat Atlético Madrid with Bryan Mbeumo brace',
+            description: 'United came from behind twice in Los Angeles.',
+            published: '2026-08-01T22:00:00Z',
+            links: { web: { href: 'https://www.espn.com/soccer/story/_/id/1/man-utd-atletico' } },
+          },
+          {
+            headline: 'Premier League 2026-27 kits: Ranking every jersey released',
+            description: 'We rank every kit released so far this summer.',
+            published: '2026-08-01T20:00:00Z',
+            links: { web: { href: 'https://www.espn.com/soccer/story/_/id/2/kit-rankings' } },
+          },
+        ],
+      }),
+    }));
+
+    const result = await fetchEspnNews();
+
+    expect(result).toHaveLength(1);
+    expect(result[0].sourceUrl).toBe('https://www.espn.com/soccer/story/_/id/1/man-utd-atletico');
+  });
+
   it('throws when the endpoint request fails', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503 }));
 

@@ -14,6 +14,10 @@ interface BbcRssItem {
 
 const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
 
+function isWrittenArticle(item: BbcRssItem): boolean {
+  return !/\/sounds\//i.test(item.link);
+}
+
 export async function fetchBbcNews(): Promise<NewsArticle[]> {
   let res: Response;
   try {
@@ -26,7 +30,7 @@ export async function fetchBbcNews(): Promise<NewsArticle[]> {
 
   const parsed = parser.parse(xml);
   const raw = parsed?.rss?.channel?.item;
-  const items: BbcRssItem[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const items: BbcRssItem[] = (Array.isArray(raw) ? raw : raw ? [raw] : []).filter(isWrittenArticle);
 
   return items.map(item => ({
     id: newsArticleId('BBC', item.link),
