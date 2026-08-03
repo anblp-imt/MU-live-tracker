@@ -106,4 +106,4 @@ Following the project's convention (a `.test.ts`/`.test.tsx` beside every source
 
 ## 8. Copyright posture
 
-No full article text is ever fetched, stored, or rendered — only what the feeds themselves expose (title, short summary/description, image, publish time, link). Every card and the detail page always show the source name and link back to the original; the detail page's primary call-to-action is leaving the app to read the full piece on the source's own site. This was an explicit user requirement, not an afterthought: crediting these sources is the point, not a compliance checkbox.
+No full article text is ever fetched, stored, or rendered — only what the feeds themselves expose (title, short summary/description, image, publish time, link). Every card links to this app's own detail page, which shows the source name and links out to the original — the list itself doesn't link out directly; the detail page's primary call-to-action is leaving the app to read the full piece on the source's own site. This was an explicit user requirement, not an afterthought: crediting these sources is the point, not a compliance checkbox.

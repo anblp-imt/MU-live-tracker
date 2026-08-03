@@ -19,9 +19,12 @@
 
 .detailImg {
   width: 100%;
-  aspect-ratio: 16 / 8;
+  max-height: 320px;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: var(--mu-surface);
+  border: 1px solid rgba(201, 162, 39, 0.15);
   border-radius: 3px;
-  object-fit: cover;
   margin-bottom: 18px;
 }
 
@@ -45,6 +48,12 @@
 .source[data-source="BBC"] { background: var(--mu-white); color: #111; }
 .source[data-source="Guardian"] { background: #052962; color: #fff; }
 .source[data-source="ESPN"] { background: var(--mu-red); color: #fff; }
+
+.time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.55;
+}
 
 .detailTitle {
   font-family: var(--font-heading);

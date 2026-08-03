@@ -37,7 +37,9 @@ describe('NewsDetailClient', () => {
     await waitFor(() => expect(screen.getByText('Defence promises to be a central issue')).toBeInTheDocument());
     expect(screen.getByText('Question marks remain over the backline.')).toBeInTheDocument();
     expect(screen.getByText('Guardian')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Read full article on Guardian/ })).toHaveAttribute('href', 'https://theguardian.com/story');
+    const link = screen.getByRole('link', { name: /Read full article on Guardian/ });
+    expect(link).toHaveAttribute('href', 'https://theguardian.com/story');
+    expect(link).not.toHaveAttribute('target');
   });
 
   it('shows a not-found state and a link back to /news when no article matches the id', async () => {
