@@ -2,7 +2,7 @@ import { XMLParser } from 'fast-xml-parser';
 import type { NewsArticle } from './types';
 import { newsArticleId } from './newsId';
 
-const BBC_FEED_URL = 'https://feeds.bbci.co.uk/sport/football/teams/manchester-united/rss.xml';
+const BBC_FEED_URL = 'https://feeds.bbci.co.uk/sport/football/rss.xml';
 
 interface BbcRssItem {
   title: string;
@@ -18,6 +18,12 @@ function isWrittenArticle(item: BbcRssItem): boolean {
   return !/\/sounds\//i.test(item.link);
 }
 
+const MU_MENTION_RE = /manchester united|man utd|man united/i;
+
+function isAboutMu(item: BbcRssItem): boolean {
+  return MU_MENTION_RE.test(item.title) || MU_MENTION_RE.test(item.description);
+}
+
 export async function fetchBbcNews(): Promise<NewsArticle[]> {
   let res: Response;
   try {
@@ -30,7 +36,9 @@ export async function fetchBbcNews(): Promise<NewsArticle[]> {
 
   const parsed = parser.parse(xml);
   const raw = parsed?.rss?.channel?.item;
-  const items: BbcRssItem[] = (Array.isArray(raw) ? raw : raw ? [raw] : []).filter(isWrittenArticle);
+  const items: BbcRssItem[] = (Array.isArray(raw) ? raw : raw ? [raw] : [])
+  .filter(isWrittenArticle)
+  .filter(isAboutMu);
 
   return items.map(item => ({
     id: newsArticleId('BBC', item.link),

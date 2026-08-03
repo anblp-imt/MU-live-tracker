@@ -49,8 +49,8 @@ const SAMPLE_BBC_XML_WITH_ARTICLE = `<?xml version="1.0" encoding="UTF-8"?><rss 
 <pubDate>Fri, 31 Jul 2026 16:22:00 GMT</pubDate>
 </item>
 <item>
-<title><![CDATA[United weigh up move for new forward]]></title>
-<description><![CDATA[United are exploring the market for attacking reinforcements.]]></description>
+<title><![CDATA[Manchester United weigh up move for new forward]]></title>
+<description><![CDATA[Manchester United are exploring the market for attacking reinforcements.]]></description>
 <link>https://www.bbc.co.uk/sport/football/articles/abc123</link>
 <pubDate>Thu, 30 Jul 2026 18:48:00 GMT</pubDate>
 </item>
@@ -97,5 +97,39 @@ describe('fetchBbcNews', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].sourceUrl).toBe('https://www.bbc.co.uk/sport/football/articles/abc123');
+  });
+
+  it('filters out articles that do not mention Manchester United', async () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  <rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+  <title><![CDATA[BBC Sport]]></title>
+  <item>
+  <title><![CDATA[Man United boss Skinner leaves role before WSL season]]></title>
+  <description><![CDATA[Manchester United manager departs.]]></description>
+  <link>https://www.bbc.co.uk/sport/football/articles/mu001</link>
+  <pubDate>Fri, 31 Jul 2026 16:22:00 GMT</pubDate>
+  </item>
+  <item>
+  <title><![CDATA[Liverpool ship four second-half goals]]></title>
+  <description><![CDATA[Liverpool dominate in the Premier League.]]></description>
+  <link>https://www.bbc.co.uk/sport/football/articles/liv001</link>
+  <pubDate>Fri, 31 Jul 2026 15:00:00 GMT</pubDate>
+  </item>
+  <item>
+  <title><![CDATA[Chelsea sign Strasbourg midfielder Barco]]></title>
+  <description><![CDATA[Chelsea complete signing.]]></description>
+  <link>https://www.bbc.co.uk/sport/football/articles/che001</link>
+  <pubDate>Fri, 31 Jul 2026 14:00:00 GMT</pubDate>
+  </item>
+  </channel>
+  </rss>`;
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, text: async () => xml }));
+
+    const result = await fetchBbcNews();
+
+    expect(result).toHaveLength(1);
+    expect(result[0].title).toBe('Man United boss Skinner leaves role before WSL season');
   });
 });
