@@ -28,6 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <NavLink href="/standings">Standings</NavLink>
             <NavLink href="/stats">Stats</NavLink>
             <NavLink href="/team">Team</NavLink>
+            <NavLink href="/news">News</NavLink>
             <span className={styles.chant}>Glory Glory Man United</span>
           </nav>
         </header>

@@ -3,13 +3,14 @@ import sitemap from './sitemap';
 import { SITE_URL } from '@/lib/seo';
 
 describe('sitemap', () => {
-  it('lists exactly the 4 static routes', () => {
+  it('lists exactly the 5 static routes', () => {
     const entries = sitemap();
     expect(entries.map(e => e.url)).toEqual([
       SITE_URL,
       `${SITE_URL}/standings`,
       `${SITE_URL}/stats`,
       `${SITE_URL}/team`,
+      `${SITE_URL}/news`,
     ]);
   });
 });
