@@ -42,7 +42,7 @@ describe('fetchGuardianNews', () => {
 
   it('omits imageUrl when an item has no media:content', async () => {
     const xmlNoImage = SAMPLE_GUARDIAN_XML.replace(
-      /<media:content[^>]*>.*?<\/media:content>\s*<media:content[^>]*>.*?<\/media:content>/s,
+      /<media:content[^>]*>[\s\S]*?<\/media:content>\s*<media:content[^>]*>[\s\S]*?<\/media:content>/,
       '',
     );
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, text: async () => xmlNoImage }));
