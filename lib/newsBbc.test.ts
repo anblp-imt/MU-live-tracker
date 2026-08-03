@@ -70,7 +70,7 @@ describe('fetchBbcNews', () => {
       sourceUrl: 'https://www.bbc.co.uk/sport/football/articles/p0p20nb9?at_medium=RSS&at_campaign=rss',
       title: 'Manchester United',
       summary: "Fraizer Campbell on United's attacking options and whether a new forward is a priority.",
-      imageUrl: 'https://ichef.bbci.co.uk/images/ic/240x135/p0p20njc.jpg',
+      imageUrl: 'https://ichef.bbci.co.uk/images/ic/976x547/p0p20njc.jpg',
       publishedAt: new Date('Fri, 31 Jul 2026 16:22:00 GMT').toISOString(),
     });
   });
@@ -100,36 +100,62 @@ describe('fetchBbcNews', () => {
   });
 
   it('filters out articles that do not mention Manchester United', async () => {
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-  <rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
-  <channel>
-  <title><![CDATA[BBC Sport]]></title>
-  <item>
-  <title><![CDATA[Man United boss Skinner leaves role before WSL season]]></title>
-  <description><![CDATA[Manchester United manager departs.]]></description>
-  <link>https://www.bbc.co.uk/sport/football/articles/mu001</link>
-  <pubDate>Fri, 31 Jul 2026 16:22:00 GMT</pubDate>
-  </item>
-  <item>
-  <title><![CDATA[Liverpool ship four second-half goals]]></title>
-  <description><![CDATA[Liverpool dominate in the Premier League.]]></description>
-  <link>https://www.bbc.co.uk/sport/football/articles/liv001</link>
-  <pubDate>Fri, 31 Jul 2026 15:00:00 GMT</pubDate>
-  </item>
-  <item>
-  <title><![CDATA[Chelsea sign Strasbourg midfielder Barco]]></title>
-  <description><![CDATA[Chelsea complete signing.]]></description>
-  <link>https://www.bbc.co.uk/sport/football/articles/che001</link>
-  <pubDate>Fri, 31 Jul 2026 14:00:00 GMT</pubDate>
-  </item>
-  </channel>
-  </rss>`;
-
+    const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+<channel>
+<title><![CDATA[BBC Sport]]></title>
+<item>
+<title><![CDATA[Manchester United sign new striker]]></title>
+<description><![CDATA[Manchester United have completed the signing of a new forward.]]></description>
+<link>https://www.bbc.co.uk/sport/football/articles/mu001</link>
+<pubDate>Fri, 31 Jul 2026 10:00:00 GMT</pubDate>
+</item>
+<item>
+<title><![CDATA[Liverpool win Premier League title]]></title>
+<description><![CDATA[Liverpool have been crowned champions.]]></description>
+<link>https://www.bbc.co.uk/sport/football/articles/lfc001</link>
+<pubDate>Fri, 31 Jul 2026 11:00:00 GMT</pubDate>
+</item>
+<item>
+<title><![CDATA[Chelsea transfer news]]></title>
+<description><![CDATA[Chelsea are looking at a new deal.]]></description>
+<link>https://www.bbc.co.uk/sport/football/articles/cfc001</link>
+<pubDate>Fri, 31 Jul 2026 12:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>`;
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, text: async () => xml }));
 
     const result = await fetchBbcNews();
 
     expect(result).toHaveLength(1);
-    expect(result[0].title).toBe('Man United boss Skinner leaves role before WSL season');
+    expect(result[0].title).toBe('Manchester United sign new striker');
+  });
+
+  it('enhances ace/standard thumbnail URLs to high resolution', async () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+<channel>
+<title><![CDATA[BBC Sport]]></title>
+<item>
+<title><![CDATA[Manchester United update]]></title>
+<description><![CDATA[Manchester United news today.]]></description>
+<link>https://www.bbc.co.uk/sport/football/articles/xyz789</link>
+<pubDate>Fri, 31 Jul 2026 10:00:00 GMT</pubDate>
+<media:thumbnail width="240" height="135" url="https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/abcd/live/1234.jpg"/>
+</item>
+</channel>
+</rss>`;
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, text: async () => xml }));
+
+    const result = await fetchBbcNews();
+
+    expect(result[0].imageUrl).toBe('https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/abcd/live/1234.jpg');
+  });
+
+  it('keeps imageUrl undefined when no thumbnail is present', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, text: async () => SAMPLE_BBC_XML_SINGLE_ITEM }));
+
+    const result = await fetchBbcNews();
+
+    expect(result[0].imageUrl).toBeUndefined();
   });
 });

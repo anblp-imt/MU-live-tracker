@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import type { NewsArticle } from '@/lib/types';
 import { PageHeading } from '@/components/PageHeading';
@@ -16,12 +17,41 @@ async function fetchNews(): Promise<{ articles: NewsArticle[] }> {
 
 export default function NewsClient() {
   const { data, loading, refetch, lastSyncedAt, error } = usePolling(fetchNews, null, { key: 'news', ttlMs: NEWS_TTL_MS });
-  const articles = data?.articles ?? [];
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
+  const allArticles = data?.articles ?? [];
+  const articles = selectedSource
+    ? allArticles.filter(a => a.source === selectedSource)
+    : allArticles;
 
   return (
     <main className={styles.main}>
       <PageHeading title="News" onRefresh={refetch} refreshing={loading} lastSyncedAt={lastSyncedAt} error={error} />
       <p className={styles.subtitle}>Latest Manchester United coverage from BBC Sport, The Guardian &amp; ESPN</p>
+
+      <div className={styles.filterBar}>
+        <button
+          className={!selectedSource ? styles.filterChipActive : styles.filterChip}
+          data-source="All"
+          onClick={() => setSelectedSource(null)}
+          type="button"
+        >
+          All ({allArticles.length})
+        </button>
+        {(['BBC', 'Guardian', 'ESPN'] as const).map(source => {
+          const count = allArticles.filter(a => a.source === source).length;
+          return (
+            <button
+              key={source}
+              className={selectedSource === source ? styles.filterChipActive : styles.filterChip}
+              data-source={source}
+              onClick={() => setSelectedSource(source)}
+              type="button"
+            >
+              {source} ({count})
+            </button>
+          );
+        })}
+      </div>
 
       {data === null ? (
         <LoadingSpinner />

@@ -26,7 +26,16 @@ export async function getNews(): Promise<NewsArticle[]> {
     .flatMap(r => r.value)
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 
-  const freshArticles = articles.filter(
+  // Deduplicate: RSS feeds can return the same article URL more than once
+  // (e.g. BBC's general feed filtered for MU mentions). Same (source, url) → same id.
+  const seen = new Set<string>();
+  const uniqueArticles = articles.filter(a => {
+    if (seen.has(a.id)) return false;
+    seen.add(a.id);
+    return true;
+  });
+
+  const freshArticles = uniqueArticles.filter(
     a => Date.now() - new Date(a.publishedAt).getTime() <= NEWS_FRESHNESS_WINDOW_MS,
   );
 

@@ -14,6 +14,95 @@
   margin: 0 0 24px;
 }
 
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filterChip {
+  height: 24px;
+  padding: 0 12px;
+  border: 1px solid;
+  border-radius: 12px;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.filterChip:hover {
+  opacity: 0.8;
+}
+
+.filterChip[data-source="All"],
+.filterChipActive[data-source="All"] {
+  border-color: var(--mu-gold);
+  color: var(--mu-gold);
+}
+
+.filterChip[data-source="All"]:hover {
+  background: rgba(201, 162, 39, 0.1);
+}
+
+.filterChipActive[data-source="All"] {
+  background: var(--mu-gold);
+  color: var(--mu-black);
+  font-weight: 700;
+  cursor: default;
+}
+
+.filterChip[data-source="BBC"] {
+  border-color: var(--mu-white);
+  color: var(--mu-white);
+}
+
+.filterChip[data-source="BBC"]:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.filterChipActive[data-source="BBC"] {
+  background: var(--mu-white);
+  color: #111;
+  font-weight: 700;
+  cursor: default;
+}
+
+.filterChip[data-source="Guardian"] {
+  border-color: #052962;
+  color: #052962;
+}
+
+.filterChip[data-source="Guardian"]:hover {
+  background: rgba(5, 41, 98, 0.15);
+}
+
+.filterChipActive[data-source="Guardian"] {
+  background: #052962;
+  color: #fff;
+  font-weight: 700;
+  cursor: default;
+}
+
+.filterChip[data-source="ESPN"] {
+  border-color: var(--mu-red);
+  color: var(--mu-red);
+}
+
+.filterChip[data-source="ESPN"]:hover {
+  background: rgba(178, 35, 34, 0.15);
+}
+
+.filterChipActive[data-source="ESPN"] {
+  background: var(--mu-red);
+  color: #fff;
+  font-weight: 700;
+  cursor: default;
+}
+
 .list {
   display: flex;
   flex-direction: column;

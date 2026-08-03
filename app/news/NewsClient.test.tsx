@@ -51,4 +51,31 @@ describe('NewsClient', () => {
 
     await waitFor(() => expect(screen.getByTestId('news-empty')).toBeInTheDocument());
   });
+
+  it('renders source filter chips and filters articles when a source is selected', async () => {
+    mockNewsResponse([
+      article({ id: 'bbc1', source: 'BBC', title: 'BBC article' }),
+      article({ id: 'gd1', source: 'Guardian', title: 'Guardian article' }),
+      article({ id: 'es1', source: 'ESPN', title: 'ESPN article' }),
+    ]);
+
+    render(<NewsClient />);
+
+    await waitFor(() => expect(screen.getByText('BBC article')).toBeInTheDocument());
+
+    // Filter chips should be visible
+    const allChip = screen.getByRole('button', { name: /all/i });
+    const bbcChip = screen.getByRole('button', { name: /bbc/i });
+    expect(allChip).toBeInTheDocument();
+    expect(bbcChip).toBeInTheDocument();
+
+    // Click BBC chip — should only show BBC article
+    bbcChip.click();
+
+    await waitFor(() => {
+      expect(screen.getByText('BBC article')).toBeInTheDocument();
+      expect(screen.queryByText('Guardian article')).not.toBeInTheDocument();
+      expect(screen.queryByText('ESPN article')).not.toBeInTheDocument();
+    });
+  });
 });

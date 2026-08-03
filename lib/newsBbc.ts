@@ -24,6 +24,16 @@ function isAboutMu(item: BbcRssItem): boolean {
   return MU_MENTION_RE.test(item.title) || MU_MENTION_RE.test(item.description);
 }
 
+// BBC's RSS feed only provides 240×135 thumbnails. The ichef CDN supports
+// on-the-fly resize — swap the width token for a larger one.
+function enhanceImageUrl(url: string): string {
+  // Format: /ace/standard/240/cpsprodpb/...
+  url = url.replace(/\/ace\/standard\/240\//, '/ace/standard/976/');
+  // Format: /images/ic/240x135/p0p20njc.jpg
+  url = url.replace(/\/images\/ic\/240x135\//, '/images/ic/976x547/');
+  return url;
+}
+
 export async function fetchBbcNews(): Promise<NewsArticle[]> {
   let res: Response;
   try {
@@ -40,13 +50,16 @@ export async function fetchBbcNews(): Promise<NewsArticle[]> {
   .filter(isWrittenArticle)
   .filter(isAboutMu);
 
-  return items.map(item => ({
-    id: newsArticleId('BBC', item.link),
-    source: 'BBC' as const,
-    sourceUrl: item.link,
-    title: item.title,
-    summary: item.description,
-    imageUrl: item['media:thumbnail']?.['@_url'],
-    publishedAt: new Date(item.pubDate).toISOString(),
-  }));
+  return items.map(item => {
+    const rawUrl = item['media:thumbnail']?.['@_url'];
+    return {
+      id: newsArticleId('BBC', item.link),
+      source: 'BBC' as const,
+      sourceUrl: item.link,
+      title: item.title,
+      summary: item.description,
+      imageUrl: rawUrl ? enhanceImageUrl(rawUrl) : undefined,
+      publishedAt: new Date(item.pubDate).toISOString(),
+    };
+  });
 }
