@@ -219,3 +219,13 @@ export interface EspnDetail {
   boxscore?: { teams?: EspnBoxscoreTeam[] };
   shootout?: EspnShootoutTeam[];
 }
+
+export interface NewsArticle {
+  id: string;
+  source: 'BBC' | 'Guardian' | 'ESPN';
+  sourceUrl: string;
+  title: string;
+  summary: string;
+  imageUrl?: string;
+  publishedAt: string;
+}
