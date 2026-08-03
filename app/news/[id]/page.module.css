@@ -1,0 +1,91 @@
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 18px 60px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mu-gold);
+  text-decoration: none;
+  margin-bottom: 18px;
+}
+
+.detailImg {
+  width: 100%;
+  aspect-ratio: 16 / 8;
+  border-radius: 3px;
+  object-fit: cover;
+  margin-bottom: 18px;
+}
+
+.detailMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.source {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-weight: 700;
+}
+
+.source[data-source="BBC"] { background: var(--mu-white); color: #111; }
+.source[data-source="Guardian"] { background: #052962; color: #fff; }
+.source[data-source="ESPN"] { background: var(--mu-red); color: #fff; }
+
+.detailTitle {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  line-height: 1.3;
+  margin: 0 0 16px;
+}
+
+.detailSummary {
+  font-size: 15px;
+  line-height: 1.65;
+  opacity: 0.88;
+  margin: 0 0 24px;
+  max-width: 62ch;
+}
+
+.readMore {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--mu-red);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 18px;
+  border-radius: 3px;
+  text-decoration: none;
+  border: 1px solid var(--mu-red-dark);
+}
+
+.readMore:hover {
+  background: var(--mu-red-dark);
+}
+
+.attribution {
+  margin-top: 14px;
+  font-size: 12px;
+  opacity: 0.55;
+}
+
+.notFound {
+  opacity: 0.75;
+  margin-bottom: 12px;
+}
