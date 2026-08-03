@@ -72,4 +72,34 @@ describe('GET /api/news', () => {
 
     expect(mockBbc).toHaveBeenCalledTimes(1);
   });
+
+  it('does not cache when every source rejects, so a retry can succeed once sources recover', async () => {
+    mockBbc.mockRejectedValue(new Error('down'));
+    mockGuardian.mockRejectedValue(new Error('down'));
+    mockEspn.mockRejectedValue(new Error('down'));
+
+    await GET();
+    await GET();
+
+    expect(mockBbc).toHaveBeenCalledTimes(2);
+  });
+
+  it('only includes articles published within the last 7 days', async () => {
+    const stale = article({
+      id: 'stale', source: 'BBC',
+      publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    });
+    const fresh = article({
+      id: 'fresh', source: 'Guardian',
+      publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    });
+    mockBbc.mockResolvedValue([stale]);
+    mockGuardian.mockResolvedValue([fresh]);
+    mockEspn.mockResolvedValue([]);
+
+    const res = await GET();
+    const body = await res.json();
+
+    expect(body.articles).toEqual([fresh]);
+  });
 });

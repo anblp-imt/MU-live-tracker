@@ -5,20 +5,13 @@ import { PageHeading } from '@/components/PageHeading';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { usePolling } from '@/hooks/usePolling';
 import { NEWS_TTL_MS } from '@/lib/cache';
+import { timeAgo } from '@/lib/newsFormat';
 import styles from './page.module.css';
 
 async function fetchNews(): Promise<{ articles: NewsArticle[] }> {
   const res = await fetch('/api/news');
   if (!res.ok) throw new Error('Failed to load news');
   return res.json();
-}
-
-function timeAgo(iso: string): string {
-  const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
 }
 
 export default function NewsClient() {
@@ -30,8 +23,10 @@ export default function NewsClient() {
       <PageHeading title="News" onRefresh={refetch} refreshing={loading} lastSyncedAt={lastSyncedAt} error={error} />
       <p className={styles.subtitle}>Latest Manchester United coverage from BBC Sport, The Guardian &amp; ESPN</p>
 
-      {articles.length === 0 ? (
+      {data === null ? (
         <LoadingSpinner />
+      ) : articles.length === 0 ? (
+        <p className={styles.empty} data-testid="news-empty">No news to show right now — try refreshing.</p>
       ) : (
         <div className={styles.list}>
           {articles.map(a => (

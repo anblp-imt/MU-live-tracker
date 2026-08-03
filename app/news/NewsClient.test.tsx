@@ -43,4 +43,12 @@ describe('NewsClient', () => {
     await waitFor(() => expect(screen.getByText('Fraizer Campbell on United')).toBeInTheDocument());
     expect(screen.getByTestId('news-card')).toHaveAttribute('href', '/news/bbc1');
   });
+
+  it('shows an empty state instead of an infinite spinner when the fetch succeeds with zero articles', async () => {
+    mockNewsResponse([]);
+
+    render(<NewsClient />);
+
+    await waitFor(() => expect(screen.getByTestId('news-empty')).toBeInTheDocument());
+  });
 });
