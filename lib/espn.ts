@@ -3,7 +3,7 @@ import type { EspnDetail, EspnScheduleEvent, EspnTeamRoster } from './types';
 const ESPN_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
 export const MU_ESPN_ID = 360;
 
-async function espnFetch(path: string): Promise<unknown> {
+export async function espnFetch(path: string): Promise<unknown> {
   let res: Response;
   try {
     res = await fetch(`${ESPN_BASE}${path}`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
