@@ -116,6 +116,15 @@
   padding: 40px 0;
 }
 
+.disclaimer {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  opacity: 0.5;
+  text-align: center;
+  margin: 28px 0 0;
+}
+
 .card {
   display: grid;
   grid-template-columns: 108px 1fr;

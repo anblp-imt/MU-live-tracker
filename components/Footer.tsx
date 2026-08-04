@@ -10,7 +10,6 @@ export function Footer() {
   return (
     <footer className={styles.footer}>
       <p className={styles.copyright}>© {year}{name && ` ${name}`}. All rights reserved.</p>
-      <p className={styles.disclaimer}>Unofficial fan project. Not affiliated with Manchester United, BBC, The Guardian or ESPN.</p>
       <nav className={styles.social}>
         {facebookUrl && <a href={facebookUrl} target="_blank" rel="noopener noreferrer">Facebook</a>}
         {linkedinUrl && <a href={linkedinUrl} target="_blank" rel="noopener noreferrer">LinkedIn</a>}

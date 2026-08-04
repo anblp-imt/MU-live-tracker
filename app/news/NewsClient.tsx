@@ -77,6 +77,7 @@ export default function NewsClient() {
           ))}
         </div>
       )}
+      <p className={styles.disclaimer}>Unofficial fan project. Not affiliated with Manchester United, BBC, The Guardian or ESPN.</p>
     </main>
   );
 }
