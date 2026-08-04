@@ -13,8 +13,8 @@ import styles from './page.module.css';
 
 type Tab = Exclude<CompetitionId, 'FRIENDLY'>;
 
-async function fetchMatches(): Promise<MatchesResponse> {
-  const res = await fetch('/api/matches');
+async function fetchMatches(force = false): Promise<MatchesResponse> {
+  const res = await fetch(`/api/matches${force ? '?force=1' : ''}`);
   if (!res.ok) throw new Error('Failed to load matches');
   return res.json();
 }
@@ -59,12 +59,12 @@ export default function StandingsClient() {
   // be held far longer than the 'matches' cache above. Exposed as its own function (not
   // folded into usePolling, which only handles one fetch per hook instance) so both the
   // tab-change effect below and the manual Refresh button can trigger it.
-  const loadStandings = useCallback((selectedTab: Tab) => {
+  const loadStandings = useCallback((selectedTab: Tab, force = false) => {
     if (!getCompetition(selectedTab).hasStandings) return;
     const requestId = ++requestIdRef.current;
     const cacheKey = `standings:${selectedTab}`;
     setStandingsLoading(true);
-    fetch(`/api/standings?comp=${selectedTab}`)
+    fetch(`/api/standings?comp=${selectedTab}${force ? '&force=1' : ''}`)
       .then(res => res.json())
       .then((json: { standings: StandingRow[] }) => {
         if (requestIdRef.current !== requestId) return;
@@ -91,7 +91,7 @@ export default function StandingsClient() {
 
   const refreshAll = () => {
     refetchMatches();
-    loadStandings(tab);
+    loadStandings(tab, true);
   };
 
   // Only MU's own finished matches produce real form data (the app has no other club's

@@ -18,8 +18,8 @@ function detailTtlMs(detail: EspnDetail): number {
   return state === 'in' ? LIVE_TTL_MS : STATIC_TTL_MS;
 }
 
-async function fetchDetail(id: string): Promise<EspnDetail> {
-  const res = await fetch(`/api/match/${id}`);
+async function fetchDetail(id: string, force = false): Promise<EspnDetail> {
+  const res = await fetch(`/api/match/${id}${force ? '?force=1' : ''}`);
   if (!res.ok) throw new Error('Failed to load match detail');
   return res.json();
 }
@@ -58,7 +58,7 @@ export default function MatchDetailClient() {
   // instantly from the last-known detail instead of a fresh loading spinner, while still
   // refreshing in the background.
   const { data, error, loading, refetch, lastSyncedAt } = usePolling(
-    () => fetchDetail(params.id),
+    (force) => fetchDetail(params.id, force),
     intervalMs,
     { key: `match-detail:${params.id}`, ttlMs: detailTtlMs },
   );

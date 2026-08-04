@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { fetchSquad } from '@/lib/fd';
 import { fetchEspnRoster } from '@/lib/espn';
 import { buildSquad } from '@/lib/team';
@@ -7,9 +7,12 @@ import type { TeamGroup } from '@/lib/team';
 
 const CACHE_KEY = 'team';
 
-export async function GET() {
-  const cached = getCached<TeamGroup[]>(CACHE_KEY);
-  if (cached) return NextResponse.json({ groups: cached });
+export async function GET(request: NextRequest) {
+  const force = request.nextUrl.searchParams.get('force') === '1';
+  if (!force) {
+    const cached = getCached<TeamGroup[]>(CACHE_KEY);
+    if (cached) return NextResponse.json({ groups: cached });
+  }
 
   const apiKey = process.env.FOOTBALL_API_KEY || '';
   const [fdSquad, espnRoster] = await Promise.all([

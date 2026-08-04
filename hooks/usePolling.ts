@@ -29,7 +29,7 @@ interface CacheOptions<T> {
 // (lib/cache.ts) had the response ready instantly. Seeding from that same cache module
 // (imported here, so it's the client-bundle's own in-memory copy) lets a remount render
 // the last-known data immediately while `run()` still refreshes it in the background.
-export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | null, cache?: CacheOptions<T>): UsePollingResult<T> {
+export function usePolling<T>(fetcher: (force: boolean) => Promise<T>, intervalMs: number | null, cache?: CacheOptions<T>): UsePollingResult<T> {
   const cachedRef = useRef<T | undefined>(cache ? getCached<T>(cache.key) : undefined);
   const [data, setData] = useState<T | null>(cachedRef.current ?? null);
   const [error, setError] = useState<Error | null>(null);
@@ -57,7 +57,7 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
   // outside the effect, e.g. a button's onClick) can trigger the same fetch-and-cache
   // logic on demand. Reassigned every time the effect below re-runs, so it's always the
   // version closed over the current `cancelled` flag.
-  const runRef = useRef<() => void>(() => {});
+  const runRef = useRef<(force?: boolean) => void>(() => {});
 
   useEffect(() => {
     // [React] `cancelled` is this run's private flag. If intervalMs changes (or the
@@ -65,9 +65,9 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
     // instead of overwriting newer state.
     let cancelled = false;
 
-    async function run() {
+    async function run(force = false) {
       try {
-        const result = await fetcherRef.current();
+        const result = await fetcherRef.current(force);
         if (!cancelled) {
           setData(result);
           setError(null);
@@ -101,7 +101,10 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs: number | nu
     };
   }, [intervalMs]);
 
-  const refetch = useCallback(() => { setLoading(true); runRef.current(); }, []);
+  // Manual refresh always bypasses the server's own cache — see route handlers'
+  // `force` query param — so it truly re-hits the upstream (3rd-party) API instead of
+  // potentially just replaying whatever the last poll already cached.
+  const refetch = useCallback(() => { setLoading(true); runRef.current(true); }, []);
 
   return { data, error, loading, refetch, lastSyncedAt };
 }

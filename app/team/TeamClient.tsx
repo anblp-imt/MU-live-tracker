@@ -7,8 +7,8 @@ import { usePolling } from '@/hooks/usePolling';
 import { STATIC_TTL_MS } from '@/lib/cache';
 import styles from './page.module.css';
 
-async function fetchTeam(): Promise<{ groups: TeamGroup[] }> {
-  const res = await fetch('/api/team');
+async function fetchTeam(force = false): Promise<{ groups: TeamGroup[] }> {
+  const res = await fetch(`/api/team${force ? '?force=1' : ''}`);
   if (!res.ok) throw new Error('Failed to load team');
   return res.json();
 }

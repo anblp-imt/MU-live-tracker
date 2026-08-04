@@ -8,9 +8,11 @@ import type { CompetitionId, EspnScheduleEvent, FdMatch, MatchesResponse } from 
 
 const CACHE_KEY = 'matches';
 
-export async function getMatches(apiKey: string): Promise<MatchesResponse> {
-  const cached = getCached<MatchesResponse>(CACHE_KEY);
-  if (cached) return cached;
+export async function getMatches(apiKey: string, force = false): Promise<MatchesResponse> {
+  if (!force) {
+    const cached = getCached<MatchesResponse>(CACHE_KEY);
+    if (cached) return cached;
+  }
 
   // Promise.allSettled means one dead source degrades the response instead of failing
   // it outright — spec section 8's error-handling requirement.

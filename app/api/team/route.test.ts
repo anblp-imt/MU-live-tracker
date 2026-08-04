@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 
 vi.mock('@/lib/fd', () => ({ fetchSquad: vi.fn() }));
 vi.mock('@/lib/espn', () => ({ fetchEspnRoster: vi.fn() }));
@@ -21,7 +22,7 @@ describe('GET /api/team', () => {
     mockFetchSquad.mockResolvedValue([{ name: 'Bruno Fernandes', position: 'Midfield', dateOfBirth: '1994-09-08', nationality: 'Portugal' }]);
     mockFetchEspnRoster.mockResolvedValue({ athletes: [{ displayName: 'Bruno Fernandes', jersey: '8' }] });
 
-    const res = await GET();
+    const res = await GET(new NextRequest('http://localhost/api/team'));
     const body = await res.json();
 
     expect(body.groups.find((g: { label: string }) => g.label === 'Midfielders').players).toEqual([
@@ -33,8 +34,8 @@ describe('GET /api/team', () => {
     mockFetchSquad.mockResolvedValue([]);
     mockFetchEspnRoster.mockResolvedValue({ athletes: [] });
 
-    await GET();
-    await GET();
+    await GET(new NextRequest('http://localhost/api/team'));
+    await GET(new NextRequest('http://localhost/api/team'));
 
     expect(mockFetchSquad).toHaveBeenCalledTimes(1);
   });

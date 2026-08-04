@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 
 vi.mock('@/lib/fd', () => ({ fetchMuMatches: vi.fn() }));
 vi.mock('@/lib/espn', () => ({ fetchEspnSchedule: vi.fn(), fetchEspnDetail: vi.fn(), MU_ESPN_ID: 360 }));
@@ -59,7 +60,7 @@ describe('GET /api/leaders', () => {
       slug === 'eng.1' ? [finishedEvent()] : []);
     mockEspnDetail.mockResolvedValue(goalDetail('Bruno Fernandes', 'Amad Diallo'));
 
-    const res = await GET();
+    const res = await GET(new NextRequest('http://localhost/api/leaders'));
     const body = await res.json();
 
     expect(body.topScorers).toEqual([{ name: 'Bruno Fernandes', count: 1 }]);
@@ -73,7 +74,7 @@ describe('GET /api/leaders', () => {
       slug === 'club.friendly' ? [finishedEvent({ id: 'f1' })] : []);
     mockEspnDetail.mockResolvedValue(goalDetail('Bruno Fernandes'));
 
-    const res = await GET();
+    const res = await GET(new NextRequest('http://localhost/api/leaders'));
     const body = await res.json();
 
     expect(body.topScorers).toEqual([]);
@@ -88,7 +89,7 @@ describe('GET /api/leaders', () => {
       .mockRejectedValueOnce(new Error('ESPN down for this one'))
       .mockResolvedValueOnce(goalDetail('Bruno Fernandes'));
 
-    const res = await GET();
+    const res = await GET(new NextRequest('http://localhost/api/leaders'));
     const body = await res.json();
 
     expect(body.topScorers).toEqual([{ name: 'Bruno Fernandes', count: 1 }]);
@@ -101,8 +102,8 @@ describe('GET /api/leaders', () => {
       slug === 'eng.1' ? [finishedEvent()] : []);
     mockEspnDetail.mockResolvedValue(goalDetail('Bruno Fernandes'));
 
-    await GET();
-    await GET();
+    await GET(new NextRequest('http://localhost/api/leaders'));
+    await GET(new NextRequest('http://localhost/api/leaders'));
 
     expect(mockEspnSchedule).toHaveBeenCalledTimes(COMPETITIONS.length);
   });

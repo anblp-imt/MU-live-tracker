@@ -7,9 +7,11 @@ import type { NewsArticle } from './types';
 const CACHE_KEY = 'news';
 const NEWS_FRESHNESS_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
-export async function getNews(): Promise<NewsArticle[]> {
-  const cached = getCached<NewsArticle[]>(CACHE_KEY);
-  if (cached) return cached;
+export async function getNews(force = false): Promise<NewsArticle[]> {
+  if (!force) {
+    const cached = getCached<NewsArticle[]>(CACHE_KEY);
+    if (cached) return cached;
+  }
 
   // Promise.allSettled means one dead source degrades the merged list instead of
   // failing the whole request — same contract as lib/matches.ts.

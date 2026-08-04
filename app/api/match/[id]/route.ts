@@ -19,9 +19,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const espnId = match.sources.espn;
   const slug = getCompetition(match.competition).espnSlug;
 
+  const force = request.nextUrl.searchParams.get('force') === '1';
   const cacheKey = `match-detail:${id}`;
-  const cached = getCached<EspnDetail>(cacheKey);
-  if (cached) return NextResponse.json(cached);
+  if (!force) {
+    const cached = getCached<EspnDetail>(cacheKey);
+    if (cached) return NextResponse.json(cached);
+  }
 
   const detail = await fetchEspnDetail(slug, espnId);
   const state = detail.header?.competitions?.[0]?.status?.type?.state;

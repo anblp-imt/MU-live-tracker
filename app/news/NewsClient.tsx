@@ -9,8 +9,8 @@ import { NEWS_TTL_MS } from '@/lib/cache';
 import { timeAgo } from '@/lib/newsFormat';
 import styles from './page.module.css';
 
-async function fetchNews(): Promise<{ articles: NewsArticle[] }> {
-  const res = await fetch('/api/news');
+async function fetchNews(force = false): Promise<{ articles: NewsArticle[] }> {
+  const res = await fetch(`/api/news${force ? '?force=1' : ''}`);
   if (!res.ok) throw new Error('Failed to load news');
   return res.json();
 }

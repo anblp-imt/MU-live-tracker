@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 
 vi.mock('@/lib/newsBbc', () => ({ fetchBbcNews: vi.fn() }));
 vi.mock('@/lib/newsGuardian', () => ({ fetchGuardianNews: vi.fn() }));
@@ -33,7 +34,7 @@ describe('GET /api/news', () => {
     mockGuardian.mockResolvedValue([article({ id: 'gd1', source: 'Guardian', publishedAt: '2026-08-03T00:00:00.000Z' })]);
     mockEspn.mockResolvedValue([article({ id: 'es1', source: 'ESPN', publishedAt: '2026-08-02T00:00:00.000Z' })]);
 
-    const res = await GET();
+    const res = await GET(new NextRequest('http://localhost/api/news'));
     const body = await res.json();
 
     expect(body.articles.map((a: NewsArticle) => a.id)).toEqual(['gd1', 'es1', 'bbc1']);
@@ -44,7 +45,7 @@ describe('GET /api/news', () => {
     mockGuardian.mockResolvedValue([article({ id: 'gd1' })]);
     mockEspn.mockResolvedValue([]);
 
-    const res = await GET();
+    const res = await GET(new NextRequest('http://localhost/api/news'));
     const body = await res.json();
 
     expect(body.articles).toEqual([article({ id: 'gd1' })]);
@@ -56,7 +57,7 @@ describe('GET /api/news', () => {
     mockGuardian.mockRejectedValue(new Error('down'));
     mockEspn.mockRejectedValue(new Error('down'));
 
-    const res = await GET();
+    const res = await GET(new NextRequest('http://localhost/api/news'));
     const body = await res.json();
 
     expect(body.articles).toEqual([]);
@@ -67,8 +68,8 @@ describe('GET /api/news', () => {
     mockGuardian.mockResolvedValue([]);
     mockEspn.mockResolvedValue([]);
 
-    await GET();
-    await GET();
+    await GET(new NextRequest('http://localhost/api/news'));
+    await GET(new NextRequest('http://localhost/api/news'));
 
     expect(mockBbc).toHaveBeenCalledTimes(1);
   });
@@ -78,8 +79,8 @@ describe('GET /api/news', () => {
     mockGuardian.mockRejectedValue(new Error('down'));
     mockEspn.mockRejectedValue(new Error('down'));
 
-    await GET();
-    await GET();
+    await GET(new NextRequest('http://localhost/api/news'));
+    await GET(new NextRequest('http://localhost/api/news'));
 
     expect(mockBbc).toHaveBeenCalledTimes(2);
   });
@@ -97,7 +98,7 @@ describe('GET /api/news', () => {
     mockGuardian.mockResolvedValue([fresh]);
     mockEspn.mockResolvedValue([]);
 
-    const res = await GET();
+    const res = await GET(new NextRequest('http://localhost/api/news'));
     const body = await res.json();
 
     expect(body.articles).toEqual([fresh]);

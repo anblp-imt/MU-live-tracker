@@ -11,14 +11,14 @@ import styles from './page.module.css';
 
 type FilterValue = CompetitionId | 'ALL';
 
-async function fetchMatches(): Promise<MatchesResponse> {
-  const res = await fetch('/api/matches');
+async function fetchMatches(force = false): Promise<MatchesResponse> {
+  const res = await fetch(`/api/matches${force ? '?force=1' : ''}`);
   if (!res.ok) throw new Error('Failed to load matches');
   return res.json();
 }
 
-async function fetchLeaders(): Promise<SeasonLeaders> {
-  const res = await fetch('/api/leaders');
+async function fetchLeaders(force = false): Promise<SeasonLeaders> {
+  const res = await fetch(`/api/leaders${force ? '?force=1' : ''}`);
   if (!res.ok) throw new Error('Failed to load leaders');
   return res.json();
 }
@@ -28,8 +28,19 @@ export default function StatsClient() {
   // Same 'matches' cache key as Today/Schedule/Standings — same endpoint, same data, so
   // arriving here after visiting any of those three renders instantly instead of
   // re-fetching (see hooks/usePolling.ts's client-cache doc comment for why).
-  const { data, loading, refetch, lastSyncedAt, error } = usePolling(fetchMatches, null, { key: 'matches', ttlMs: LIVE_TTL_MS });
-  const { data: leaders } = usePolling(fetchLeaders, null, { key: 'leaders', ttlMs: LEADERS_TTL_MS });
+  const {
+    data, loading: matchesLoading, refetch: refetchMatches,
+    lastSyncedAt: matchesSyncedAt, error: matchesError,
+  } = usePolling(fetchMatches, null, { key: 'matches', ttlMs: LIVE_TTL_MS });
+  const {
+    data: leaders, loading: leadersLoading, refetch: refetchLeaders,
+    lastSyncedAt: leadersSyncedAt, error: leadersError,
+  } = usePolling(fetchLeaders, null, { key: 'leaders', ttlMs: LEADERS_TTL_MS });
+
+  const refreshAll = () => {
+    refetchMatches();
+    refetchLeaders();
+  };
 
   if (!data) return <LoadingSpinner />;
 
@@ -45,7 +56,13 @@ export default function StatsClient() {
 
   return (
     <main className={styles.main} data-testid="stats-page">
-      <PageHeading title="Stats" onRefresh={refetch} refreshing={loading} lastSyncedAt={lastSyncedAt} error={error} />
+      <PageHeading
+        title="Stats"
+        onRefresh={refreshAll}
+        refreshing={matchesLoading || leadersLoading}
+        lastSyncedAt={Math.max(matchesSyncedAt ?? 0, leadersSyncedAt ?? 0) || null}
+        error={matchesError || leadersError}
+      />
       <div role="tablist" className={styles.tabs}>
         <button role="tab" aria-selected={selected === 'ALL'} onClick={() => setSelected('ALL')} className={styles.tab}>ALL</button>
         {competitiveCompetitions.map(c => (

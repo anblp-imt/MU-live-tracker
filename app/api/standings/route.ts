@@ -9,9 +9,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'comp must be PL or CL' }, { status: 400 });
   }
 
+  const force = request.nextUrl.searchParams.get('force') === '1';
   const cacheKey = `standings:${comp}`;
-  const cached = getCached<StandingRow[]>(cacheKey);
-  if (cached) return NextResponse.json({ standings: cached });
+  if (!force) {
+    const cached = getCached<StandingRow[]>(cacheKey);
+    if (cached) return NextResponse.json({ standings: cached });
+  }
 
   const apiKey = process.env.FOOTBALL_API_KEY || '';
   const standings = await fetchStandings(apiKey, comp);

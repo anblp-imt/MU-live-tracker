@@ -12,8 +12,8 @@ import styles from './page.module.css';
 
 type FilterValue = CompetitionId | 'ALL';
 
-async function fetchMatches(): Promise<MatchesResponse> {
-  const res = await fetch('/api/matches');
+async function fetchMatches(force = false): Promise<MatchesResponse> {
+  const res = await fetch(`/api/matches${force ? '?force=1' : ''}`);
   if (!res.ok) throw new Error('Failed to load matches');
   return res.json();
 }

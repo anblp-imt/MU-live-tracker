@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { fetchMuMatches } from '@/lib/fd';
 import { fetchEspnSchedule, fetchEspnDetail, MU_ESPN_ID } from '@/lib/espn';
 import { mergeMatches } from '@/lib/merge';
@@ -9,9 +9,12 @@ import type { CompetitionId, EspnScheduleEvent, FdMatch, SeasonLeaders } from '@
 
 const CACHE_KEY = 'leaders';
 
-export async function GET() {
-  const cached = getCached<SeasonLeaders>(CACHE_KEY);
-  if (cached) return NextResponse.json(cached);
+export async function GET(request: NextRequest) {
+  const force = request.nextUrl.searchParams.get('force') === '1';
+  if (!force) {
+    const cached = getCached<SeasonLeaders>(CACHE_KEY);
+    if (cached) return NextResponse.json(cached);
+  }
 
   const apiKey = process.env.FOOTBALL_API_KEY || '';
 

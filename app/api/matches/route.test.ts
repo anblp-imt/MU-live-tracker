@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 
 vi.mock('@/lib/fd', () => ({ fetchMuMatches: vi.fn() }));
 vi.mock('@/lib/espn', () => ({ fetchEspnSchedule: vi.fn() }));
@@ -21,7 +22,7 @@ describe('GET /api/matches', () => {
     mockFdMatches.mockResolvedValue([]);
     mockEspnSchedule.mockResolvedValue([]);
 
-    const res = await GET();
+    const res = await GET(new NextRequest('http://localhost/api/matches'));
     const body = await res.json();
 
     expect(body.meta.sources).toEqual({ fd: true, espn: true });
@@ -33,7 +34,7 @@ describe('GET /api/matches', () => {
     mockFdMatches.mockRejectedValue(new Error('FD down'));
     mockEspnSchedule.mockResolvedValue([]);
 
-    const res = await GET();
+    const res = await GET(new NextRequest('http://localhost/api/matches'));
     const body = await res.json();
 
     expect(body.meta.sources).toEqual({ fd: false, espn: true });
@@ -44,7 +45,7 @@ describe('GET /api/matches', () => {
     mockFdMatches.mockResolvedValue([]);
     mockEspnSchedule.mockRejectedValue(new Error('ESPN down'));
 
-    const res = await GET();
+    const res = await GET(new NextRequest('http://localhost/api/matches'));
     const body = await res.json();
 
     expect(body.meta.sources).toEqual({ fd: true, espn: false });
@@ -54,8 +55,8 @@ describe('GET /api/matches', () => {
     mockFdMatches.mockResolvedValue([]);
     mockEspnSchedule.mockResolvedValue([]);
 
-    await GET();
-    await GET();
+    await GET(new NextRequest('http://localhost/api/matches'));
+    await GET(new NextRequest('http://localhost/api/matches'));
 
     expect(mockFdMatches).toHaveBeenCalledTimes(1);
   });
