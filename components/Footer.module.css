@@ -17,6 +17,12 @@
   opacity: 0.7;
 }
 
+.disclaimer {
+  margin: 0;
+  color: var(--mu-white);
+  opacity: 0.5;
+}
+
 .social {
   display: flex;
   gap: 18px;
