@@ -78,4 +78,37 @@ describe('NewsClient', () => {
       expect(screen.queryByText('ESPN article')).not.toBeInTheDocument();
     });
   });
+
+  it('shows only the first 10 articles and reveals more on "Load more" click', async () => {
+    const articles = Array.from({ length: 15 }, (_, i) =>
+      article({ id: `a${i}`, title: `Article ${i}`, publishedAt: new Date(Date.now() - i * 1000).toISOString() }));
+    mockNewsResponse(articles);
+
+    render(<NewsClient />);
+
+    await waitFor(() => expect(screen.getByText('Article 0')).toBeInTheDocument());
+    expect(screen.getAllByTestId('news-card')).toHaveLength(10);
+    expect(screen.queryByText('Article 10')).not.toBeInTheDocument();
+
+    screen.getByRole('button', { name: /load more/i }).click();
+
+    await waitFor(() => expect(screen.getAllByTestId('news-card')).toHaveLength(15));
+    expect(screen.queryByRole('button', { name: /load more/i })).not.toBeInTheDocument();
+  });
+
+  it('resets the visible count to 10 when switching source filters', async () => {
+    const articles = Array.from({ length: 15 }, (_, i) =>
+      article({ id: `a${i}`, source: 'BBC', title: `Article ${i}`, publishedAt: new Date(Date.now() - i * 1000).toISOString() }));
+    mockNewsResponse(articles);
+
+    render(<NewsClient />);
+
+    await waitFor(() => expect(screen.getByText('Article 0')).toBeInTheDocument());
+    screen.getByRole('button', { name: /load more/i }).click();
+    await waitFor(() => expect(screen.getAllByTestId('news-card')).toHaveLength(15));
+
+    screen.getByRole('button', { name: /^all/i }).click();
+
+    await waitFor(() => expect(screen.getAllByTestId('news-card')).toHaveLength(10));
+  });
 });

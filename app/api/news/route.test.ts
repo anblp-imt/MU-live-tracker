@@ -85,10 +85,10 @@ describe('GET /api/news', () => {
     expect(mockBbc).toHaveBeenCalledTimes(2);
   });
 
-  it('only includes articles published within the last 7 days', async () => {
+  it('only includes articles published within the last 14 days', async () => {
     const stale = article({
       id: 'stale', source: 'BBC',
-      publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      publishedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
     });
     const fresh = article({
       id: 'fresh', source: 'Guardian',

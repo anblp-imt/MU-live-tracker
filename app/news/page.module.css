@@ -116,6 +116,26 @@
   padding: 40px 0;
 }
 
+.loadMore {
+  display: block;
+  margin: 20px auto 0;
+  height: 32px;
+  padding: 0 20px;
+  border: 1px solid var(--mu-gold);
+  border-radius: 16px;
+  background: transparent;
+  color: var(--mu-gold);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.loadMore:hover {
+  background: rgba(201, 162, 39, 0.1);
+}
+
 .disclaimer {
   font-family: var(--font-mono);
   font-size: 11px;

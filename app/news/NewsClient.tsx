@@ -15,13 +15,22 @@ async function fetchNews(force = false): Promise<{ articles: NewsArticle[] }> {
   return res.json();
 }
 
+const PAGE_SIZE = 10;
+
 export default function NewsClient() {
   const { data, loading, refetch, lastSyncedAt, error } = usePolling(fetchNews, null, { key: 'news', ttlMs: NEWS_TTL_MS });
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const allArticles = data?.articles ?? [];
   const articles = selectedSource
     ? allArticles.filter(a => a.source === selectedSource)
     : allArticles;
+  const visibleArticles = articles.slice(0, visibleCount);
+
+  function selectSource(source: string | null) {
+    setSelectedSource(source);
+    setVisibleCount(PAGE_SIZE);
+  }
 
   return (
     <main className={styles.main}>
@@ -32,7 +41,7 @@ export default function NewsClient() {
         <button
           className={!selectedSource ? styles.filterChipActive : styles.filterChip}
           data-source="All"
-          onClick={() => setSelectedSource(null)}
+          onClick={() => selectSource(null)}
           type="button"
         >
           All ({allArticles.length})
@@ -44,7 +53,7 @@ export default function NewsClient() {
               key={source}
               className={selectedSource === source ? styles.filterChipActive : styles.filterChip}
               data-source={source}
-              onClick={() => setSelectedSource(source)}
+              onClick={() => selectSource(source)}
               type="button"
             >
               {source} ({count})
@@ -59,7 +68,7 @@ export default function NewsClient() {
         <p className={styles.empty} data-testid="news-empty">No news to show right now — try refreshing.</p>
       ) : (
         <div className={styles.list}>
-          {articles.map(a => (
+          {visibleArticles.map(a => (
             <Link key={a.id} href={`/news/${a.id}`} className={styles.card} data-testid="news-card">
               {a.imageUrl && (
                 // eslint-disable-next-line @next/next/no-img-element -- external, unoptimizable source images
@@ -76,6 +85,15 @@ export default function NewsClient() {
             </Link>
           ))}
         </div>
+      )}
+      {visibleCount < articles.length && (
+        <button
+          type="button"
+          className={styles.loadMore}
+          onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+        >
+          Load more ({articles.length - visibleCount} more)
+        </button>
       )}
       <p className={styles.disclaimer}>Unofficial fan project. Not affiliated with Manchester United, BBC, The Guardian or ESPN.</p>
     </main>

@@ -5,7 +5,7 @@ import { getCached, setCached, NEWS_TTL_MS } from './cache';
 import type { NewsArticle } from './types';
 
 const CACHE_KEY = 'news';
-const NEWS_FRESHNESS_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const NEWS_FRESHNESS_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
 
 export async function getNews(force = false): Promise<NewsArticle[]> {
   if (!force) {
