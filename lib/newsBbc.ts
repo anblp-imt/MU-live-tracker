@@ -24,6 +24,16 @@ function isAboutMu(item: BbcRssItem): boolean {
   return MU_MENTION_RE.test(item.title) || MU_MENTION_RE.test(item.description);
 }
 
+// BBC's general football feed has no field distinguishing men's from women's team
+// content, so this is a best-effort text filter, not a guarantee — a player-profile
+// piece that never says "women's" or "WSL" (e.g. an interview framed around a single
+// player) can still slip through.
+const WOMENS_TEAM_RE = /women['’]s|\bwsl\b/i;
+
+function isAboutWomensTeam(item: BbcRssItem): boolean {
+  return WOMENS_TEAM_RE.test(item.title) || WOMENS_TEAM_RE.test(item.description);
+}
+
 // BBC's RSS feed only provides 240×135 thumbnails. The ichef CDN supports
 // on-the-fly resize — swap the width token for a larger one.
 function enhanceImageUrl(url: string): string {
@@ -48,7 +58,8 @@ export async function fetchBbcNews(): Promise<NewsArticle[]> {
   const raw = parsed?.rss?.channel?.item;
   const items: BbcRssItem[] = (Array.isArray(raw) ? raw : raw ? [raw] : [])
   .filter(isWrittenArticle)
-  .filter(isAboutMu);
+  .filter(isAboutMu)
+  .filter(item => !isAboutWomensTeam(item));
 
   return items.map(item => {
     const rawUrl = item['media:thumbnail']?.['@_url'];

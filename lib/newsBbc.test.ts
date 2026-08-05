@@ -131,6 +131,38 @@ describe('fetchBbcNews', () => {
     expect(result[0].title).toBe('Manchester United sign new striker');
   });
 
+  it('filters out articles about the women\'s team', async () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+<channel>
+<title><![CDATA[BBC Sport]]></title>
+<item>
+<title><![CDATA[Man Utd set to appoint ex-Hearts boss Olid as women's manager]]></title>
+<description><![CDATA[Manchester United are set to appoint former Hearts boss Eva Olid as their women's manager.]]></description>
+<link>https://www.bbc.co.uk/sport/football/articles/wsl001</link>
+<pubDate>Fri, 31 Jul 2026 10:00:00 GMT</pubDate>
+</item>
+<item>
+<title><![CDATA[Man Utd's George closing in on Brighton move]]></title>
+<description><![CDATA[Manchester United defender Gabby George is closing in on a move to Brighton before the start of the WSL season.]]></description>
+<link>https://www.bbc.co.uk/sport/football/articles/wsl002</link>
+<pubDate>Fri, 31 Jul 2026 11:00:00 GMT</pubDate>
+</item>
+<item>
+<title><![CDATA[Man Utd admit ticket touting investigation error]]></title>
+<description><![CDATA[Manchester United admit making mistakes in the execution of their ticket touting investigation.]]></description>
+<link>https://www.bbc.co.uk/sport/football/articles/men001</link>
+<pubDate>Fri, 31 Jul 2026 12:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>`;
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, text: async () => xml }));
+
+    const result = await fetchBbcNews();
+
+    expect(result).toHaveLength(1);
+    expect(result[0].title).toBe('Man Utd admit ticket touting investigation error');
+  });
+
   it('enhances ace/standard thumbnail URLs to high resolution', async () => {
     const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
 <channel>
