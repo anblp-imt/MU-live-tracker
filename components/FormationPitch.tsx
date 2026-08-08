@@ -1,7 +1,7 @@
 'use client';
-import { useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import { buildFormationRows } from '@/lib/formation';
-import { displayTeamName, isManUtd } from '@/lib/normalize';
+import { displayTeamAbbr, isManUtd } from '@/lib/normalize';
 import type { EspnRoster, EspnRosterPlayer } from '@/lib/types';
 import type { GoalContribution } from '@/lib/merge';
 import styles from './FormationPitch.module.css';
@@ -81,11 +81,13 @@ export function FormationPitch({
   const awayIsMu = isManUtd(awayRoster?.team?.displayName || '');
   const homeColor = homeRoster?.team?.color ? `#${homeRoster.team.color}` : undefined;
   const awayColor = awayRoster?.team?.color ? `#${awayRoster.team.color}` : undefined;
+  const homeSubs = homeRoster?.roster.filter(p => !p.starter) || [];
+  const awaySubs = awayRoster?.roster.filter(p => !p.starter) || [];
 
   return (
     <div data-testid="formation-pitch" className={styles.pitch}>
       <div className={styles.pitchLines} />
-      <div className={styles.teamLabel}>{displayTeamName(awayRoster?.team?.displayName || '')}</div>
+      <div className={styles.teamLabel}>{displayTeamAbbr(awayRoster?.team?.displayName || '', awayRoster?.team?.abbreviation)}</div>
       <div className={styles.teamHalf}>
         {awayRoster?.formation && <span className={styles.formationBadge}>{awayRoster.formation}</span>}
         <div data-testid="away-rows">
@@ -113,7 +115,41 @@ export function FormationPitch({
           ))}
         </div>
       </div>
-      <div className={styles.teamLabel}>{displayTeamName(homeRoster?.team?.displayName || '')}</div>
+      <div className={styles.teamLabel}>{displayTeamAbbr(homeRoster?.team?.displayName || '', homeRoster?.team?.abbreviation)}</div>
+
+      {(homeSubs.length > 0 || awaySubs.length > 0) && (
+        <>
+          <div className={styles.subsHead}>
+            <span className={styles.subsTitle}>Subs</span>
+          </div>
+          <div className={styles.subsCols}>
+            <div className={`${styles.subsCol} ${styles.subsColAway}`}>
+              <span className={styles.subsColLabel}>{displayTeamAbbr(awayRoster?.team?.displayName || '', awayRoster?.team?.abbreviation)}</span>
+              {awaySubs.map((p, i) => (
+                <Fragment key={i}>
+                  {i > 0 && <div className={styles.subDivider} />}
+                  <div className={styles.sub}>
+                    <span className={styles.subNum}>{p.jersey}</span>
+                    <span className={styles.subName}>{playerLabel(p)}</span>
+                  </div>
+                </Fragment>
+              ))}
+            </div>
+            <div className={styles.subsCol}>
+              <span className={styles.subsColLabel}>{displayTeamAbbr(homeRoster?.team?.displayName || '', homeRoster?.team?.abbreviation)}</span>
+              {homeSubs.map((p, i) => (
+                <Fragment key={i}>
+                  {i > 0 && <div className={styles.subDivider} />}
+                  <div className={styles.sub}>
+                    <span className={styles.subNum}>{p.jersey}</span>
+                    <span className={styles.subName}>{playerLabel(p)}</span>
+                  </div>
+                </Fragment>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

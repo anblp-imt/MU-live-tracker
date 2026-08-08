@@ -168,7 +168,7 @@ export interface EspnRosterPlayer {
 
 export interface EspnRoster {
   homeAway: 'home' | 'away';
-  team?: { displayName?: string; color?: string };
+  team?: { displayName?: string; color?: string; abbreviation?: string };
   formation?: string;
   roster: EspnRosterPlayer[];
 }

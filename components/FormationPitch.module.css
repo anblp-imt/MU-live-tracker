@@ -151,3 +151,92 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+.subsHead {
+  padding: 14px 16px 8px;
+  margin: 0 4px;
+  border-top: 1px solid rgba(201, 162, 39, 0.18);
+}
+
+.subsTitle {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(237, 230, 214, 0.55);
+}
+
+.subsCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+  padding: 0 8px 14px;
+}
+
+.subsCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.subsColLabel {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(237, 230, 214, 0.4);
+  padding: 4px 8px 6px;
+}
+
+.sub {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+}
+
+.subNum {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(237, 230, 214, 0.5);
+  text-align: center;
+}
+
+.subName {
+  font-size: 12px;
+  color: var(--mu-white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subDivider {
+  height: 1px;
+  background: rgba(237, 230, 214, 0.06);
+  margin: 1px 8px;
+}
+
+/* Away column mirrors the home column: number/name order flips so both read
+   outward-in, toward the shared "Subs" midline — same mirroring the pitch
+   itself uses between the away and home halves. */
+.subsColAway {
+  align-items: flex-end;
+}
+.subsColAway .subsColLabel {
+  text-align: right;
+}
+.subsColAway .sub {
+  grid-template-columns: 1fr 22px;
+  width: 100%;
+}
+.subsColAway .subName {
+  text-align: right;
+  order: 1;
+}
+.subsColAway .subNum {
+  order: 2;
+}

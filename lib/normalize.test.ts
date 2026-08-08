@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeTeamName, isManUtd, displayTeamName } from './normalize';
+import { normalizeTeamName, isManUtd, displayTeamName, displayTeamAbbr } from './normalize';
 
 describe('normalizeTeamName', () => {
   it('lowercases and strips punctuation/spaces', () => {
@@ -41,5 +41,19 @@ describe('displayTeamName', () => {
 
   it('returns the name unchanged for any other club', () => {
     expect(displayTeamName('Arsenal FC')).toBe('Arsenal FC');
+  });
+});
+
+describe('displayTeamAbbr', () => {
+  it('returns "Red Devils" for Manchester United even when an abbreviation is given', () => {
+    expect(displayTeamAbbr('Manchester United', 'MAN')).toBe('Red Devils');
+  });
+
+  it('returns the abbreviation for any other club', () => {
+    expect(displayTeamAbbr('Paris Saint-Germain', 'PSG')).toBe('PSG');
+  });
+
+  it('falls back to the full name when no abbreviation is given', () => {
+    expect(displayTeamAbbr('Brighton & Hove Albion')).toBe('Brighton & Hove Albion');
   });
 });

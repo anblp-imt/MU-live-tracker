@@ -89,6 +89,36 @@ describe('FormationPitch', () => {
     expect(screen.queryByText(/⚽|🅰️/)).not.toBeInTheDocument();
   });
 
+  it('shows the opponent\'s abbreviation as the team label when given', () => {
+    const psgRoster: EspnRoster = { homeAway: 'away', team: { displayName: 'Paris Saint-Germain', abbreviation: 'PSG' }, formation: '4-3-3', roster: [] };
+    render(<FormationPitch homeRoster={roster} awayRoster={psgRoster} />);
+    expect(screen.getByText('PSG')).toBeInTheDocument();
+  });
+
+  it('shows "Red Devils" for MU even when ESPN provides its own abbreviation', () => {
+    const opponentRoster: EspnRoster = { homeAway: 'home', team: { displayName: 'Brighton & Hove Albion', abbreviation: 'BHA' }, formation: '4-3-3', roster: [] };
+    const muRoster: EspnRoster = { homeAway: 'away', team: { displayName: 'Manchester United', abbreviation: 'MAN' }, formation: '4-3-3', roster: [] };
+    render(<FormationPitch homeRoster={opponentRoster} awayRoster={muRoster} />);
+    expect(screen.getByText('Red Devils')).toBeInTheDocument();
+    expect(screen.queryByText('MAN')).not.toBeInTheDocument();
+  });
+
+  it('lists each team\'s substitutes (non-starters) under a Subs section', () => {
+    const withSubs: EspnRoster = {
+      homeAway: 'home',
+      team: { displayName: 'Manchester United' },
+      formation: '4-3-3',
+      roster: [
+        { starter: true, formationPlace: '1', position: { abbreviation: 'G' }, athlete: { displayName: 'Onana' } },
+        { starter: false, jersey: '8', athlete: { displayName: 'Bruno Fernandes', shortName: 'B. Fernandes' } },
+      ],
+    };
+    render(<FormationPitch homeRoster={withSubs} />);
+    expect(screen.getByText('Subs')).toBeInTheDocument();
+    expect(screen.getByText('B. Fernandes')).toBeInTheDocument();
+    expect(screen.queryByText('Onana', { selector: '.subName, [class*="subName"]' })).not.toBeInTheDocument();
+  });
+
   it('renders the MU goalkeeper in green, not the red outfield color', () => {
     const { container } = render(<FormationPitch homeRoster={roster} />);
     const circle = container.querySelector('[class*="gkCircle"]');

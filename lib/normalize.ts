@@ -24,3 +24,10 @@ export function isManUtd(name: string): boolean {
 export function displayTeamName(name: string): string {
   return isManUtd(name) ? 'Red Devils' : name;
 }
+
+// Used where space is tight (e.g. the formation pitch): the opponent gets their real
+// abbreviation, but MU keeps "Red Devils" rather than ESPN's own "MAN" abbreviation —
+// this site exists to honor them, not to abbreviate them like every other club.
+export function displayTeamAbbr(name: string, abbreviation?: string): string {
+  return isManUtd(name) ? 'Red Devils' : abbreviation || name;
+}
