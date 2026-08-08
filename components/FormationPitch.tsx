@@ -123,7 +123,7 @@ export function FormationPitch({
             <span className={styles.subsTitle}>Subs</span>
           </div>
           <div className={styles.subsCols}>
-            <div className={`${styles.subsCol} ${styles.subsColAway}`}>
+            <div className={styles.subsCol}>
               <span className={styles.subsColLabel}>{displayTeamAbbr(awayRoster?.team?.displayName || '', awayRoster?.team?.abbreviation)}</span>
               {awaySubs.map((p, i) => (
                 <Fragment key={i}>
@@ -135,7 +135,7 @@ export function FormationPitch({
                 </Fragment>
               ))}
             </div>
-            <div className={styles.subsCol}>
+            <div className={`${styles.subsCol} ${styles.subsColMirror}`}>
               <span className={styles.subsColLabel}>{displayTeamAbbr(homeRoster?.team?.displayName || '', homeRoster?.team?.abbreviation)}</span>
               {homeSubs.map((p, i) => (
                 <Fragment key={i}>

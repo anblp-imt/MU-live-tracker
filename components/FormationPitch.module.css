@@ -220,23 +220,23 @@
   margin: 1px 8px;
 }
 
-/* Away column mirrors the home column: number/name order flips so both read
-   outward-in, toward the shared "Subs" midline — same mirroring the pitch
-   itself uses between the away and home halves. */
-.subsColAway {
+/* The right-hand (home) column mirrors the left: number/name order flips so
+   both read outward-in, toward the shared "Subs" midline — same mirroring
+   the pitch itself uses between the away and home halves. */
+.subsColMirror {
   align-items: flex-end;
 }
-.subsColAway .subsColLabel {
+.subsColMirror .subsColLabel {
   text-align: right;
 }
-.subsColAway .sub {
+.subsColMirror .sub {
   grid-template-columns: 1fr 22px;
   width: 100%;
 }
-.subsColAway .subName {
+.subsColMirror .subName {
   text-align: right;
   order: 1;
 }
-.subsColAway .subNum {
+.subsColMirror .subNum {
   order: 2;
 }
