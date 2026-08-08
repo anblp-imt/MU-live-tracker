@@ -27,10 +27,21 @@ export function clearCache(): void {
 
 export const LIVE_TTL_MS = 30_000;
 export const STATIC_TTL_MS = 300_000;
+export const NEAR_KICKOFF_TTL_MS = 30_000;
+export const NEAR_KICKOFF_WINDOW_MS = 60 * 60_000; // 60 minutes — lineups can land any time in this window
 export const LEADERS_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours — see plan's Global Constraints
 export const NEWS_TTL_MS = 20 * 60 * 1000; // 20 minutes — news doesn't need live-match freshness
 
 export function matchesTtlMs(matches: Array<{ status: string }>): number {
   const hasLive = matches.some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
   return hasLive ? LIVE_TTL_MS : STATIC_TTL_MS;
+}
+
+// Pre-match detail (rosters/lineups) is cached at STATIC_TTL_MS normally, but that's a
+// 5-minute window a just-published lineup could sit stale in. Once kickoff is close enough
+// that a lineup might land any minute, poll it as tightly as a live match.
+export function matchDetailTtlMs(state: string | undefined, kickoffIso: string, now: number = Date.now()): number {
+  if (state === 'in') return LIVE_TTL_MS;
+  if (state === 'pre' && new Date(kickoffIso).getTime() - now <= NEAR_KICKOFF_WINDOW_MS) return NEAR_KICKOFF_TTL_MS;
+  return STATIC_TTL_MS;
 }

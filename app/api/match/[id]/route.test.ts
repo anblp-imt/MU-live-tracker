@@ -90,4 +90,31 @@ describe('GET /api/match/[id]', () => {
 
     expect(mockFetchDetail).toHaveBeenCalledTimes(1); // second call served from the 30s live cache
   });
+
+  it('re-fetches quickly (not the 5-minute static TTL) for a pre-match within 60 minutes of kickoff', async () => {
+    const kickoff = '2026-07-18T15:00:00Z';
+    vi.useFakeTimers({ now: new Date(kickoff).getTime() - 30 * 60_000 }); // 30 min before kickoff
+
+    mockEspnSchedule.mockImplementation(async slug =>
+      slug === 'club.friendly' ? [{
+        id: '401863531',
+        date: kickoff,
+        competitions: [{
+          status: { type: { state: 'pre' } },
+          competitors: [
+            { homeAway: 'home', team: { id: '360', displayName: 'Manchester United' } },
+            { homeAway: 'away', team: { id: '352', displayName: 'Wrexham' } },
+          ],
+        }],
+      }] : [],
+    );
+    mockFetchDetail.mockResolvedValue({ header: { competitions: [{ status: { type: { state: 'pre' } } }] } });
+
+    await GET(req('http://localhost/api/match/2026-07-18_wrexham'), { params: Promise.resolve({ id: '2026-07-18_wrexham' }) });
+    vi.advanceTimersByTime(31_000); // past the 30s near-kickoff TTL, well short of the 5-minute static TTL
+    await GET(req('http://localhost/api/match/2026-07-18_wrexham'), { params: Promise.resolve({ id: '2026-07-18_wrexham' }) });
+
+    expect(mockFetchDetail).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
 });

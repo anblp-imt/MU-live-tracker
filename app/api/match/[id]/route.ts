@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchEspnDetail } from '@/lib/espn';
 import { getMatches } from '@/lib/matches';
 import { getCompetition } from '@/lib/competitions';
-import { getCached, setCached, LIVE_TTL_MS, STATIC_TTL_MS } from '@/lib/cache';
+import { getCached, setCached, matchDetailTtlMs } from '@/lib/cache';
 import type { EspnDetail } from '@/lib/types';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -28,6 +28,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const detail = await fetchEspnDetail(slug, espnId);
   const state = detail.header?.competitions?.[0]?.status?.type?.state;
-  setCached(cacheKey, detail, state === 'in' ? LIVE_TTL_MS : STATIC_TTL_MS);
+  setCached(cacheKey, detail, matchDetailTtlMs(state, match.utcDate));
   return NextResponse.json(detail);
 }
