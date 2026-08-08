@@ -189,26 +189,37 @@
   padding: 4px 8px 6px;
 }
 
+.subsCrest {
+  height: 18px;
+  width: auto;
+  object-fit: contain;
+  margin: 2px 8px 8px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
 .sub {
   display: grid;
-  grid-template-columns: 22px 1fr;
+  grid-template-columns: 26px 1fr;
   align-items: center;
   gap: 8px;
   padding: 5px 8px;
   border-radius: 6px;
 }
 
+/* The number is what a viewer actually scans for first — bigger and brighter
+   than the name, which is secondary context read second. */
 .subNum {
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(237, 230, 214, 0.5);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--mu-gold-bright);
   text-align: center;
 }
 
 .subName {
   font-size: 12px;
-  color: var(--mu-white);
+  font-weight: 500;
+  color: rgba(237, 230, 214, 0.8);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -119,6 +119,36 @@ describe('FormationPitch', () => {
     expect(screen.queryByText('Onana', { selector: '.subName, [class*="subName"]' })).not.toBeInTheDocument();
   });
 
+  it('shows the team crest instead of a (possibly unreadable) colored name in the Subs header', () => {
+    const withSubs: EspnRoster = {
+      homeAway: 'away',
+      team: {
+        displayName: 'Paris Saint-Germain',
+        color: '011F68',
+        logos: [
+          { href: 'https://example.com/psg-default.png', rel: ['full', 'default'] },
+          { href: 'https://example.com/psg-dark.png', rel: ['full', 'dark'] },
+        ],
+      },
+      formation: '4-3-3',
+      roster: [{ starter: false, jersey: '30', athlete: { displayName: 'Lucas Chevalier', shortName: 'L. Chevalier' } }],
+    };
+    render(<FormationPitch awayRoster={withSubs} />);
+    const crest = screen.getByAltText('Paris Saint-Germain');
+    expect(crest).toHaveAttribute('src', 'https://example.com/psg-dark.png');
+  });
+
+  it('falls back to team name text in the Subs header when no crest is available', () => {
+    const withSubs: EspnRoster = {
+      homeAway: 'away',
+      team: { displayName: 'Paris Saint-Germain' },
+      formation: '4-3-3',
+      roster: [{ starter: false, jersey: '30', athlete: { displayName: 'Lucas Chevalier', shortName: 'L. Chevalier' } }],
+    };
+    render(<FormationPitch awayRoster={withSubs} />);
+    expect(screen.getAllByText('Paris Saint-Germain').length).toBeGreaterThan(0);
+  });
+
   it('renders the MU goalkeeper in green, not the red outfield color', () => {
     const { container } = render(<FormationPitch homeRoster={roster} />);
     const circle = container.querySelector('[class*="gkCircle"]');

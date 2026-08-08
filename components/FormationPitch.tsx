@@ -21,6 +21,14 @@ function jerseyKitUrl(p: EspnRosterPlayer): string | undefined {
   return images.find(img => img.rel?.includes('dark'))?.href || images[0]?.href;
 }
 
+// A team's crest reads reliably against the dark pitch regardless of the club's own brand
+// color (e.g. PSG's navy blue name text was unreadable) — same dark-variant preference as
+// the jersey kit render above.
+function teamCrestUrl(team?: EspnRoster['team']): string | undefined {
+  const logos = team?.logos || [];
+  return logos.find(l => l.rel?.includes('dark'))?.href || logos[0]?.href;
+}
+
 // ESPN only exposes each club's default kit render, not the specific strip actually worn
 // that match — two clubs whose default colors happen to be similar (e.g. Man Utd and
 // Wrexham, both red) then render as visually identical shirts. Rather than trust that
@@ -83,6 +91,8 @@ export function FormationPitch({
   const awayColor = awayRoster?.team?.color ? `#${awayRoster.team.color}` : undefined;
   const homeSubs = homeRoster?.roster.filter(p => !p.starter) || [];
   const awaySubs = awayRoster?.roster.filter(p => !p.starter) || [];
+  const homeCrest = teamCrestUrl(homeRoster?.team);
+  const awayCrest = teamCrestUrl(awayRoster?.team);
 
   return (
     <div data-testid="formation-pitch" className={styles.pitch}>
@@ -124,7 +134,11 @@ export function FormationPitch({
           </div>
           <div className={styles.subsCols}>
             <div className={styles.subsCol}>
-              <span className={styles.subsColLabel}>{displayTeamAbbr(awayRoster?.team?.displayName || '', awayRoster?.team?.abbreviation)}</span>
+              {awayCrest ? (
+                <img className={styles.subsCrest} src={awayCrest} alt={awayRoster?.team?.displayName || ''} />
+              ) : (
+                <span className={styles.subsColLabel}>{displayTeamAbbr(awayRoster?.team?.displayName || '', awayRoster?.team?.abbreviation)}</span>
+              )}
               {awaySubs.map((p, i) => (
                 <Fragment key={i}>
                   {i > 0 && <div className={styles.subDivider} />}
@@ -136,7 +150,11 @@ export function FormationPitch({
               ))}
             </div>
             <div className={`${styles.subsCol} ${styles.subsColMirror}`}>
-              <span className={styles.subsColLabel}>{displayTeamAbbr(homeRoster?.team?.displayName || '', homeRoster?.team?.abbreviation)}</span>
+              {homeCrest ? (
+                <img className={styles.subsCrest} src={homeCrest} alt={homeRoster?.team?.displayName || ''} />
+              ) : (
+                <span className={styles.subsColLabel}>{displayTeamAbbr(homeRoster?.team?.displayName || '', homeRoster?.team?.abbreviation)}</span>
+              )}
               {homeSubs.map((p, i) => (
                 <Fragment key={i}>
                   {i > 0 && <div className={styles.subDivider} />}
